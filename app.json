@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "GA Mobile App",
+    "slug": "ga-mobile-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "ga-mobile",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.acr.gamobileapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.acr.gamobileapp"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
