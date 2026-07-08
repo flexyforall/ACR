@@ -4,19 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CEDUR — The roof that makes you feel at home</title>
+
+  <!-- Fallback fonts while the real ones are not installed -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Inter:wght@500;600;700&display=swap"
     rel="stylesheet"
   />
+
   <style>
+    /* ============ FONTS ============
+       The design uses Owners (Medium) for the headline and
+       Overused Grotesk (SemiBold/Bold) for everything else.
+
+       1. Overused Grotesk is FREE (SIL OFL):
+          https://github.com/RandomMaerks/Overused-Grotesk
+          -> take OverusedGrotesk-SemiBold.woff2 and
+             OverusedGrotesk-Bold.woff2 from featured/webfonts
+             and drop them into ./fonts/
+
+       2. Owners is a commercial typeface (Fenotype). Either activate
+          it through Adobe Fonts (add the web-project <link> here), or
+          put a licensed Owners-Medium.woff2 into ./fonts/.
+
+       When the files are missing the @font-face rules silently fail
+       and the page falls back to Archivo/Inter below. */
+
+    @font-face {
+      font-family: "Owners";
+      src: url("./fonts/Owners-Medium.woff2") format("woff2");
+      font-weight: 500;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Overused Grotesk";
+      src: url("./fonts/OverusedGrotesk-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Overused Grotesk";
+      src: url("./fonts/OverusedGrotesk-Bold.woff2") format("woff2");
+      font-weight: 700;
+      font-display: swap;
+    }
+
     :root {
+      --font-display: "Owners", "Archivo", "Inter", sans-serif;
+      --font-body: "Overused Grotesk", "Inter", "Helvetica Neue", sans-serif;
       --white-70: rgba(255, 255, 255, 0.7);
       --white-20: rgba(255, 255, 255, 0.2);
       --white-05: rgba(255, 255, 255, 0.05);
-      /* max tilt of the camera, deg */
-      --tilt: 3.2;
     }
 
     * {
@@ -28,7 +69,7 @@
     body {
       background: #000;
       color: #fff;
-      font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--font-body);
       -webkit-font-smoothing: antialiased;
     }
 
@@ -39,63 +80,36 @@
       height: 100vh;
       min-height: 640px;
       overflow: hidden;
-      background: #05070f;
-      /* the "camera": everything inside lives in 3D space */
-      perspective: 1100px;
+      background: #060c1c;
     }
 
-    .hero__scene {
+    .hero__scene,
+    .hero__scene canvas {
       position: absolute;
       inset: 0;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-
-    /* Layers sit at different depths (translateZ). When the scene
-       rotates toward the cursor, near layers shift more than far
-       ones — that difference is what sells "being inside" the shot. */
-    .hero__layer {
-      position: absolute;
-      inset: 0;
-      will-change: transform;
-    }
-
-    .hero__layer--photo {
-      /* far plane: pushed back and scaled up so its edges never
-         show while the scene tilts */
-      transform: translateZ(-120px) scale(1.24);
-    }
-
-    .hero__layer--photo img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
       display: block;
     }
 
-    /* fallback scene if the photo fails to load */
-    .hero__layer--photo .photo-fallback {
+    /* static gradient shown only if WebGL is unavailable */
+    .hero__fallback {
       position: absolute;
       inset: 0;
       display: none;
       background:
-        radial-gradient(ellipse 60% 45% at 62% 55%, rgba(255, 170, 80, 0.35), transparent 70%),
-        linear-gradient(180deg, #0a1230 0%, #101a3d 55%, #1c2440 75%, #2a3050 100%);
+        radial-gradient(ellipse 60% 45% at 62% 55%, rgba(255, 170, 80, 0.3), transparent 70%),
+        linear-gradient(180deg, #050a1a 0%, #0c1731 55%, #16264c 80%, #233459 100%);
     }
 
-    .hero__layer--photo.is-fallback img { display: none; }
-    .hero__layer--photo.is-fallback .photo-fallback { display: block; }
+    .hero__fallback.is-visible { display: block; }
 
-    .hero__layer--haze {
-      /* mid plane: soft darkening that anchors the bottom of the frame */
-      transform: translateZ(-40px) scale(1.1);
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.7) 100%);
-    }
-
-    .hero__layer--vignette {
-      background: radial-gradient(ellipse 120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
-      transform: translateZ(-10px) scale(1.04);
+    /* soft darkening so the copy stays readable over the scene */
+    .hero__shade {
+      position: absolute;
+      inset: 0;
       pointer-events: none;
+      background: linear-gradient(180deg, rgba(2, 4, 12, 0.25) 0%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.66) 100%);
     }
 
     /* ============ HEADER ============ */
@@ -145,9 +159,9 @@
       height: 40px;
       padding: 4px 12px 4px 4px;
       border: 1px solid var(--white-05);
-      background: rgba(0, 0, 0, 0);
+      background: rgba(0, 0, 0, 0.25);
       color: #fff;
-      font-family: inherit;
+      font-family: var(--font-body);
       font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
@@ -158,7 +172,7 @@
 
     .cta:hover {
       border-color: var(--white-20);
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .cta__thumb {
@@ -179,15 +193,12 @@
     /* ============ COPY ============ */
 
     .hero__copy {
-      /* near plane: closest to the camera, moves the most */
       position: absolute;
       left: 40px;
       right: 40px;
       bottom: 64px;
-      /* scale compensates the perspective magnification of the near
-         plane (1100 / (1100 - 60)) so margins match the design */
-      transform: translateZ(60px) scale(0.9455);
       z-index: 5;
+      will-change: transform;
     }
 
     .hero__copy-row {
@@ -200,7 +211,7 @@
     }
 
     .hero__title {
-      font-family: "Archivo", "Inter", sans-serif;
+      font-family: var(--font-display);
       font-size: clamp(40px, 5vw, 72px);
       font-weight: 500;
       line-height: 1;
@@ -241,49 +252,42 @@
         gap: 24px;
       }
     }
-
-    @media (prefers-reduced-motion: reduce) {
-      .hero__scene { transform: none !important; }
-      .hero__layer { transform: translateZ(0) scale(1.05) !important; }
-      .hero__copy { transform: none !important; }
-    }
   </style>
 </head>
 <body>
   <section class="hero" id="hero">
-    <div class="hero__scene" id="scene">
-      <div class="hero__layer hero__layer--photo" id="photoLayer">
-        <img
-          id="heroPhoto"
-          src="https://www.figma.com/api/mcp/asset/cedf677a-31f1-450f-80d4-42179e196f95"
-          alt="A two-story house with warmly lit windows in a snowy night forest, smoke rising from the chimney"
-        />
-        <div class="photo-fallback"></div>
-      </div>
-      <div class="hero__layer hero__layer--haze"></div>
-      <div class="hero__layer hero__layer--vignette"></div>
+    <div class="hero__scene" id="scene3d"></div>
+    <div class="hero__fallback" id="sceneFallback"></div>
+    <div class="hero__shade"></div>
 
-      <div class="hero__copy">
-        <div class="hero__copy-row">
-          <h1 class="hero__title">
-            The roof that<br />makes you feel<br /><span class="dim">at home.</span>
-          </h1>
-          <p class="hero__subtitle">
-            CEDUR brings the warm aesthetic of natural cedar shakes and the
-            enduring performance of engineered materials to every roof.
-          </p>
-        </div>
+    <div class="hero__copy" id="heroCopy">
+      <div class="hero__copy-row">
+        <h1 class="hero__title">
+          The roof that<br />makes you feel<br /><span class="dim">at home.</span>
+        </h1>
+        <p class="hero__subtitle">
+          CEDUR brings the warm aesthetic of natural cedar shakes and the
+          enduring performance of engineered materials to every roof.
+        </p>
       </div>
     </div>
 
     <header class="hero__header">
-      <svg class="logo" viewBox="0 0 50 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="CEDUR">
-        <path d="M25 1 L47 6 V22 C47 31 38 37.5 25 39 C12 37.5 3 31 3 22 V6 Z"
-              stroke="#fff" stroke-width="2" fill="none" />
-        <text x="25" y="21" text-anchor="middle" fill="#fff"
-              font-family="Archivo, Inter, sans-serif" font-size="8.5"
-              font-weight="600" letter-spacing="0.5">CEDUR</text>
-        <path d="M17 27 h16 M20 30.5 h10" stroke="#fff" stroke-width="1.4" />
+      <!-- CEDUR shield: white shield with the wordmark and a roof mark
+           knocked out. Redrawn from the Figma logo; for the 1:1 original
+           select the "logo" layer in Figma and Copy as SVG. -->
+      <svg class="logo" viewBox="0 0 50 40" xmlns="http://www.w3.org/2000/svg" aria-label="CEDUR">
+        <defs>
+          <mask id="logoKnockout">
+            <rect width="50" height="40" fill="#fff" />
+            <text x="25" y="21.5" text-anchor="middle" fill="#000"
+                  font-family="Archivo, Inter, sans-serif" font-size="11"
+                  font-weight="700" letter-spacing="0.6">CEDUR</text>
+            <path d="M25 25.5 l4.4 5.2 h-8.8 Z" fill="#000" />
+          </mask>
+        </defs>
+        <path d="M1.5 1.5 H48.5 V21 C48.5 30 39 36.8 25 39.6 C11 36.8 1.5 30 1.5 21 Z"
+              fill="#fff" mask="url(#logoKnockout)" />
       </svg>
 
       <nav class="nav">
@@ -308,65 +312,7 @@
     <p>Move the cursor over the hero &uarr;</p>
   </section>
 
-  <script>
-    (function () {
-      const hero = document.getElementById("hero");
-      const scene = document.getElementById("scene");
-      const photoLayer = document.getElementById("photoLayer");
-      const photo = document.getElementById("heroPhoto");
-
-      photo.addEventListener("error", () => photoLayer.classList.add("is-fallback"));
-
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-      const maxTilt = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue("--tilt")
-      );
-
-      // target = where the cursor points, current = smoothed camera position
-      const target = { x: 0, y: 0 };
-      const current = { x: 0, y: 0 };
-      let rafId = null;
-
-      function onMove(e) {
-        const rect = hero.getBoundingClientRect();
-        // -1..1 from the center of the section
-        target.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        target.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-        schedule();
-      }
-
-      function onLeave() {
-        target.x = 0;
-        target.y = 0;
-        schedule();
-      }
-
-      function schedule() {
-        if (rafId === null && !reduceMotion.matches) rafId = requestAnimationFrame(tick);
-      }
-
-      function tick() {
-        // lerp toward the target so the camera glides instead of snapping
-        current.x += (target.x - current.x) * 0.07;
-        current.y += (target.y - current.y) * 0.07;
-
-        const rotY = current.x * maxTilt;
-        const rotX = -current.y * maxTilt;
-        scene.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-
-        const settled =
-          Math.abs(target.x - current.x) < 0.001 &&
-          Math.abs(target.y - current.y) < 0.001;
-        rafId = settled ? null : requestAnimationFrame(tick);
-      }
-
-      // pointermove covers mouse and pen; on pure touch devices there is
-      // no hover, so the scene simply stays static
-      hero.addEventListener("pointermove", (e) => {
-        if (e.pointerType === "mouse" || e.pointerType === "pen") onMove(e);
-      });
-      hero.addEventListener("pointerleave", onLeave);
-    })();
-  </script>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./scene.js"></script>
 </body>
 </html>
