@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEDUR — The roof that makes you feel at home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Inter:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --white-70: rgba(255, 255, 255, 0.7);
+      --white-20: rgba(255, 255, 255, 0.2);
+      --white-05: rgba(255, 255, 255, 0.05);
+      /* max tilt of the camera, deg */
+      --tilt: 3.2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ HERO ============ */
+
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 640px;
+      overflow: hidden;
+      background: #05070f;
+      /* the "camera": everything inside lives in 3D space */
+      perspective: 1100px;
+    }
+
+    .hero__scene {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    /* Layers sit at different depths (translateZ). When the scene
+       rotates toward the cursor, near layers shift more than far
+       ones — that difference is what sells "being inside" the shot. */
+    .hero__layer {
+      position: absolute;
+      inset: 0;
+      will-change: transform;
+    }
+
+    .hero__layer--photo {
+      /* far plane: pushed back and scaled up so its edges never
+         show while the scene tilts */
+      transform: translateZ(-120px) scale(1.24);
+    }
+
+    .hero__layer--photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* fallback scene if the photo fails to load */
+    .hero__layer--photo .photo-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      background:
+        radial-gradient(ellipse 60% 45% at 62% 55%, rgba(255, 170, 80, 0.35), transparent 70%),
+        linear-gradient(180deg, #0a1230 0%, #101a3d 55%, #1c2440 75%, #2a3050 100%);
+    }
+
+    .hero__layer--photo.is-fallback img { display: none; }
+    .hero__layer--photo.is-fallback .photo-fallback { display: block; }
+
+    .hero__layer--haze {
+      /* mid plane: soft darkening that anchors the bottom of the frame */
+      transform: translateZ(-40px) scale(1.1);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.7) 100%);
+    }
+
+    .hero__layer--vignette {
+      background: radial-gradient(ellipse 120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+      transform: translateZ(-10px) scale(1.04);
+      pointer-events: none;
+    }
+
+    /* ============ HEADER ============ */
+
+    .hero__header {
+      position: absolute;
+      top: 40px;
+      left: 40px;
+      right: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+    }
+
+    .logo {
+      width: 50px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+
+    .nav {
+      display: flex;
+      gap: 40px;
+      position: absolute;
+      left: 137px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .nav a {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.12px;
+      text-transform: uppercase;
+      color: var(--white-70);
+      text-decoration: none;
+      transition: color 0.25s ease;
+    }
+
+    .nav a:hover { color: #fff; }
+
+    .cta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 40px;
+      padding: 4px 12px 4px 4px;
+      border: 1px solid var(--white-05);
+      background: rgba(0, 0, 0, 0);
+      color: #fff;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .cta:hover {
+      border-color: var(--white-20);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .cta__thumb {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      background:
+        repeating-linear-gradient(100deg, #6d4a2e 0 6px, #7d5636 6px 12px, #5c3d24 12px 19px),
+        #6d4a2e;
+    }
+
+    .cta__arrow {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    /* ============ COPY ============ */
+
+    .hero__copy {
+      /* near plane: closest to the camera, moves the most */
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      bottom: 64px;
+      /* scale compensates the perspective magnification of the near
+         plane (1100 / (1100 - 60)) so margins match the design */
+      transform: translateZ(60px) scale(0.9455);
+      z-index: 5;
+    }
+
+    .hero__copy-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--white-20);
+    }
+
+    .hero__title {
+      font-family: "Archivo", "Inter", sans-serif;
+      font-size: clamp(40px, 5vw, 72px);
+      font-weight: 500;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .hero__title .dim { color: var(--white-70); }
+
+    .hero__subtitle {
+      max-width: 462px;
+      padding-bottom: 8px;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--white-70);
+    }
+
+    /* ============ DEMO SECTION BELOW ============ */
+
+    .after-hero {
+      min-height: 60vh;
+      display: grid;
+      place-items: center;
+      background: #0a0a0a;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 900px) {
+      .nav { display: none; }
+
+      .hero__copy-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero__scene { transform: none !important; }
+      .hero__layer { transform: translateZ(0) scale(1.05) !important; }
+      .hero__copy { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero" id="hero">
+    <div class="hero__scene" id="scene">
+      <div class="hero__layer hero__layer--photo" id="photoLayer">
+        <img
+          id="heroPhoto"
+          src="https://www.figma.com/api/mcp/asset/cedf677a-31f1-450f-80d4-42179e196f95"
+          alt="A two-story house with warmly lit windows in a snowy night forest, smoke rising from the chimney"
+        />
+        <div class="photo-fallback"></div>
+      </div>
+      <div class="hero__layer hero__layer--haze"></div>
+      <div class="hero__layer hero__layer--vignette"></div>
+
+      <div class="hero__copy">
+        <div class="hero__copy-row">
+          <h1 class="hero__title">
+            The roof that<br />makes you feel<br /><span class="dim">at home.</span>
+          </h1>
+          <p class="hero__subtitle">
+            CEDUR brings the warm aesthetic of natural cedar shakes and the
+            enduring performance of engineered materials to every roof.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <header class="hero__header">
+      <svg class="logo" viewBox="0 0 50 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="CEDUR">
+        <path d="M25 1 L47 6 V22 C47 31 38 37.5 25 39 C12 37.5 3 31 3 22 V6 Z"
+              stroke="#fff" stroke-width="2" fill="none" />
+        <text x="25" y="21" text-anchor="middle" fill="#fff"
+              font-family="Archivo, Inter, sans-serif" font-size="8.5"
+              font-weight="600" letter-spacing="0.5">CEDUR</text>
+        <path d="M17 27 h16 M20 30.5 h10" stroke="#fff" stroke-width="1.4" />
+      </svg>
+
+      <nav class="nav">
+        <a href="#">Who we are</a>
+        <a href="#">Built for you</a>
+        <a href="#">Inspiration</a>
+        <a href="#">Our produts</a>
+        <a href="#">Resources</a>
+      </nav>
+
+      <button class="cta" type="button">
+        <span class="cta__thumb" aria-hidden="true"></span>
+        Request sample
+        <svg class="cta__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M2 8 h11 M8.5 3.5 L13 8 l-4.5 4.5" stroke="#fff" stroke-width="1.5" />
+        </svg>
+      </button>
+    </header>
+  </section>
+
+  <section class="after-hero">
+    <p>Move the cursor over the hero &uarr;</p>
+  </section>
+
+  <script>
+    (function () {
+      const hero = document.getElementById("hero");
+      const scene = document.getElementById("scene");
+      const photoLayer = document.getElementById("photoLayer");
+      const photo = document.getElementById("heroPhoto");
+
+      photo.addEventListener("error", () => photoLayer.classList.add("is-fallback"));
+
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const maxTilt = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--tilt")
+      );
+
+      // target = where the cursor points, current = smoothed camera position
+      const target = { x: 0, y: 0 };
+      const current = { x: 0, y: 0 };
+      let rafId = null;
+
+      function onMove(e) {
+        const rect = hero.getBoundingClientRect();
+        // -1..1 from the center of the section
+        target.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        target.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+        schedule();
+      }
+
+      function onLeave() {
+        target.x = 0;
+        target.y = 0;
+        schedule();
+      }
+
+      function schedule() {
+        if (rafId === null && !reduceMotion.matches) rafId = requestAnimationFrame(tick);
+      }
+
+      function tick() {
+        // lerp toward the target so the camera glides instead of snapping
+        current.x += (target.x - current.x) * 0.07;
+        current.y += (target.y - current.y) * 0.07;
+
+        const rotY = current.x * maxTilt;
+        const rotX = -current.y * maxTilt;
+        scene.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+        const settled =
+          Math.abs(target.x - current.x) < 0.001 &&
+          Math.abs(target.y - current.y) < 0.001;
+        rafId = settled ? null : requestAnimationFrame(tick);
+      }
+
+      // pointermove covers mouse and pen; on pure touch devices there is
+      // no hover, so the scene simply stays static
+      hero.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "mouse" || e.pointerType === "pen") onMove(e);
+      });
+      hero.addEventListener("pointerleave", onLeave);
+    })();
+  </script>
+</body>
+</html>
