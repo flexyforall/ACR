@@ -34,7 +34,7 @@
   // snaps into the same fast rewind back to frame 1, and only then the
   // scroll scrub toward the second section takes over (scrub is parked at
   // frame 1 until SCRUB_IN anyway, so the rewind always lands first).
-  const AMBIENT_FPS = 12;      // half real-time — a slow, calm background
+  const AMBIENT_FPS = 6;       // quarter real-time — a slow, calm background
   const AMBIENT_REWIND_S = 0.9;   // idle-loop rewind duration
   const AMBIENT_AT = 0.02;        // ambient runs below this progress
   const REWIND_K = 0.3;           // fast catch-up lerp once scrolling starts
