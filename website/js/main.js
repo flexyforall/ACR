@@ -219,23 +219,25 @@
   }
 
   // ------------------------------------------------------------------
-  // /welcome labels: typed out letter by letter, deleted the same way,
-  // looped — both sides in sync
+  // typed labels: the /welcome sides and the keep-scrolling line type
+  // out letter by letter, delete the same way, and loop — one shared
+  // cursor keeps them in sync (shorter labels finish early and hold)
   // ------------------------------------------------------------------
-  const WELCOME = '/welcome';
-  const typeEls = Array.from(document.querySelectorAll('.explore__side'));
+  const typeEls = Array.from(document.querySelectorAll('.explore__side, .explore__center'))
+    .map(el => ({ el, text: el.textContent }));
+  const typeMax = Math.max(0, ...typeEls.map(t => t.text.length));
 
   function startTypeLoop() {
     if (reducedMotion || !typeEls.length) return;
-    let n = WELCOME.length; // labels fade in complete, then the loop begins
+    let n = typeMax; // labels fade in complete, then the loop begins
     let dir = -1;
     function tick() {
       n += dir;
-      typeEls.forEach(el => { el.textContent = WELCOME.slice(0, n); });
+      typeEls.forEach(t => { t.el.textContent = t.text.slice(0, n); });
       let delay;
-      if (dir > 0 && n >= WELCOME.length) { dir = -1; delay = 2400; } // hold typed
-      else if (dir < 0 && n <= 0) { dir = 1; delay = 900; }           // hold empty
-      else delay = dir > 0 ? 120 : 60;                                // type / delete
+      if (dir > 0 && n >= typeMax) { dir = -1; delay = 2400; } // hold typed
+      else if (dir < 0 && n <= 0) { dir = 1; delay = 900; }    // hold empty
+      else delay = dir > 0 ? 120 : 60;                         // type / delete
       setTimeout(tick, delay);
     }
     setTimeout(tick, 2400);
