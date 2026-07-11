@@ -12,23 +12,23 @@
 
   <!-- ======================= LOADER (Figma 122:199 → 122:375) ======================= -->
   <div class="loader" id="loader" aria-hidden="true">
-    <!-- top progress track: two 8px dots at the ends (122:208) -->
+    <!-- top track: two 8px dots at the ends (122:208) -->
     <div class="loader__track">
-      <span class="dot dot--dim"></span>
-      <span class="dot dot--dim"></span>
+      <span class="dot dot--dim" id="dotTL"></span>
+      <span class="dot dot--dim" id="dotTR"></span>
     </div>
 
     <!-- centered tagline revealed through a collapsing band (122:236) -->
     <div class="loader__band" id="loaderBand">
       <div class="loader__tagline">
-        <p class="tl tl--left"><span class="tl__inner">the&nbsp;&nbsp;roof</span></p>
+        <p class="tl tl--left"><span class="tl__inner" id="tlLeft">the&nbsp;&nbsp;roof</span></p>
         <p class="tl tl--home"><span class="tl__inner" id="tlHome">home</span></p>
-        <p class="tl tl--right"><span class="tl__inner">that makes it</span></p>
+        <p class="tl tl--right"><span class="tl__inner" id="tlRight">that makes it</span></p>
       </div>
     </div>
 
     <!-- bottom-right dot (122:207) -->
-    <span class="dot dot--dim loader__dotbr"></span>
+    <span class="dot dot--dim loader__dotbr" id="dotBR"></span>
 
     <!-- window onto the hero image: starts as the 100×100 square (122:206),
          expands to full bleed (122:334) -->
@@ -63,17 +63,16 @@
         </div>
       </header>
 
-      <!-- hero copy (122:421..430) -->
-      <div class="hero" id="hero">
-        <div class="hero__text">
-          <div class="hero__title-block">
-            <h1 class="hero__title"><span class="reveal" data-reveal>cedur</span></h1>
-            <div class="hero__rule">
-              <span class="hero__rule-progress" id="heroRule"></span>
-            </div>
-          </div>
-          <p class="hero__desc"><span class="reveal" data-reveal>CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof</span></p>
+      <!-- persistent headline: CEDUR in the hero, morphs down + shrinks into
+           the benefits heading; the rule + progress travel with it -->
+      <div class="headline" id="headline">
+        <div class="headline__row">
+          <h1 class="headline__title" id="headlineTitle">cedur</h1>
         </div>
+        <div class="headline__rule">
+          <span class="headline__progress" id="ruleProgress"></span>
+        </div>
+        <p class="headline__desc" id="heroDesc">CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof</p>
       </div>
 
       <!-- hero bottom-right: tagline + request-sample button (122:389..399) -->
@@ -92,16 +91,8 @@
         </div>
       </div>
 
-      <!-- benefits copy (130:118 / 130:147 / 130:176) -->
-      <div class="benefits" id="benefits" aria-live="polite">
-        <div class="benefits__head-block">
-          <div class="benefits__head-row">
-            <h2 class="benefits__title" id="benefitTitle"><span class="reveal"></span></h2>
-          </div>
-          <span class="benefits__progress" id="benefitProgress"></span>
-        </div>
-        <p class="benefits__desc" id="benefitDesc"><span class="reveal"></span></p>
-      </div>
+      <!-- benefits paragraph, bottom right (130:146) -->
+      <p class="benefits__desc" id="benefitDesc" aria-live="polite"></p>
 
     </div>
   </div>

@@ -5,10 +5,8 @@
    ============================================================ */
 
 /* ---------- fonts ----------
-   The design uses OwnersTRIAL Medium + Neue Montreal Regular.
-   Drop the licensed files into assets/fonts/ with the names below
-   and they will be picked up automatically; until then the site
-   falls back to Archivo (headings) and Inter (body). */
+   OwnersTRIAL Medium + Neue Montreal Regular (licensed files in
+   assets/fonts/), with Archivo / Inter as bundled fallbacks. */
 @font-face {
   font-family: "OwnersTRIAL";
   src: url("../assets/fonts/OwnersTRIAL-Medium.woff2") format("woff2");
@@ -79,16 +77,48 @@ button { background: none; border: 0; color: inherit; cursor: pointer; font: inh
   background: var(--white);
   flex: none;
 }
-.dot--dim { background: var(--white-20); }
+.dot--dim {
+  background: var(--white-20);
+  transition: background 0.35s linear;
+}
+.dot--dim.lit { background: var(--white); }
 .dot--solid { background: var(--white); }
 
-/* masked line reveal helper */
+/* ============================================================
+   TEXT REVEAL SYSTEM — line-mask rise with a skew settle
+   (word wrappers .w clip; inners .wi rise + rotate into place)
+   ============================================================ */
+.w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+.wi {
+  display: inline-block;
+  transform: translateY(120%) rotate(4deg);
+  transform-origin: 0% 100%;
+  opacity: 1;
+  will-change: transform;
+  transition:
+    transform 0.9s var(--ease-out) calc(var(--i, 0) * 60ms),
+    opacity 0.4s linear calc(var(--i, 0) * 60ms);
+}
+.wi.in { transform: translateY(0) rotate(0deg); opacity: 1; }
+.wi.out {
+  transform: translateY(-115%) rotate(-3deg);
+  opacity: 0;
+  transition:
+    transform 0.45s cubic-bezier(0.55, 0, 0.55, 0.2) calc(var(--i, 0) * 28ms),
+    opacity 0.3s linear calc(var(--i, 0) * 28ms);
+}
+
+/* legacy single-block reveal (cta row) */
 .reveal {
   display: inline-block;
   transform: translateY(110%);
   will-change: transform;
 }
-[data-revealed] .reveal, .reveal[data-revealed] { transform: translateY(0); }
+[data-revealed] .reveal { transform: translateY(0); }
 
 /* ============================================================
    LOADER
@@ -135,7 +165,7 @@ body[data-state="done-loading"] .loader { display: none; }
   padding: 0 calc(40 * var(--u));
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: calc(20 * var(--u));
+  font-size: calc(14 * var(--u));
   line-height: 0.9;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -146,17 +176,19 @@ body[data-state="done-loading"] .loader { display: none; }
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  transition: color 0.5s linear;
 }
 .tl__inner {
   display: inline-block;
   transform: translateY(115%);
-  transition: transform 1.1s var(--ease-out);
+  transition:
+    transform 1.1s var(--ease-out),
+    color 0.4s linear;
 }
+.tl__inner.lit { color: var(--white); }
 .loader[data-in] .tl__inner { transform: translateY(0); }
-.loader[data-in] .tl--left .tl__inner { transition-delay: 0.05s; }
-.loader[data-in] .tl--home .tl__inner { transition-delay: 0.2s; }
-.loader[data-in] .tl--right .tl__inner { transition-delay: 0.35s; }
+.loader[data-in] .tl--left .tl__inner { transition-delay: 0.05s, 0s; }
+.loader[data-in] .tl--home .tl__inner { transition-delay: 0.2s, 0s; }
+.loader[data-in] .tl--right .tl__inner { transition-delay: 0.35s, 0s; }
 
 /* window onto the hero frame: 100×100 at bottom-center → full-bleed */
 .loader__window {
@@ -252,64 +284,71 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .nav__burger-lines span:first-child { width: calc(20 * var(--u)); }
 .nav__burger-lines span:last-child { width: calc(12 * var(--u)); }
 
-/* ---------- hero copy (122:423) ---------- */
-.hero {
+/* ============================================================
+   HEADLINE — one element that lives in both sections.
+   JS drives --rule-y (line position), --ts (title size),
+   --lh (line-height), --pad-b (gap between text and line).
+   Hero:      rule at 50vh + 82u, title 160u / 0.9, pad 10u
+   Benefits:  rule at 100vh − 166u, title 32u / 1.1, pad 16u
+   ============================================================ */
+.headline {
   position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  will-change: opacity, transform;
-}
-.hero__text {
-  position: absolute;
-  top: calc(50% + 38 * var(--u));
   left: 0;
   width: 100%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: calc(32 * var(--u));
+  top: var(--rule-y, calc(50% + 82 * var(--u)));
+  z-index: 3;
+  pointer-events: none;
 }
-.hero__title-block { position: relative; width: 100%; }
-.hero__title {
-  padding: calc(10 * var(--u)) calc(40 * var(--u));
+.headline__row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 0 calc(40 * var(--u));
+}
+.headline__title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: calc(160 * var(--u));
-  line-height: 0.9;
+  font-size: var(--ts, calc(160 * var(--u)));
+  line-height: var(--lh, 0.9);
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  overflow: hidden;
+  padding-bottom: var(--pad-b, calc(10 * var(--u)));
+  max-width: none;
 }
-.hero__title .reveal { transition: transform 1.3s var(--ease-out) 0.1s; }
-.hero__rule {
-  position: relative;
+/* the shared rule: full-width hairline in both sections
+   (Line 10 in the hero, the heading border in benefits) */
+.headline__rule {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 1px;
   background: var(--white-20);
 }
-.hero__rule-progress {
+.headline__progress {
   position: absolute;
   left: 0;
   top: 0;
   height: 1px;
-  width: calc(64 * var(--u));
+  width: calc(1360 * var(--u));
   background: var(--white);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 1.2s var(--ease-out) 0.55s;
+  will-change: transform;
 }
-body[data-state="revealed"] .hero__rule-progress,
-body[data-state="done-loading"] .hero__rule-progress { transform: scaleX(1); }
-.hero__desc {
+/* hero description under the rule (122:429) */
+.headline__desc {
+  position: absolute;
+  top: calc(32 * var(--u));
+  left: 0;
   padding-left: calc(40 * var(--u));
   font-size: calc(18 * var(--u));
   letter-spacing: 0.01em;
   line-height: normal;
   max-width: calc(539 * var(--u)); /* 40 padding + 499 text (122:430) */
-  overflow: hidden;
+  will-change: opacity, transform, filter;
 }
-.hero__desc .reveal { transition: transform 1.3s var(--ease-out) 0.3s; }
 
 /* ---------- hero cta (122:389) ---------- */
 .cta {
@@ -345,6 +384,7 @@ body[data-state="done-loading"] .hero__rule-progress { transform: scaleX(1); }
   background: var(--white-08);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
 }
 .btn__label {
   display: flex;
@@ -368,50 +408,7 @@ body[data-state="done-loading"] .hero__rule-progress { transform: scaleX(1); }
   object-fit: cover;
 }
 
-/* ---------- benefits copy (130:142..146) ---------- */
-.benefits {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0;
-}
-.benefits__head-block {
-  position: absolute;
-  left: 0;
-  bottom: calc(166 * var(--u));
-  width: 100%;
-}
-.benefits__head-row {
-  padding: calc(16 * var(--u)) calc(40 * var(--u));
-  border-bottom: 1px solid var(--white-20);
-}
-.benefits__title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: calc(32 * var(--u));
-  line-height: 1.1;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  max-width: calc(420 * var(--u));
-  overflow: hidden;
-}
-.benefits__title .reveal,
-.benefits__desc .reveal {
-  transform: translateY(0);
-  transition: transform 0.7s var(--ease-out), opacity 0.45s linear;
-}
-.benefits__progress {
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  height: 1px;
-  width: calc(1360 * var(--u));
-  background: var(--white);
-  transform: scaleX(0);
-  transform-origin: left;
-  will-change: transform;
-}
+/* ---------- benefits paragraph (130:146) ---------- */
 .benefits__desc {
   position: absolute;
   right: calc(40 * var(--u));
@@ -420,28 +417,41 @@ body[data-state="done-loading"] .hero__rule-progress { transform: scaleX(1); }
   font-size: calc(18 * var(--u));
   line-height: 1.2;
   letter-spacing: -0.02em;
-  overflow: hidden;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(14px);
+  transition:
+    opacity 0.5s linear,
+    filter 0.6s ease,
+    transform 0.6s var(--ease-out);
+}
+.benefits__desc.show {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+.benefits__desc.hide {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(-12px);
+  transition:
+    opacity 0.3s linear,
+    filter 0.35s ease,
+    transform 0.35s ease;
 }
 
-/* text swap states */
-.swap-out .reveal { transform: translateY(-110%); opacity: 0; }
-.swap-in .reveal { transform: translateY(0); opacity: 1; }
-.swap-prep .reveal { transition: none; transform: translateY(110%); opacity: 1; }
-
-/* ---------- small screens: keep proportions readable ---------- */
+/* ---------- small screens ---------- */
 @media (max-width: 720px) {
   :root { --u: calc(100vw / 720); }
-  .hero__title { font-size: calc(112 * var(--u)); }
-  .hero__desc { font-size: calc(15 * var(--u)); max-width: calc(560 * var(--u)); }
+  .headline__desc { font-size: calc(15 * var(--u)); max-width: calc(560 * var(--u)); }
   .cta__tagline { display: none; }
-  .benefits__desc {
-    width: calc(402 * var(--u));
-    font-size: calc(15 * var(--u));
-  }
-  .loader__tagline { font-size: calc(15 * var(--u)); }
+  .benefits__desc { font-size: calc(15 * var(--u)); }
+  .loader__tagline { font-size: calc(12 * var(--u)); }
   .nav__contact { font-size: calc(12 * var(--u)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .tl__inner, .cta__row, .hero__rule-progress { transition: none !important; }
+  .reveal, .tl__inner, .cta__row, .wi, .benefits__desc { transition: none !important; }
 }
