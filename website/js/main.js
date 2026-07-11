@@ -34,7 +34,7 @@
   // snaps into the same fast rewind back to frame 1, and only then the
   // scroll scrub toward the second section takes over (scrub is parked at
   // frame 1 until SCRUB_IN anyway, so the rewind always lands first).
-  const AMBIENT_FPS = 24;
+  const AMBIENT_FPS = 12;      // half real-time — a slow, calm background
   const AMBIENT_REWIND_S = 0.9;   // idle-loop rewind duration
   const AMBIENT_AT = 0.02;        // ambient runs below this progress
   const REWIND_K = 0.3;           // fast catch-up lerp once scrolling starts
@@ -213,8 +213,32 @@
         body.setAttribute('data-revealed', '');
         // the slogan fill-sweep and the rest run off [data-revealed];
         // the ambient background loop starts on its own in the raf loop
+        setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
       };
     };
+  }
+
+  // ------------------------------------------------------------------
+  // /welcome labels: typed out letter by letter, deleted the same way,
+  // looped — both sides in sync
+  // ------------------------------------------------------------------
+  const WELCOME = '/welcome';
+  const typeEls = Array.from(document.querySelectorAll('.explore__side'));
+
+  function startTypeLoop() {
+    if (reducedMotion || !typeEls.length) return;
+    let n = WELCOME.length; // labels fade in complete, then the loop begins
+    let dir = -1;
+    function tick() {
+      n += dir;
+      typeEls.forEach(el => { el.textContent = WELCOME.slice(0, n); });
+      let delay;
+      if (dir > 0 && n >= WELCOME.length) { dir = -1; delay = 2400; } // hold typed
+      else if (dir < 0 && n <= 0) { dir = 1; delay = 900; }           // hold empty
+      else delay = dir > 0 ? 120 : 60;                                // type / delete
+      setTimeout(tick, delay);
+    }
+    setTimeout(tick, 2400);
   }
 
   // ------------------------------------------------------------------
