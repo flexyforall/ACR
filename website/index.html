@@ -57,28 +57,39 @@
       <!-- fine film grain (130:628 noise) -->
       <div class="noise" id="noise" aria-hidden="true"></div>
 
-      <!-- hero UI (Figma 130:538) — dissolves after the building is gone -->
+      <!-- hero UI (Figma 130:630) — dissolves after the building is gone -->
       <div class="hero2" id="hero2">
-        <!-- keep · scrolling · to explore (130:603) -->
-        <div class="explore" id="explore">
-          <span class="explore__side">keep</span>
-          <span class="explore__center">scrolling</span>
-          <span class="explore__side">to explore</span>
+        <!-- vertical hairlines at 448/992 with crosses at y177 (141:962..990) -->
+        <div class="grid">
+          <span class="grid__v grid__v--a"></span>
+          <span class="grid__v grid__v--b"></span>
+          <span class="grid__x grid__x--a"></span>
+          <span class="grid__x grid__x--b"></span>
         </div>
 
-        <!-- THE ROOF THAT MAKES IT HOME — 140px, HOME at 40% (130:565) -->
-        <h1 class="slogan slogan--big" id="slogan">
-          <span class="sl"><span class="wi" style="--i:0">THE ROOF</span></span>
-          <span class="sl"><span class="wi" style="--i:1">THAT MAKES IT</span></span>
-          <span class="sl sl--dim"><span class="wi" style="--i:2">HOME</span></span>
-        </h1>
+        <!-- centered block: labels row + 140px title (130:668) -->
+        <div class="hero-center">
+          <div class="explore" id="explore">
+            <span class="explore__side">/welcome</span>
+            <span class="explore__center">keep scrolling to explore</span>
+            <span class="explore__side">/welcome</span>
+          </div>
+          <h1 class="slogan slogan--big" id="slogan">
+            <span class="sl"><span class="wi" style="--i:0">THE ROOF</span></span>
+            <span class="sl"><span class="wi" style="--i:1">THAT MAKES IT</span></span>
+            <span class="sl sl--dim"><span class="wi" style="--i:2">HOME</span></span>
+          </h1>
+        </div>
 
-        <!-- REQUEST SAMPLE, centered near the bottom (130:595) -->
-        <div class="cta cta--center" id="cta">
+        <!-- bottom-left paragraph (130:675) -->
+        <p class="hero-para">CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof.</p>
+
+        <!-- REQUEST SAMPLE, bottom right (130:661) -->
+        <div class="cta cta--right" id="cta">
           <div class="cta__mask">
             <a class="btn" href="#request-sample">
               <span class="btn__label">
-                <span class="dot dot--sm"></span>
+                <span class="dot dot--xs"></span>
                 <span>REQUEST SAMPLE</span>
               </span>
               <span class="btn__img"><img src="assets/thumb.jpg" alt="" /></span>
@@ -94,7 +105,7 @@
         </a>
         <div class="nav__right">
           <a class="nav__contact" href="#contact">
-            <span class="dot dot--sm"></span>
+            <span class="dot dot--xs"></span>
             <span class="nav__contact-label">contact</span>
           </a>
           <button class="nav__burger" aria-label="Menu">
@@ -106,15 +117,15 @@
         </div>
       </header>
 
-      <!-- benefits heading block (130:142): title + rule + progress -->
+      <!-- bottom fade band for the film section (130:771) -->
+      <div class="benefits-band" id="benefitsBand"></div>
+
+      <!-- benefits heading, mid-left (130:769) -->
       <div class="benefits-head" id="benefitsHead">
-        <div class="benefits-head__row">
-          <h2 class="benefits-head__title" id="benefitTitle"></h2>
-        </div>
-        <span class="benefits-head__progress" id="ruleProgress"></span>
+        <h2 class="benefits-head__title" id="benefitTitle"></h2>
       </div>
 
-      <!-- benefits paragraph, bottom right (130:146) -->
+      <!-- benefits paragraph, bottom right (130:714) -->
       <p class="benefits__desc" id="benefitDesc" aria-live="polite"></p>
 
     </div>

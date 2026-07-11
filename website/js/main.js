@@ -78,7 +78,7 @@
   const slogan = document.getElementById('slogan');
   const benefitsHead = document.getElementById('benefitsHead');
   const benefitTitle = document.getElementById('benefitTitle');
-  const ruleProgress = document.getElementById('ruleProgress');
+  const benefitsBand = document.getElementById('benefitsBand');
   const benefitDesc = document.getElementById('benefitDesc');
   const canvas = document.getElementById('scene');
   const ctx = canvas.getContext('2d');
@@ -265,7 +265,6 @@
 
   function applyBenefitTitle(state) {
     setWords(benefitTitle, STEPS[state].title);
-    benefitTitle.style.maxWidth = `calc(${STEPS[state].width} * var(--u))`;
     requestAnimationFrame(() => requestAnimationFrame(() => wordsIn(benefitTitle)));
   }
 
@@ -277,12 +276,14 @@
 
     if (next === 'hero') {
       benefitsHead.classList.remove('show');
+      benefitsBand.classList.remove('show');
       setBenefitDesc('hero');
       return;
     }
     if (prev === 'hero' || reducedMotion) {
       applyBenefitTitle(next);
       benefitsHead.classList.add('show');
+      benefitsBand.classList.add('show');
       setBenefitDesc(next);
       return;
     }
@@ -333,9 +334,6 @@
       : scrubPos < STEP_BOUNDS[0] ? 0
       : scrubPos < STEP_BOUNDS[1] ? 1 : 2;
     transitionBenefits(next);
-
-    // ---- progress line fills across the film section ----
-    ruleProgress.style.transform = `scaleX(${range(p, BENEFITS_AT, SCRUB_OUT).toFixed(4)})`;
   }
 
   function rafLoop() {
