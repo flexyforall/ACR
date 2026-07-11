@@ -13,9 +13,11 @@
   // config
   // ------------------------------------------------------------------
   const FRAME_COUNT = 169;
-  const FRAME_W = 1440;
-  const FRAME_H = 800;
-  const FRAME_PATH = i => `assets/frames/frame_${String(i + 1).padStart(3, '0')}.webp`;
+  // retina screens get the 2880×1600 set (1:1 canvas pixels), others 1440×800
+  const HIRES = window.devicePixelRatio > 1.5 && window.innerWidth > 900;
+  const FRAME_W = HIRES ? 2880 : 1440;
+  const FRAME_H = HIRES ? 1600 : 800;
+  const FRAME_PATH = i => `assets/${HIRES ? 'frames2x' : 'frames'}/frame_${String(i + 1).padStart(3, '0')}.webp`;
 
   const GATE_FRAMES = 42;       // frames that must be ready before reveal
   const SCRUB_IN = 0.05;        // scroll progress where the scrub starts
@@ -376,6 +378,7 @@
 
   sizeCanvas();
   window.scrollTo(0, 0);
+  loaderWindow.querySelector('img').src = FRAME_PATH(0);
   preloadAll();
   loaderTick();
   onScroll();

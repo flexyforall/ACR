@@ -258,9 +258,10 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   letter-spacing: 0.01em;
   text-transform: uppercase;
 }
+/* burger matches the logo height (40u) so the nav reads as one line */
 .nav__burger {
-  width: calc(48 * var(--u));
-  height: calc(48 * var(--u));
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
   border: 1px solid var(--white-20);
   border-radius: calc(4 * var(--u));
   display: flex;
