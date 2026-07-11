@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CEDUR — The Roof That Makes It Home</title>
+  <meta name="description" content="CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof." />
+  <link rel="preload" href="assets/frames/frame_001.webp" as="image" type="image/webp" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-state="loading">
+
+  <!-- ======================= LOADER (Figma 122:199 → 122:375) ======================= -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <!-- top progress track: two 8px dots at the ends (122:208) -->
+    <div class="loader__track">
+      <span class="dot dot--dim"></span>
+      <span class="dot dot--dim"></span>
+    </div>
+
+    <!-- centered tagline revealed through a collapsing band (122:236) -->
+    <div class="loader__band" id="loaderBand">
+      <div class="loader__tagline">
+        <p class="tl tl--left"><span class="tl__inner">the&nbsp;&nbsp;roof</span></p>
+        <p class="tl tl--home"><span class="tl__inner" id="tlHome">home</span></p>
+        <p class="tl tl--right"><span class="tl__inner">that makes it</span></p>
+      </div>
+    </div>
+
+    <!-- bottom-right dot (122:207) -->
+    <span class="dot dot--dim loader__dotbr"></span>
+
+    <!-- window onto the hero image: starts as the 100×100 square (122:206),
+         expands to full bleed (122:334) -->
+    <div class="loader__window" id="loaderWindow">
+      <img src="assets/frames/frame_001.webp" alt="" draggable="false" />
+    </div>
+  </div>
+
+  <!-- ======================= PINNED STAGE: hero + scroll-scrubbed benefits ======================= -->
+  <div class="stage" id="stage">
+    <div class="stage__pin">
+
+      <!-- the scene: scroll-scrubbed frame sequence -->
+      <canvas id="scene" class="scene"></canvas>
+
+      <!-- nav (122:432 / 130:121) -->
+      <header class="nav" id="nav">
+        <a class="nav__logo" href="#" aria-label="CEDUR home">
+          <img src="assets/logo.svg" alt="CEDUR" width="50" height="40" />
+        </a>
+        <div class="nav__right">
+          <a class="nav__contact" href="#contact">
+            <span class="dot"></span>
+            <span class="nav__contact-label">contact</span>
+          </a>
+          <button class="nav__burger" aria-label="Menu">
+            <span class="nav__burger-lines">
+              <span></span>
+              <span></span>
+            </span>
+          </button>
+        </div>
+      </header>
+
+      <!-- hero copy (122:421..430) -->
+      <div class="hero" id="hero">
+        <div class="hero__text">
+          <div class="hero__title-block">
+            <h1 class="hero__title"><span class="reveal" data-reveal>cedur</span></h1>
+            <div class="hero__rule">
+              <span class="hero__rule-progress" id="heroRule"></span>
+            </div>
+          </div>
+          <p class="hero__desc"><span class="reveal" data-reveal>CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof</span></p>
+        </div>
+      </div>
+
+      <!-- hero bottom-right: tagline + request-sample button (122:389..399) -->
+      <div class="cta" id="cta">
+        <div class="cta__mask">
+          <div class="cta__row reveal" data-reveal>
+            <p class="cta__tagline">the&nbsp;&nbsp;roof that makes it home</p>
+            <a class="btn" href="#request-sample">
+              <span class="btn__label">
+                <span class="dot dot--solid"></span>
+                <span>REQUEST SAMPLE</span>
+              </span>
+              <span class="btn__img"><img src="assets/thumb.jpg" alt="" /></span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- benefits copy (130:118 / 130:147 / 130:176) -->
+      <div class="benefits" id="benefits" aria-live="polite">
+        <div class="benefits__head-block">
+          <div class="benefits__head-row">
+            <h2 class="benefits__title" id="benefitTitle"><span class="reveal"></span></h2>
+          </div>
+          <span class="benefits__progress" id="benefitProgress"></span>
+        </div>
+        <p class="benefits__desc" id="benefitDesc"><span class="reveal"></span></p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
