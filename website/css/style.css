@@ -232,15 +232,11 @@ body[data-state="done-loading"] .loader { display: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(calc(60 * var(--u)));
-  transform: scale(1.12);
 }
 .loader__veil {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%),
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%),
     linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%);
 }
 
@@ -264,44 +260,15 @@ body[data-state="done-loading"] .loader { display: none; }
   will-change: filter, transform;
 }
 
-/* stacked black→transparent gradient, top-anchored (130:634/637);
-   JS fades it out once the building and copy have left */
+/* top black→transparent gradient (143:414); JS fades it on scroll */
 .veil {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background-image:
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%),
     linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%);
   will-change: opacity;
-}
-
-/* the building — sharp foreground still (130:627), h1015 at top257 on the
-   1440-board. JS drives --par (parallax translate) and --bfade. */
-.building {
-  position: absolute;
-  left: 0;
-  top: calc(267 * var(--u));
-  width: calc(1819 * var(--u));
-  height: calc(1015 * var(--u));
-  transform:
-    perspective(1400px)
-    translateY(var(--par, 0px))
-    rotateY(var(--ry, 0deg))
-    rotateX(var(--rx, 0deg));
-  transform-origin: 42% 60%;
-  opacity: var(--bfade, 1);
-  z-index: 2;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-.building img,
-.building .building-gl {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 /* fine film grain (130:628) — self-contained SVG turbulence */
@@ -327,56 +294,26 @@ body[data-state="done-loading"] .loader { display: none; }
   will-change: opacity, transform;
 }
 
-/* vertical hairlines + crosses (141:962..990) */
-.grid__v, .grid__x { position: absolute; }
-.grid__v {
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--white-12);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 1.4s var(--ease-out) 1s;
-}
-.grid__v--a { left: calc(448 * var(--u)); }
-.grid__v--b { left: calc(992 * var(--u)); }
-[data-revealed] .grid__v { transform: scaleY(1); }
-/* + crosses live inside the label row, centered on its height */
-.grid__x {
+/* horizontal hairlines at y453 / y524 (143:418/420) */
+.hline {
   position: absolute;
-  width: calc(5 * var(--u));
-  height: calc(5 * var(--u));
-  top: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.6s linear 1.8s;
-}
-.grid__x::before, .grid__x::after {
-  content: "";
-  position: absolute;
-  background: var(--grey);
-}
-.grid__x::before { left: 50%; top: 0; width: 1px; height: 100%; }
-.grid__x::after { top: 50%; left: 0; height: 1px; width: 100%; }
-[data-revealed] .grid__x { opacity: 1; }
-.grid__x--a { left: calc(448.5 * var(--u)); }
-.grid__x--b { left: calc(992.5 * var(--u)); }
-
-/* centered block: labels + title, offset -30.5 from center (130:668) */
-.hero-center {
-  position: absolute;
-  top: calc(50% - 30.5 * var(--u));
   left: 0;
   width: 100%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: calc(48 * var(--u));
+  height: 1px;
+  background: var(--white-12);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.4s var(--ease-out) 1s;
 }
+.hline--a { top: calc(453 * var(--u)); }
+.hline--b { top: calc(524 * var(--u)); }
+[data-revealed] .hline { transform: scaleX(1); }
 
-/* /welcome · keep scrolling to explore · /welcome (130:669) */
+/* /welcome · keep scrolling to explore · /welcome at y216 (143:481) */
 .explore {
-  position: relative;
+  position: absolute;
+  top: calc(216 * var(--u));
+  left: 0;
   width: 100%;
   padding: 0 calc(40 * var(--u));
   display: flex;
@@ -384,7 +321,7 @@ body[data-state="done-loading"] .loader { display: none; }
   justify-content: space-between;
   font-family: var(--font-text);
   font-weight: 400;
-  font-size: calc(8 * var(--u));
+  font-size: calc(10 * var(--u));
   line-height: 0.9;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -393,30 +330,31 @@ body[data-state="done-loading"] .loader { display: none; }
   transition: opacity 0.9s linear 1.2s;
 }
 .explore__side { opacity: 0.4; }
-/* keep scrolling matches the bottom-left subtitle size (10u) */
 .explore__center {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: calc(10 * var(--u));
 }
 [data-revealed] .explore { opacity: 1; }
 
-/* the 140px hero title (130:674). Reveal: each line rises in as faint
-   transparent-white text, then fills to solid white with a left-to-right
-   sweep (terminal-industries-style, grey instead of a color shade). */
+/* the 100px hero title, vertically centered −135 (143:423). Reveal: each
+   line rises in as faint transparent-white text, then fills to solid
+   white with a left-to-right sweep (terminal-industries-style). */
 .slogan {
+  position: absolute;
+  top: calc(50% - 135 * var(--u));
+  left: 0;
   width: 100%;
   text-align: center;
   font-family: var(--font-display);
   font-weight: 500;
   font-size: calc(80 * var(--u));
-  line-height: 0.8;
+  line-height: 0.9;
   letter-spacing: 0.01em;
   text-transform: uppercase;
 }
-.slogan--big { font-size: calc(140 * var(--u)); }
+.slogan--big { font-size: calc(100 * var(--u)); }
 .sl {
   display: block;
   color: transparent;
@@ -481,8 +419,8 @@ body[data-state="done-loading"] .loader { display: none; }
 body[data-state="revealed"] .nav,
 body[data-state="done-loading"] .nav { opacity: 1; }
 .nav__logo img {
-  width: calc(50 * var(--u));
-  height: calc(40 * var(--u));
+  width: calc(40 * var(--u));
+  height: calc(32 * var(--u));
 }
 .nav__right {
   display: flex;
@@ -661,5 +599,5 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .tl__inner, .cta--right .btn, .wi, .benefits__desc, .explore, .sl, .hero-para, .grid__v, .grid__x { transition: none !important; }
+  .reveal, .tl__inner, .cta--right .btn, .wi, .benefits__desc, .explore, .sl, .hero-para, .hline { transition: none !important; }
 }

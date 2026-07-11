@@ -19,24 +19,21 @@
   const FRAME_PATH = i => `assets/${HIRES ? 'frames2x' : 'frames'}/frame_${String(i + 1).padStart(3, '0')}.webp`;
 
   const GATE_FRAMES = 42;       // frames that must be ready before reveal
-  const SCRUB_IN = 0.30;        // the scrub starts once the blur has cleared
+  const SCRUB_IN = 0.16;        // the scrub starts once the hero has left
   const SCRUB_OUT = 0.96;       // scroll progress where frame 169 lands
 
-  // scroll sequence (smooth, staggered so each stage finishes before the
-  // next starts): building parallaxes down & out → hero copy fades → the
-  // dark veil + blur clear, revealing the film from its first frame.
-  const BUILD_OUT = [0.0, 0.10];  // building parallax down + fade
-  const BUILD_PARALLAX = 52;      // vh the building travels down, in %
-  const HERO_OUT = [0.09, 0.17];  // remaining hero copy dissolves
-  const VEIL_OUT = [0.17, 0.30];  // dark veil + blur clear last
-  const BENEFITS_AT = 0.30;       // benefits copy takes over from here
+  // scroll sequence (smooth, staggered): hero copy dissolves, the top
+  // gradient fades, then the film scrubs from its first frame
+  const HERO_OUT = [0.0, 0.10];   // hero copy dissolves
+  const VEIL_OUT = [0.06, 0.16];  // top gradient fades
+  const BENEFITS_AT = 0.16;       // benefits copy takes over from here
   const VEIL_MAX = 1;             // hero veil opacity multiplier
-  const BLUR_MAX = 60;            // scene blur while in the hero (px @1440)
 
-  // ambient: while resting in the hero the blurred film plays in a slow
-  // ping-pong loop so the background light shifts; scrolling glides it
+  // ambient: at rest the sharp film sways gently across its first frames
+  // (drifting smoke and light, no visible rewind); scrolling glides it
   // back to frame 1 before the film section takes over
-  const AMBIENT_FPS = 14;
+  const AMBIENT_FPS = 10;
+  const AMBIENT_SPAN = 36;        // ping-pong across the first N frames
   const AMBIENT_AT = 0.02;        // ambient runs below this progress
 
   // loader sequence: phrases lit one at a time (previous dims back)
@@ -75,7 +72,6 @@
   const stage = document.getElementById('stage');
   const hero2 = document.getElementById('hero2');
   const veil = document.getElementById('veil');
-  const building = document.getElementById('building');
   const cta = document.getElementById('cta');
   const benefitsHead = document.getElementById('benefitsHead');
   const benefitTitle = document.getElementById('benefitTitle');
@@ -286,8 +282,6 @@
   let scrubPos = 0;
   let shownFrame = 0;
   let ambientT = 0;
-  let idleYaw = 0;   // gentle autonomous sway of the building at rest
-  let idlePitch = 0;
 
   function onScroll() {
     const vh = window.innerHeight;
@@ -302,30 +296,15 @@
     // scrub position 0..1 across the film (starts after the unblur)
     scrubPos = range(p, SCRUB_IN, SCRUB_OUT);
 
-    // ---- 1. the building rotates a touch, then parallaxes DOWN and out ----
-    const bOut = range(p, BUILD_OUT[0], BUILD_OUT[1]);
-    building.style.setProperty('--par', `${(BUILD_PARALLAX * bOut * vh / 100).toFixed(1)}px`);
-    building.style.setProperty('--bfade', (1 - bOut).toFixed(3));
-    building.style.visibility = bOut >= 1 ? 'hidden' : '';
-    // rotation: idle sway at rest + up to ~7° of yaw as it leaves
-    const yaw = idleYaw + 7 * bOut;
-    const pitch = idlePitch + 2.2 * bOut;
-    building.style.setProperty('--ry', `${yaw.toFixed(2)}deg`);
-    building.style.setProperty('--rx', `${(-pitch).toFixed(2)}deg`);
-    if (window.__houseTilt) window.__houseTilt(yaw * 0.028, pitch * 0.02);
-
-    // ---- 2. then the remaining hero copy dissolves ----
+    // ---- 1. the hero copy dissolves ----
     const hOut = range(p, HERO_OUT[0], HERO_OUT[1]);
     hero2.style.opacity = (1 - hOut).toFixed(3);
     hero2.style.transform = `translateY(${(-24 * hOut).toFixed(1)}px)`;
     hero2.style.visibility = hOut >= 1 ? 'hidden' : '';
 
-    // ---- 3. finally the veil + blur clear, the film comes alive ----
+    // ---- 2. the top gradient fades; the grain overlay stays ----
     const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
     veil.style.opacity = (VEIL_MAX * (1 - vOut)).toFixed(3);
-    const blur = BLUR_MAX * (1 - vOut) * u();
-    canvas.style.filter = blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : '';
-    canvas.style.transform = vOut < 1 ? `scale(${(1 + 0.06 * (1 - vOut)).toFixed(4)})` : '';
 
     // ---- benefits copy ----
     const next = p < BENEFITS_AT ? 'hero'
@@ -340,26 +319,18 @@
     const dt = Math.min(0.05, (now - lastT) / 1000 || 0.016);
     lastT = now;
 
-    // gentle building sway while resting in the hero
-    if (!reducedMotion) {
-      const t = now / 1000;
-      const rest = clamp01(1 - rawP / AMBIENT_AT);
-      idleYaw = Math.sin(t * 0.5) * 1.1 * rest;
-      idlePitch = Math.cos(t * 0.37) * 0.5 * rest;
-    }
-
     // smooth-scroll inertia: everything glides toward the real position
     smoothP += (rawP - smoothP) * (reducedMotion ? 1 : 0.11);
     if (Math.abs(rawP - smoothP) < 0.0004) smoothP = rawP;
     if (body.dataset.state !== 'loading') applyScroll(smoothP);
 
-    // frame target: ambient ping-pong at rest, back to frame 1 on scroll
+    // frame target: gentle ambient sway at rest, back to frame 1 on scroll
     let targetFrame;
     const ambient = body.hasAttribute('data-revealed') && rawP < AMBIENT_AT && !reducedMotion;
     if (ambient) {
       ambientT += dt * AMBIENT_FPS;
-      const cycle = ambientT % (2 * (FRAME_COUNT - 1));
-      targetFrame = cycle <= FRAME_COUNT - 1 ? cycle : 2 * (FRAME_COUNT - 1) - cycle;
+      const cycle = ambientT % (2 * AMBIENT_SPAN);
+      targetFrame = cycle <= AMBIENT_SPAN ? cycle : 2 * AMBIENT_SPAN - cycle;
     } else {
       ambientT = 0;
       targetFrame = scrubPos * (FRAME_COUNT - 1);
@@ -392,7 +363,6 @@
   sizeCanvas();
   window.scrollTo(0, 0);
   loaderWindow.querySelector('img').src = FRAME_PATH(0);
-  if (HIRES) document.getElementById('buildingImg').src = 'assets/house2x.webp';
   preloadAll();
   loaderTick();
   onScroll();

@@ -38,49 +38,37 @@
   <div class="stage" id="stage">
     <div class="stage__pin">
 
-      <!-- the scene: scroll-scrubbed frame sequence. Blurred while in the
-           hero (130:541: bg photo blur 100px); it unblurs only after the
-           building and the hero copy have left. -->
+      <!-- the scene: scroll-scrubbed frame sequence, sharp from the start
+           (143:410 — no blur); a slow ambient sway plays at rest -->
       <canvas id="scene" class="scene"></canvas>
 
-      <!-- triple black→transparent gradient over the scene (130:542..544) -->
+      <!-- top black→transparent gradient (143:414); fades on scroll -->
       <div class="veil" id="veil"></div>
 
-      <!-- the building — sharp foreground cutout (130:658). Parallaxes up
-           and out first as you begin to scroll. -->
-      <div class="building" id="building">
-        <img src="assets/house.webp" alt="" draggable="false" id="buildingImg" />
-      </div>
-
-      <!-- fine film grain (130:628 noise) -->
+      <!-- fine film grain overlaid on the video (143:416) — persistent -->
       <div class="noise" id="noise" aria-hidden="true"></div>
 
-      <!-- hero UI (Figma 130:630) — dissolves after the building is gone -->
+      <!-- hero UI (Figma 143:410) — dissolves into the film section -->
       <div class="hero2" id="hero2">
-        <!-- vertical hairlines at 448/992 (141:962/964) -->
-        <div class="grid">
-          <span class="grid__v grid__v--a"></span>
-          <span class="grid__v grid__v--b"></span>
+        <!-- horizontal hairlines at y453 / y524 (143:418/420) -->
+        <span class="hline hline--a"></span>
+        <span class="hline hline--b"></span>
+
+        <!-- /welcome · keep scrolling to explore · /welcome at y216 (143:481) -->
+        <div class="explore" id="explore">
+          <span class="explore__side">/welcome</span>
+          <span class="explore__center">keep scrolling to explore</span>
+          <span class="explore__side">/welcome</span>
         </div>
 
-        <!-- centered block: labels row + 140px title (130:668) -->
-        <div class="hero-center">
-          <div class="explore" id="explore">
-            <span class="explore__side">/welcome</span>
-            <span class="explore__center">keep scrolling to explore</span>
-            <span class="explore__side">/welcome</span>
-            <!-- + crosses sit on the label line, centered on its height -->
-            <span class="grid__x grid__x--a"></span>
-            <span class="grid__x grid__x--b"></span>
-          </div>
-          <h1 class="slogan slogan--big" id="slogan">
-            <span class="sl" style="--i:0">THE ROOF</span>
-            <span class="sl" style="--i:1">THAT MAKES IT</span>
-            <span class="sl sl--dim" style="--i:2">HOME</span>
-          </h1>
-        </div>
+        <!-- THE ROOF THAT MAKES IT HOME — 100px, HOME at 40% (143:423) -->
+        <h1 class="slogan slogan--big" id="slogan">
+          <span class="sl" style="--i:0">THE ROOF</span>
+          <span class="sl" style="--i:1">THAT MAKES IT</span>
+          <span class="sl sl--dim" style="--i:2">HOME</span>
+        </h1>
 
-        <!-- bottom-left paragraph (130:675) -->
+        <!-- bottom-left paragraph (143:475) -->
         <p class="hero-para">CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof.</p>
 
         <!-- REQUEST SAMPLE, bottom right (130:661) -->
@@ -100,7 +88,7 @@
       <!-- nav (130:356) -->
       <header class="nav" id="nav">
         <a class="nav__logo" href="#" aria-label="CEDUR home">
-          <img src="assets/logo.svg" alt="CEDUR" width="50" height="40" />
+          <img src="assets/logo.svg" alt="CEDUR" width="40" height="32" />
         </a>
         <div class="nav__right">
           <a class="nav__contact" href="#contact">
@@ -130,7 +118,6 @@
     </div>
   </div>
 
-  <script src="js/house3d.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
