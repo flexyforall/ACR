@@ -38,22 +38,44 @@
   <div class="stage" id="stage">
     <div class="stage__pin">
 
-      <!-- the scene: scroll-scrubbed frame sequence, dimmed 50% while in
-           the hero; the dim clears as you scroll into the film -->
+      <!-- the scene: scroll-scrubbed frame sequence. Blurred while in the
+           hero (130:541: bg photo blur 100px); it unblurs only after the
+           building and the hero copy have left. -->
       <canvas id="scene" class="scene"></canvas>
 
-      <!-- 50% black overlay over the scene (130:479: video at 50% on black) -->
+      <!-- triple black→transparent gradient over the scene (130:542..544) -->
       <div class="veil" id="veil"></div>
 
-      <!-- hero UI (Figma 130:476) — dissolves as the overlay clears -->
+      <!-- the building — sharp foreground still (130:627). Parallaxes up
+           and out first as you begin to scroll. NOTE: this uses the film's
+           establishing frame as a stand-in; drop the exact house PNG at
+           assets/house.webp to swap it in (see README). -->
+      <div class="building" id="building">
+        <img src="assets/frames/frame_001.webp" alt="" draggable="false" />
+      </div>
+
+      <!-- fine film grain (130:628 noise) -->
+      <div class="noise" id="noise" aria-hidden="true"></div>
+
+      <!-- hero UI (Figma 130:538) — dissolves after the building is gone -->
       <div class="hero2" id="hero2">
-        <div class="hero-stack">
-          <h1 class="slogan" id="slogan">
-            <span class="sl"><span class="wi" style="--i:0">THE ROOF</span></span>
-            <span class="sl"><span class="wi" style="--i:1">THAT MAKES IT</span></span>
-            <span class="sl sl--dim"><span class="wi" style="--i:2">HOME.</span></span>
-          </h1>
-          <div class="hero-stack__cta">
+        <!-- keep · scrolling · to explore (130:603) -->
+        <div class="explore" id="explore">
+          <span class="explore__side">keep</span>
+          <span class="explore__center">scrolling</span>
+          <span class="explore__side">to explore</span>
+        </div>
+
+        <!-- THE ROOF THAT MAKES IT HOME — 140px, HOME at 40% (130:565) -->
+        <h1 class="slogan slogan--big" id="slogan">
+          <span class="sl"><span class="wi" style="--i:0">THE ROOF</span></span>
+          <span class="sl"><span class="wi" style="--i:1">THAT MAKES IT</span></span>
+          <span class="sl sl--dim"><span class="wi" style="--i:2">HOME</span></span>
+        </h1>
+
+        <!-- REQUEST SAMPLE, centered near the bottom (130:595) -->
+        <div class="cta cta--center" id="cta">
+          <div class="cta__mask">
             <a class="btn" href="#request-sample">
               <span class="btn__label">
                 <span class="dot dot--sm"></span>
@@ -63,9 +85,6 @@
             </a>
           </div>
         </div>
-
-        <p class="welcome welcome--l">welcome</p>
-        <p class="welcome welcome--r">to cedur</p>
       </div>
 
       <!-- nav (130:356) -->

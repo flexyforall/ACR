@@ -222,11 +222,16 @@ body[data-state="done-loading"] .loader { display: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: blur(calc(60 * var(--u)));
+  transform: scale(1.12);
 }
 .loader__veil {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background-image:
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%);
 }
 
 /* ============================================================
@@ -245,89 +250,117 @@ body[data-state="done-loading"] .loader { display: none; }
   inset: 0;
   width: 100%;
   height: 100%;
+  transform-origin: 50% 50%;
+  will-change: filter, transform;
 }
 
-/* 50% black overlay (130:479: the scene sits at 50% opacity on black);
-   JS fades it out on scroll into the film */
+/* triple black→transparent gradient, top-anchored (130:542..544);
+   JS fades it out once the building and copy have left */
 .veil {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: #000;
-  opacity: 0.5;
+  background-image:
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 62%);
   will-change: opacity;
 }
 
-/* ============================================================
-   HERO (Figma 130:476)
-   ============================================================ */
-.hero2 {
+/* the building — sharp foreground still (130:627), h1015 at top257 on the
+   1440-board. JS drives --par (parallax translate) and --bfade. */
+.building {
+  position: absolute;
+  left: 50%;
+  top: calc(257 * var(--u));
+  width: calc(1819 * var(--u));
+  height: calc(1015 * var(--u));
+  transform: translate(-50%, var(--par, 0px));
+  opacity: var(--bfade, 1);
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.building img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(120% 90% at 50% 55%, #000 62%, rgba(0,0,0,0) 92%);
+          mask-image: radial-gradient(120% 90% at 50% 55%, #000 62%, rgba(0,0,0,0) 92%);
+}
+
+/* fine film grain (130:628) — self-contained SVG turbulence */
+.noise {
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: calc(270 * var(--u)) calc(270 * var(--u));
+}
+
+/* ============================================================
+   HERO (Figma 130:538)
+   ============================================================ */
+.hero2 {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
   will-change: opacity, transform;
 }
 
-/* centered stack (130:522): slogan + request-sample, gap 40 */
-.hero-stack {
+/* keep · scrolling · to explore (130:603) */
+.explore {
   position: absolute;
-  top: calc(50% - 108 * var(--u));
+  top: calc(139 * var(--u));
   left: 0;
   width: 100%;
+  padding: 0 calc(40 * var(--u));
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: calc(40 * var(--u));
-}
-/* the button rises out of its own mask after the slogan */
-.hero-stack__cta {
-  overflow: hidden;
-  pointer-events: auto;
-}
-.hero-stack__cta .btn {
-  transform: translateY(115%);
-  transition: transform 1.2s var(--ease-out) 0.7s;
-}
-[data-revealed] .hero-stack__cta .btn { transform: translateY(0); }
-
-/* central slogan (130:511): 80px, three masked lines, HOME. at 40% */
-.slogan {
-  width: 100%;
-  text-align: center;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: calc(80 * var(--u));
-  line-height: 0.9;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  color: var(--white);
-}
-.sl {
-  display: block;
-  overflow: hidden;
-}
-.sl--dim { color: rgba(255, 255, 255, 0.4); }
-
-/* welcome / to cedur labels on the center axis (130:525) */
-.welcome {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  justify-content: space-between;
   font-family: var(--font-text);
-  font-weight: 400;
-  font-size: calc(10 * var(--u));
+  font-weight: 500;
+  font-size: calc(12 * var(--u));
   line-height: 0.9;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--white);
   opacity: 0;
-  transition: opacity 0.8s linear 1.3s;
+  transition: opacity 0.9s linear 1.2s;
 }
-[data-revealed] .welcome { opacity: 1; }
-.welcome--l { left: calc(40 * var(--u)); }
-.welcome--r { right: calc(40 * var(--u)); text-align: right; }
+.explore__center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+[data-revealed] .explore { opacity: 0.4; }
+
+/* central slogan — 80px default; --big is the 140px hero title (130:565) */
+.slogan {
+  position: absolute;
+  top: calc(139 * var(--u) + 60 * var(--u));
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: calc(80 * var(--u));
+  line-height: 0.8;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.slogan--big { font-size: calc(140 * var(--u)); }
+.sl {
+  display: block;
+  overflow: hidden;
+}
+.sl--dim { color: rgba(255, 255, 255, 0.4); }
 
 /* ---------- nav (122:432) ---------- */
 .nav {
@@ -429,6 +462,28 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   will-change: transform;
 }
 
+/* the hero slogan rises out of its masks on reveal */
+.slogan .wi {
+  transform: translateY(115%);
+  transition: transform 1.2s var(--ease-out) calc(0.12s + var(--i, 0) * 0.09s);
+}
+[data-revealed] .slogan .wi { transform: translateY(0); }
+
+/* request-sample button, centered near the bottom (130:595) */
+.cta--center {
+  position: absolute;
+  left: 50%;
+  top: calc(717 * var(--u));
+  transform: translateX(-50%);
+  z-index: 4;
+}
+.cta__mask { overflow: hidden; }
+.cta--center .btn {
+  transform: translateY(120%);
+  transition: transform 1.2s var(--ease-out) 0.55s;
+}
+[data-revealed] .cta--center .btn { transform: translateY(0); }
+
 /* ---------- request-sample button (130:514) ---------- */
 .btn {
   display: flex;
@@ -508,5 +563,5 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .tl__inner, .hero-stack__cta, .wi, .benefits__desc { transition: none !important; }
+  .reveal, .tl__inner, .cta--center .btn, .wi, .benefits__desc, .explore, .slogan .wi { transition: none !important; }
 }

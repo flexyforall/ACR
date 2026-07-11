@@ -22,10 +22,16 @@
   const SCRUB_IN = 0.05;        // scroll progress where the scrub starts
   const SCRUB_OUT = 0.96;       // scroll progress where frame 169 lands
 
-  const HERO_OUT = [0.0, 0.09];   // hero UI dissolves over this range
-  const VEIL_OUT = [0.02, 0.14];  // 50% dark overlay clears over this range
-  const BENEFITS_AT = 0.14;       // benefits copy takes over from here
-  const VEIL_MAX = 0.5;           // hero overlay strength (130:479)
+  // scroll sequence (smooth, staggered so each stage finishes before the
+  // next starts): building parallaxes up & out → hero copy fades → the
+  // dark veil + blur clear, revealing the film → the film scrubs/plays.
+  const BUILD_OUT = [0.0, 0.10];  // building parallax up + fade
+  const BUILD_PARALLAX = 46;      // vh the building travels up, in %
+  const HERO_OUT = [0.09, 0.17];  // remaining hero copy dissolves
+  const VEIL_OUT = [0.17, 0.30];  // dark veil + blur clear last
+  const BENEFITS_AT = 0.30;       // benefits copy takes over from here
+  const VEIL_MAX = 1;             // hero veil opacity multiplier
+  const BLUR_MAX = 60;            // scene blur while in the hero (px @1440)
 
   // loader sequence: phrases lit one at a time (previous dims back)
   const LOADER_STEP_T = [1350, 1950, 2550];
@@ -67,6 +73,8 @@
   const stage = document.getElementById('stage');
   const hero2 = document.getElementById('hero2');
   const veil = document.getElementById('veil');
+  const building = document.getElementById('building');
+  const cta = document.getElementById('cta');
   const slogan = document.getElementById('slogan');
   const benefitsHead = document.getElementById('benefitsHead');
   const benefitTitle = document.getElementById('benefitTitle');
@@ -301,15 +309,24 @@
     // scrub position 0..1 across the film (picks up after the intro)
     scrubPos = range(p, SCRUB_IN, SCRUB_OUT);
 
-    // ---- hero UI dissolves ----
+    // ---- 1. the building parallaxes up and out first ----
+    const bOut = range(p, BUILD_OUT[0], BUILD_OUT[1]);
+    building.style.setProperty('--par', `${(-BUILD_PARALLAX * bOut * vh / 100).toFixed(1)}px`);
+    building.style.setProperty('--bfade', (1 - bOut).toFixed(3));
+    building.style.visibility = bOut >= 1 ? 'hidden' : '';
+
+    // ---- 2. then the remaining hero copy dissolves ----
     const hOut = range(p, HERO_OUT[0], HERO_OUT[1]);
     hero2.style.opacity = (1 - hOut).toFixed(3);
-    hero2.style.transform = `translateY(${(-30 * hOut).toFixed(1)}px)`;
+    hero2.style.transform = `translateY(${(-24 * hOut).toFixed(1)}px)`;
     hero2.style.visibility = hOut >= 1 ? 'hidden' : '';
 
-    // ---- the dark overlay clears, revealing the film as-is ----
+    // ---- 3. finally the veil + blur clear, the film comes alive ----
     const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
     veil.style.opacity = (VEIL_MAX * (1 - vOut)).toFixed(3);
+    const blur = BLUR_MAX * (1 - vOut) * u();
+    canvas.style.filter = blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : '';
+    canvas.style.transform = vOut < 1 ? `scale(${(1 + 0.06 * (1 - vOut)).toFixed(4)})` : '';
 
     // ---- benefits copy ----
     const next = p < BENEFITS_AT ? 'hero'

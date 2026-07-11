@@ -44,6 +44,13 @@ bundled open fonts (Archivo / Inter).
 - `assets/thumb.jpg` — request-sample button thumbnail (low-res export;
   replace with the original `Products_Carousel_Live-Oak` product photo
   for full fidelity).
+- **Hero building image** — the parallax foreground currently reuses the
+  film's establishing frame (`frame_001.webp`) as a stand-in, because
+  Figma's asset CDN is blocked from the build environment. To use the
+  exact house cutout from Figma node `130:627`, export it as a PNG with
+  transparency, save it as `assets/house.webp` (or `.png`), and point the
+  `<div class="building"><img>` in `index.html` at it. The radial mask in
+  `.building img` can then be removed since the export already has alpha.
 
 To re-extract frames from a new cut of the video:
 
