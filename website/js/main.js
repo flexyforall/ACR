@@ -286,6 +286,8 @@
   let scrubPos = 0;
   let shownFrame = 0;
   let ambientT = 0;
+  let idleYaw = 0;   // gentle autonomous sway of the building at rest
+  let idlePitch = 0;
 
   function onScroll() {
     const vh = window.innerHeight;
@@ -300,11 +302,17 @@
     // scrub position 0..1 across the film (starts after the unblur)
     scrubPos = range(p, SCRUB_IN, SCRUB_OUT);
 
-    // ---- 1. the building parallaxes DOWN and out first ----
+    // ---- 1. the building rotates a touch, then parallaxes DOWN and out ----
     const bOut = range(p, BUILD_OUT[0], BUILD_OUT[1]);
     building.style.setProperty('--par', `${(BUILD_PARALLAX * bOut * vh / 100).toFixed(1)}px`);
     building.style.setProperty('--bfade', (1 - bOut).toFixed(3));
     building.style.visibility = bOut >= 1 ? 'hidden' : '';
+    // rotation: idle sway at rest + up to ~7° of yaw as it leaves
+    const yaw = idleYaw + 7 * bOut;
+    const pitch = idlePitch + 2.2 * bOut;
+    building.style.setProperty('--ry', `${yaw.toFixed(2)}deg`);
+    building.style.setProperty('--rx', `${(-pitch).toFixed(2)}deg`);
+    if (window.__houseTilt) window.__houseTilt(yaw * 0.028, pitch * 0.02);
 
     // ---- 2. then the remaining hero copy dissolves ----
     const hOut = range(p, HERO_OUT[0], HERO_OUT[1]);
@@ -331,6 +339,14 @@
   function rafLoop(now) {
     const dt = Math.min(0.05, (now - lastT) / 1000 || 0.016);
     lastT = now;
+
+    // gentle building sway while resting in the hero
+    if (!reducedMotion) {
+      const t = now / 1000;
+      const rest = clamp01(1 - rawP / AMBIENT_AT);
+      idleYaw = Math.sin(t * 0.5) * 1.1 * rest;
+      idlePitch = Math.cos(t * 0.37) * 0.5 * rest;
+    }
 
     // smooth-scroll inertia: everything glides toward the real position
     smoothP += (rawP - smoothP) * (reducedMotion ? 1 : 0.11);

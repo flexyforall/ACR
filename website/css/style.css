@@ -285,16 +285,23 @@ body[data-state="done-loading"] .loader { display: none; }
   top: calc(267 * var(--u));
   width: calc(1819 * var(--u));
   height: calc(1015 * var(--u));
-  transform: translateY(var(--par, 0px));
+  transform:
+    perspective(1400px)
+    translateY(var(--par, 0px))
+    rotateY(var(--ry, 0deg))
+    rotateX(var(--rx, 0deg));
+  transform-origin: 42% 60%;
   opacity: var(--bfade, 1);
   z-index: 2;
   pointer-events: none;
   will-change: transform, opacity;
 }
-.building img {
+.building img,
+.building .building-gl {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 /* fine film grain (130:628) — self-contained SVG turbulence */
