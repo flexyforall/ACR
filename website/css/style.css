@@ -14,6 +14,12 @@
   font-display: swap;
 }
 @font-face {
+  font-family: "Owners TRIAL Text";
+  src: url("../assets/fonts/OwnersTextTRIAL-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
   font-family: "Neue Montreal";
   src: url("../assets/fonts/NeueMontreal-Regular.woff2") format("woff2");
   font-weight: 400;
@@ -46,7 +52,9 @@
   --white-20: rgba(255, 255, 255, 0.2);
   --white-08: rgba(255, 255, 255, 0.08);
   --grey: #d9d9d9;
+  --white-12: rgba(255, 255, 255, 0.12);
   --font-display: "OwnersTRIAL", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-text: "Owners TRIAL Text", "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Neue Montreal", "Inter", "Helvetica Neue", Arial, sans-serif;
   --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
 }
@@ -83,6 +91,10 @@ button { background: none; border: 0; color: inherit; cursor: pointer; font: inh
 }
 .dot--dim.lit { background: var(--white); }
 .dot--solid { background: var(--white); }
+.dot--sm {
+  width: calc(6 * var(--u));
+  height: calc(6 * var(--u));
+}
 
 /* ============================================================
    TEXT REVEAL SYSTEM — line-mask rise with a skew settle
@@ -187,7 +199,9 @@ body[data-state="done-loading"] .loader { display: none; }
 .loader[data-in] .tl--home .tl__inner { transition-delay: 0.2s, 0s; }
 .loader[data-in] .tl--right .tl__inner { transition-delay: 0.35s, 0s; }
 
-/* window onto the hero frame: 100×100 at bottom-center → full-bleed */
+/* window onto the hero frame: 100×100 at bottom-center → full-bleed;
+   the scene inside carries the hero's blur + veil so the hand-off is
+   seamless */
 .loader__window {
   position: absolute;
   inset: 0;
@@ -198,11 +212,27 @@ body[data-state="done-loading"] .loader { display: none; }
     calc(50% - 50 * var(--u))
   );
   will-change: clip-path;
+  overflow: hidden;
 }
-.loader__window img {
+.loader__scene {
+  position: absolute;
+  inset: 0;
+}
+.loader__scene img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: blur(calc(25 * var(--u)));
+  transform: scale(1.17);
+  transform-origin: 50% 100%;
+}
+.loader__veil {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 /* ============================================================
@@ -221,7 +251,136 @@ body[data-state="done-loading"] .loader { display: none; }
   inset: 0;
   width: 100%;
   height: 100%;
+  transform-origin: 50% 100%;
+  will-change: filter, transform;
 }
+
+/* triple black→transparent gradient (130:400..402); JS fades it out */
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%);
+  will-change: opacity;
+}
+
+/* ============================================================
+   HERO (Figma 130:352)
+   ============================================================ */
+.hero2 {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* hairline grid, white 12% (130:405/407) */
+.grid__v, .grid__h, .grid__x { position: absolute; }
+.grid__v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--white-12);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1.4s var(--ease-out) 0.9s;
+}
+.grid__v--a { left: calc(440.5 * var(--u)); }
+.grid__v--b { left: calc(998.5 * var(--u)); }
+.grid__h {
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--white-12);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.4s var(--ease-out) 1.05s;
+}
+.grid__h--a { top: calc(50% - 100 * var(--u)); }
+.grid__h--b { top: calc(50% + 100 * var(--u)); }
+[data-revealed] .grid__v { transform: scaleY(1); }
+[data-revealed] .grid__h { transform: scaleX(1); }
+/* + crosses at the intersections (130:410..421) */
+.grid__x {
+  width: calc(5 * var(--u));
+  height: calc(5 * var(--u));
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.6s linear 1.7s;
+}
+.grid__x::before, .grid__x::after {
+  content: "";
+  position: absolute;
+  background: var(--grey);
+}
+.grid__x::before { left: 50%; top: 0; width: 1px; height: 100%; }
+.grid__x::after { top: 50%; left: 0; height: 1px; width: 100%; }
+[data-revealed] .grid__x { opacity: 1; }
+.grid__x--tl { left: calc(441 * var(--u)); top: calc(50% - 100 * var(--u)); }
+.grid__x--tr { left: calc(999 * var(--u)); top: calc(50% - 100 * var(--u)); }
+.grid__x--bl { left: calc(441 * var(--u)); top: calc(50% + 100 * var(--u)); }
+.grid__x--br { left: calc(999 * var(--u)); top: calc(50% + 100 * var(--u)); }
+
+/* central slogan (130:387): 80px, three masked lines, HOME. at 40% */
+.slogan {
+  position: absolute;
+  top: calc(50% - 108 * var(--u));
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: calc(80 * var(--u));
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.sl {
+  display: block;
+  overflow: hidden;
+}
+.sl--dim { color: rgba(255, 255, 255, 0.4); }
+
+/* /WELCOME TO CEDUR labels (130:456/457) */
+.welcome {
+  position: absolute;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: calc(10 * var(--u));
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+  opacity: 0;
+  transition: opacity 0.8s linear 1.5s;
+}
+[data-revealed] .welcome { opacity: 1; }
+.welcome--l { left: calc(40 * var(--u)); top: calc(50% - 83 * var(--u)); }
+.welcome--r { right: calc(40 * var(--u)); top: calc(50% + 73 * var(--u)); text-align: right; }
+
+/* bottom-left lead paragraph (130:390) */
+.lead {
+  position: absolute;
+  left: calc(40 * var(--u));
+  bottom: calc(40 * var(--u));
+  width: calc(336 * var(--u));
+  font-family: var(--font-body);
+  font-size: calc(14 * var(--u));
+  letter-spacing: 0.01em;
+  line-height: normal;
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.9s linear 1.1s, transform 1.1s var(--ease-out) 1.1s;
+}
+.lead p + p { margin-top: calc(14 * var(--u)); }
+[data-revealed] .lead { opacity: 1; transform: translateY(0); }
 
 /* ---------- nav (122:432) ---------- */
 .nav {
@@ -245,20 +404,20 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .nav__right {
   display: flex;
   align-items: center;
-  gap: calc(35 * var(--u));
+  gap: calc(20 * var(--u));
 }
 .nav__contact {
   display: flex;
   align-items: center;
-  gap: calc(11 * var(--u));
-  font-family: var(--font-display);
-  font-weight: 500;
+  gap: calc(8 * var(--u));
+  font-family: var(--font-text);
+  font-weight: 400;
   font-size: calc(10 * var(--u));
   line-height: 0.9;
   letter-spacing: 0.01em;
   text-transform: uppercase;
 }
-/* burger matches the logo height (40u) so the nav reads as one line */
+/* burger matches the logo height, lines centered (130:371..375) */
 .nav__burger {
   width: calc(40 * var(--u));
   height: calc(40 * var(--u));
@@ -271,63 +430,50 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .nav__burger-lines {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: calc(4 * var(--u));
 }
 .nav__burger-lines span {
   display: block;
-  height: 2px;
+  height: 1px;
   background: var(--grey);
 }
-.nav__burger-lines span:first-child { width: calc(20 * var(--u)); }
-.nav__burger-lines span:last-child { width: calc(12 * var(--u)); }
+.nav__burger-lines span:first-child { width: calc(16 * var(--u)); }
+.nav__burger-lines span:last-child { width: calc(10 * var(--u)); }
 
 /* ============================================================
-   HEADLINE — one element that lives in both sections.
-   JS drives --rule-y (line position), --ts (title size),
-   --lh (line-height), --pad-b (gap between text and line).
-   Hero:      rule at 50vh + 82u, title 160u / 0.9, pad 10u
-   Benefits:  rule at 100vh − 166u, title 32u / 1.1, pad 16u
+   BENEFITS HEADING (130:142): title + rule + progress, anchored
+   to the bottom; fades in when the film section takes over
    ============================================================ */
-.headline {
+.benefits-head {
   position: absolute;
   left: 0;
+  bottom: calc(166 * var(--u));
   width: 100%;
-  top: var(--rule-y, calc(50% + 82 * var(--u)));
   z-index: 3;
   pointer-events: none;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s linear, transform 0.8s var(--ease-out);
 }
-.headline__row {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 0 calc(40 * var(--u));
+.benefits-head.show { opacity: 1; transform: translateY(0); }
+.benefits-head__row {
+  padding: calc(16 * var(--u)) calc(40 * var(--u));
+  border-bottom: 1px solid var(--white-20);
 }
-.headline__title {
+.benefits-head__title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--ts, calc(160 * var(--u)));
-  line-height: var(--lh, 0.9);
+  font-size: calc(32 * var(--u));
+  line-height: 1.1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  padding-bottom: var(--pad-b, calc(10 * var(--u)));
-  max-width: none;
+  max-width: calc(420 * var(--u));
 }
-/* the shared rule: full-width hairline in both sections
-   (Line 10 in the hero, the heading border in benefits) */
-.headline__rule {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--white-20);
-}
-.headline__progress {
+.benefits-head__progress {
   position: absolute;
   left: 0;
-  top: 0;
+  bottom: -1px;
   height: 1px;
   width: calc(1360 * var(--u));
   background: var(--white);
@@ -335,24 +481,12 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   transform-origin: left;
   will-change: transform;
 }
-/* hero description under the rule (122:429) */
-.headline__desc {
-  position: absolute;
-  top: calc(32 * var(--u));
-  left: 0;
-  padding-left: calc(40 * var(--u));
-  font-size: calc(16 * var(--u));
-  letter-spacing: 0.01em;
-  line-height: normal;
-  max-width: calc(539 * var(--u)); /* 40 padding + 499 text (122:430) */
-  will-change: opacity, transform, filter;
-}
 
-/* ---------- hero cta (122:389) ---------- */
+/* ---------- request-sample button (130:392) ---------- */
 .cta {
   position: absolute;
   right: calc(40 * var(--u));
-  bottom: calc(32 * var(--u));
+  bottom: calc(40 * var(--u));
   z-index: 4;
 }
 .cta__mask { overflow: hidden; }
@@ -378,8 +512,8 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   display: flex;
   align-items: center;
   gap: calc(6 * var(--u));
-  font-family: var(--font-display);
-  font-weight: 500;
+  font-family: var(--font-text);
+  font-weight: 400;
   font-size: calc(10 * var(--u));
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -433,7 +567,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 /* ---------- small screens ---------- */
 @media (max-width: 720px) {
   :root { --u: calc(100vw / 720); }
-  .headline__desc { font-size: calc(14 * var(--u)); max-width: calc(560 * var(--u)); }
+  .lead { font-size: calc(13 * var(--u)); width: calc(420 * var(--u)); }
   .benefits__desc { font-size: calc(15 * var(--u)); }
   .loader__tagline { font-size: calc(12 * var(--u)); }
   .nav__contact { font-size: calc(12 * var(--u)); }

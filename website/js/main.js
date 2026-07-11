@@ -1,9 +1,8 @@
 /* ============================================================
-   CEDUR — loader → hero reveal → scroll-scrubbed scene
-   The second section scrubs a 169-frame sequence with the scroll
-   position. The headline (CEDUR + rule + progress) is ONE
-   persistent element: it travels down and shrinks into the
-   benefits heading, the rule and progress line moving with it.
+   CEDUR — loader → blurred hero → scroll clears into the film
+   The hero sits on a blurred, veiled still of the scene. Scrolling
+   dissolves the veil and the blur, revealing the film as-is, then
+   scrubs it frame-by-frame while the benefits copy swaps in-frame.
    ============================================================ */
 
 (() => {
@@ -23,12 +22,13 @@
   const SCRUB_IN = 0.05;        // scroll progress where the scrub starts
   const SCRUB_OUT = 0.96;       // scroll progress where frame 169 lands
 
-  // headline morph: hero state → benefits state over this scroll window
-  const MORPH = [0.02, 0.115];
-  const PROGRESS_START = 64 / 1360; // hero progress segment (122:428)
+  const HERO_OUT = [0.0, 0.09];   // hero UI dissolves over this range
+  const VEIL_OUT = [0.02, 0.14];  // dark veil + blur clear over this range
+  const BENEFITS_AT = 0.14;       // benefits copy takes over from here
+  const BLUR_MAX = 25;            // design blur, in 1440-board px (130:355)
+  const SCALE_MAX = 1.17;         // blurred scene overscan (936/800)
 
-  // loader sequence: phrases lit one at a time (previous dims back),
-  // then the window expands
+  // loader sequence: phrases lit one at a time (previous dims back)
   const LOADER_STEP_T = [1350, 1950, 2550];
   const LOADER_MIN_MS = 3250;
 
@@ -66,10 +66,12 @@
   const loaderBand = document.getElementById('loaderBand');
   const loaderWindow = document.getElementById('loaderWindow');
   const stage = document.getElementById('stage');
-  const headline = document.getElementById('headline');
-  const headlineTitle = document.getElementById('headlineTitle');
+  const hero2 = document.getElementById('hero2');
+  const veil = document.getElementById('veil');
+  const slogan = document.getElementById('slogan');
+  const benefitsHead = document.getElementById('benefitsHead');
+  const benefitTitle = document.getElementById('benefitTitle');
   const ruleProgress = document.getElementById('ruleProgress');
-  const heroDesc = document.getElementById('heroDesc');
   const cta = document.getElementById('cta');
   const benefitDesc = document.getElementById('benefitDesc');
   const canvas = document.getElementById('scene');
@@ -102,9 +104,6 @@
   }
   const wordsIn = el => el.querySelectorAll('.wi').forEach(wi => { wi.classList.remove('out'); wi.classList.add('in'); });
   const wordsOut = el => el.querySelectorAll('.wi').forEach(wi => wi.classList.add('out'));
-
-  setWords(headlineTitle, 'cedur');
-  setWords(heroDesc, heroDesc.textContent.trim());
 
   // ------------------------------------------------------------------
   // frame preloading
@@ -162,11 +161,6 @@
 
   // ------------------------------------------------------------------
   // loader timeline
-  // 1. tagline slides in (all 20% white)
-  // 2. "the roof" lights up, a square appearing before it
-  // 3. "that makes it" lights up, "the roof" dims back
-  // 4. "home" lights up, "that makes it" dims back
-  // 5. the window expands into the hero
   // ------------------------------------------------------------------
   const t0 = performance.now();
 
@@ -206,26 +200,14 @@
         { duration: reducedMotion ? 1 : 1100, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards' }
       );
       win.onfinish = () => {
-        // the canvas already shows the same frame the window revealed, so
-        // the loader can be dropped immediately — otherwise it covers the
-        // page and the hero text animations play invisibly beneath it
+        // the canvas behind carries the same blurred/veiled scene, so the
+        // loader can drop immediately and the hero reveals play visibly
         drawFrame(0);
         body.dataset.state = 'done-loading';
         body.setAttribute('data-revealed', '');
-        // hero text: staggered word rise with skew settle
-        setTimeout(() => wordsIn(headlineTitle), reducedMotion ? 0 : 120);
-        setTimeout(() => wordsIn(heroDesc), reducedMotion ? 0 : 380);
-        // progress segment draws in to its 64px hero width
-        const anim = ruleProgress.animate(
-          [{ transform: 'scaleX(0)' }, { transform: `scaleX(${PROGRESS_START})` }],
-          { duration: reducedMotion ? 1 : 900, delay: reducedMotion ? 0 : 500, easing: 'cubic-bezier(0.19,1,0.22,1)', fill: 'forwards' }
-        );
-        anim.onfinish = () => {
-          anim.cancel();
-          ruleProgress.style.transform = `scaleX(${PROGRESS_START})`;
-        };
-        // hero intro: a gentle push into the scene
-        setTimeout(playIntro, reducedMotion ? 0 : 350);
+        setTimeout(() => wordsIn(slogan), reducedMotion ? 0 : 150);
+        // hero intro: a gentle push into the scene, behind the veil
+        setTimeout(playIntro, reducedMotion ? 0 : 500);
       };
     };
   }
@@ -249,21 +231,10 @@
   }
 
   // ------------------------------------------------------------------
-  // headline state machine: 'hero' (CEDUR) ↔ benefit steps 0..2
+  // benefits state machine: hidden in the hero ↔ steps 0..2
   // ------------------------------------------------------------------
-  let headlineState = 'hero';
+  let benefitState = 'hero';
   let swapLock = 0;
-
-  function applyHeadline(state) {
-    if (state === 'hero') {
-      setWords(headlineTitle, 'cedur');
-      headlineTitle.style.maxWidth = 'none';
-    } else {
-      setWords(headlineTitle, STEPS[state].title);
-      headlineTitle.style.maxWidth = `calc(${STEPS[state].width} * var(--u))`;
-    }
-    requestAnimationFrame(() => requestAnimationFrame(() => wordsIn(headlineTitle)));
-  }
 
   function setBenefitDesc(state) {
     if (state === 'hero') {
@@ -286,13 +257,32 @@
     }
   }
 
-  function transitionHeadline(next) {
-    if (next === headlineState) return;
-    headlineState = next;
+  function applyBenefitTitle(state) {
+    setWords(benefitTitle, STEPS[state].title);
+    benefitTitle.style.maxWidth = `calc(${STEPS[state].width} * var(--u))`;
+    requestAnimationFrame(() => requestAnimationFrame(() => wordsIn(benefitTitle)));
+  }
+
+  function transitionBenefits(next) {
+    if (next === benefitState) return;
+    const prev = benefitState;
+    benefitState = next;
     const token = ++swapLock;
-    if (reducedMotion) { applyHeadline(next); setBenefitDesc(next); return; }
-    wordsOut(headlineTitle);
-    setTimeout(() => { if (token === swapLock) applyHeadline(next); }, 380);
+
+    if (next === 'hero') {
+      benefitsHead.classList.remove('show');
+      setBenefitDesc('hero');
+      return;
+    }
+    if (prev === 'hero' || reducedMotion) {
+      applyBenefitTitle(next);
+      benefitsHead.classList.add('show');
+      setBenefitDesc(next);
+      return;
+    }
+    // step → step: masked word swap
+    wordsOut(benefitTitle);
+    setTimeout(() => { if (token === swapLock) applyBenefitTitle(next); }, 380);
     setBenefitDesc(next);
   }
 
@@ -302,7 +292,6 @@
   const clamp01 = v => Math.max(0, Math.min(1, v));
   const range = (p, a, b) => clamp01((p - a) / (b - a));
   const lerp = (a, b, t) => a + (b - a) * t;
-  const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
   let scrubPos = 0;
   let shownFrame = 0;
@@ -313,42 +302,32 @@
     const total = stage.offsetHeight - vh;
     const p = total > 0 ? clamp01(window.scrollY / total) : 0;
 
-    // scrub position 0..1 across the film (the scroll picks up after the
-    // intro's frames, so the film never jumps backwards)
-    const scrub = range(p, SCRUB_IN, SCRUB_OUT);
-    scrubPos = scrub;
+    // scrub position 0..1 across the film (picks up after the intro)
+    scrubPos = range(p, SCRUB_IN, SCRUB_OUT);
 
-    // ---- headline morph: hero → benefits position/size ----
-    const m = easeInOut(range(p, MORPH[0], MORPH[1]));
-    const ruleY = lerp(vh / 2 + 82 * px, vh - 166 * px, m);
-    headline.style.setProperty('--rule-y', `${ruleY.toFixed(2)}px`);
-    headline.style.setProperty('--ts', `calc(${lerp(160, 32, m).toFixed(2)} * var(--u))`);
-    headline.style.setProperty('--lh', lerp(0.9, 1.1, m).toFixed(3));
-    headline.style.setProperty('--pad-b', `calc(${lerp(10, 16, m).toFixed(2)} * var(--u))`);
+    // ---- hero UI dissolves ----
+    const hOut = range(p, HERO_OUT[0], HERO_OUT[1]);
+    hero2.style.opacity = (1 - hOut).toFixed(3);
+    hero2.style.transform = `translateY(${(-30 * hOut).toFixed(1)}px)`;
+    hero2.style.visibility = hOut >= 1 ? 'hidden' : '';
+    cta.style.opacity = (1 - hOut).toFixed(3);
+    cta.style.visibility = hOut >= 1 ? 'hidden' : '';
 
-    // ---- hero description dissolves as we take off ----
-    const dOut = range(p, 0.012, 0.06);
-    heroDesc.style.opacity = (1 - dOut).toFixed(3);
-    heroDesc.style.filter = dOut > 0 ? `blur(${(6 * dOut).toFixed(1)}px)` : '';
-    heroDesc.style.transform = `translateY(${(-14 * dOut).toFixed(1)}px)`;
-    heroDesc.style.visibility = dOut >= 1 ? 'hidden' : '';
+    // ---- the veil and the blur clear, revealing the film as-is ----
+    const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
+    veil.style.opacity = (1 - vOut).toFixed(3);
+    const blur = BLUR_MAX * (1 - vOut) * px;
+    canvas.style.filter = blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : '';
+    canvas.style.transform = vOut < 1 ? `scale(${lerp(SCALE_MAX, 1, vOut).toFixed(4)})` : '';
 
-    // ---- cta fades with the hero ----
-    const cOut = range(p, 0, 0.08);
-    cta.style.opacity = (1 - cOut).toFixed(3);
-    cta.style.visibility = cOut >= 1 ? 'hidden' : '';
+    // ---- benefits copy ----
+    const next = p < BENEFITS_AT ? 'hero'
+      : scrubPos < STEP_BOUNDS[0] ? 0
+      : scrubPos < STEP_BOUNDS[1] ? 1 : 2;
+    transitionBenefits(next);
 
-    // ---- title text: CEDUR ↔ step titles (subtle masked swap) ----
-    const next = p < MORPH[1] ? 'hero'
-      : scrub < STEP_BOUNDS[0] ? 0
-      : scrub < STEP_BOUNDS[1] ? 1 : 2;
-    transitionHeadline(next);
-
-    // ---- progress line: continuous from the 64px hero segment to full ----
-    if (body.dataset.state === 'done-loading' || p > 0.001) {
-      const sx = PROGRESS_START + (1 - PROGRESS_START) * range(p, MORPH[0], SCRUB_OUT);
-      ruleProgress.style.transform = `scaleX(${sx.toFixed(4)})`;
-    }
+    // ---- progress line fills across the film section ----
+    ruleProgress.style.transform = `scaleX(${range(p, BENEFITS_AT, SCRUB_OUT).toFixed(4)})`;
   }
 
   function rafLoop() {
