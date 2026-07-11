@@ -19,27 +19,29 @@
   const FRAME_PATH = i => `assets/${HIRES ? 'frames2x' : 'frames'}/frame_${String(i + 1).padStart(3, '0')}.webp`;
 
   const GATE_FRAMES = 42;       // frames that must be ready before reveal
-  const SCRUB_IN = 0.05;        // scroll progress where the scrub starts
+  const SCRUB_IN = 0.30;        // the scrub starts once the blur has cleared
   const SCRUB_OUT = 0.96;       // scroll progress where frame 169 lands
 
   // scroll sequence (smooth, staggered so each stage finishes before the
-  // next starts): building parallaxes up & out → hero copy fades → the
-  // dark veil + blur clear, revealing the film → the film scrubs/plays.
-  const BUILD_OUT = [0.0, 0.10];  // building parallax up + fade
-  const BUILD_PARALLAX = 46;      // vh the building travels up, in %
+  // next starts): building parallaxes down & out → hero copy fades → the
+  // dark veil + blur clear, revealing the film from its first frame.
+  const BUILD_OUT = [0.0, 0.10];  // building parallax down + fade
+  const BUILD_PARALLAX = 52;      // vh the building travels down, in %
   const HERO_OUT = [0.09, 0.17];  // remaining hero copy dissolves
   const VEIL_OUT = [0.17, 0.30];  // dark veil + blur clear last
   const BENEFITS_AT = 0.30;       // benefits copy takes over from here
   const VEIL_MAX = 1;             // hero veil opacity multiplier
   const BLUR_MAX = 60;            // scene blur while in the hero (px @1440)
 
+  // ambient: while resting in the hero the blurred film plays in a slow
+  // ping-pong loop so the background light shifts; scrolling glides it
+  // back to frame 1 before the film section takes over
+  const AMBIENT_FPS = 14;
+  const AMBIENT_AT = 0.02;        // ambient runs below this progress
+
   // loader sequence: phrases lit one at a time (previous dims back)
   const LOADER_STEP_T = [1350, 1950, 2550];
   const LOADER_MIN_MS = 3250;
-
-  // hero intro: the film nudges forward this many frames right after the
-  // loader — a small push toward the house — then waits for the scroll
-  const INTRO_FRAMES = 14;
 
   // copy per step — verbatim from Figma (130:118 / 130:147 / 130:176)
   const STEPS = [
@@ -75,7 +77,6 @@
   const veil = document.getElementById('veil');
   const building = document.getElementById('building');
   const cta = document.getElementById('cta');
-  const slogan = document.getElementById('slogan');
   const benefitsHead = document.getElementById('benefitsHead');
   const benefitTitle = document.getElementById('benefitTitle');
   const benefitsBand = document.getElementById('benefitsBand');
@@ -211,29 +212,10 @@
         drawFrame(0);
         body.dataset.state = 'done-loading';
         body.setAttribute('data-revealed', '');
-        setTimeout(() => wordsIn(slogan), reducedMotion ? 0 : 150);
-        // hero intro: a gentle push into the scene, behind the veil
-        setTimeout(playIntro, reducedMotion ? 0 : 500);
+        // the slogan fill-sweep and the rest run off [data-revealed];
+        // the ambient background loop starts on its own in the raf loop
       };
     };
-  }
-
-  // ------------------------------------------------------------------
-  // hero intro scrub — the film eases forward INTRO_FRAMES after the
-  // reveal; scrolling then continues from that frame
-  // ------------------------------------------------------------------
-  let introFrame = 0;
-
-  function playIntro() {
-    if (reducedMotion) { introFrame = INTRO_FRAMES; return; }
-    const start = performance.now();
-    const dur = 1500;
-    const tick = now => {
-      const t = clamp01((now - start) / dur);
-      introFrame = INTRO_FRAMES * (1 - Math.pow(1 - t, 3)); // easeOutCubic
-      if (t < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
   }
 
   // ------------------------------------------------------------------
@@ -299,20 +281,28 @@
   const clamp01 = v => Math.max(0, Math.min(1, v));
   const range = (p, a, b) => clamp01((p - a) / (b - a));
 
+  let rawP = 0;      // real scroll progress
+  let smoothP = 0;   // inertia-smoothed progress driving every effect
   let scrubPos = 0;
   let shownFrame = 0;
+  let ambientT = 0;
 
   function onScroll() {
     const vh = window.innerHeight;
     const total = stage.offsetHeight - vh;
-    const p = total > 0 ? clamp01(window.scrollY / total) : 0;
+    rawP = total > 0 ? clamp01(window.scrollY / total) : 0;
+  }
 
-    // scrub position 0..1 across the film (picks up after the intro)
+  // all scroll-driven effects run off the smoothed progress
+  function applyScroll(p) {
+    const vh = window.innerHeight;
+
+    // scrub position 0..1 across the film (starts after the unblur)
     scrubPos = range(p, SCRUB_IN, SCRUB_OUT);
 
-    // ---- 1. the building parallaxes up and out first ----
+    // ---- 1. the building parallaxes DOWN and out first ----
     const bOut = range(p, BUILD_OUT[0], BUILD_OUT[1]);
-    building.style.setProperty('--par', `${(-BUILD_PARALLAX * bOut * vh / 100).toFixed(1)}px`);
+    building.style.setProperty('--par', `${(BUILD_PARALLAX * bOut * vh / 100).toFixed(1)}px`);
     building.style.setProperty('--bfade', (1 - bOut).toFixed(3));
     building.style.visibility = bOut >= 1 ? 'hidden' : '';
 
@@ -336,9 +326,30 @@
     transitionBenefits(next);
   }
 
-  function rafLoop() {
-    const targetFrame = introFrame + scrubPos * (FRAME_COUNT - 1 - INTRO_FRAMES);
-    const k = reducedMotion ? 1 : 0.16;
+  let lastT = performance.now();
+
+  function rafLoop(now) {
+    const dt = Math.min(0.05, (now - lastT) / 1000 || 0.016);
+    lastT = now;
+
+    // smooth-scroll inertia: everything glides toward the real position
+    smoothP += (rawP - smoothP) * (reducedMotion ? 1 : 0.11);
+    if (Math.abs(rawP - smoothP) < 0.0004) smoothP = rawP;
+    if (body.dataset.state !== 'loading') applyScroll(smoothP);
+
+    // frame target: ambient ping-pong at rest, back to frame 1 on scroll
+    let targetFrame;
+    const ambient = body.hasAttribute('data-revealed') && rawP < AMBIENT_AT && !reducedMotion;
+    if (ambient) {
+      ambientT += dt * AMBIENT_FPS;
+      const cycle = ambientT % (2 * (FRAME_COUNT - 1));
+      targetFrame = cycle <= FRAME_COUNT - 1 ? cycle : 2 * (FRAME_COUNT - 1) - cycle;
+    } else {
+      ambientT = 0;
+      targetFrame = scrubPos * (FRAME_COUNT - 1);
+    }
+
+    const k = reducedMotion ? 1 : (ambient ? 1 : 0.16);
     shownFrame += (targetFrame - shownFrame) * k;
     if (Math.abs(targetFrame - shownFrame) < 0.02) shownFrame = targetFrame;
     const idx = Math.round(shownFrame);
@@ -356,6 +367,7 @@
     sizeCanvas();
     drawFrame(Math.round(shownFrame));
     onScroll();
+    applyScroll(smoothP);
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -368,5 +380,5 @@
   preloadAll();
   loaderTick();
   onScroll();
-  rafLoop();
+  requestAnimationFrame(rafLoop);
 })();

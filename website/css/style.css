@@ -20,6 +20,12 @@
   font-display: swap;
 }
 @font-face {
+  font-family: "GT Eesti Text Trial";
+  src: url("../assets/fonts/GTEestiTextTrial-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
   font-family: "Neue Montreal";
   src: url("../assets/fonts/NeueMontreal-Regular.woff2") format("woff2");
   font-weight: 400;
@@ -328,9 +334,12 @@ body[data-state="done-loading"] .loader { display: none; }
 .grid__v--a { left: calc(448 * var(--u)); }
 .grid__v--b { left: calc(992 * var(--u)); }
 [data-revealed] .grid__v { transform: scaleY(1); }
+/* + crosses live inside the label row, centered on its height */
 .grid__x {
+  position: absolute;
   width: calc(5 * var(--u));
   height: calc(5 * var(--u));
+  top: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity 0.6s linear 1.8s;
@@ -343,8 +352,8 @@ body[data-state="done-loading"] .loader { display: none; }
 .grid__x::before { left: 50%; top: 0; width: 1px; height: 100%; }
 .grid__x::after { top: 50%; left: 0; height: 1px; width: 100%; }
 [data-revealed] .grid__x { opacity: 1; }
-.grid__x--a { left: calc(448.5 * var(--u)); top: calc(177.5 * var(--u)); }
-.grid__x--b { left: calc(992.5 * var(--u)); top: calc(177.5 * var(--u)); }
+.grid__x--a { left: calc(448.5 * var(--u)); }
+.grid__x--b { left: calc(992.5 * var(--u)); }
 
 /* centered block: labels + title, offset -30.5 from center (130:668) */
 .hero-center {
@@ -377,14 +386,19 @@ body[data-state="done-loading"] .loader { display: none; }
   transition: opacity 0.9s linear 1.2s;
 }
 .explore__side { opacity: 0.4; }
+/* keep scrolling matches the bottom-left subtitle size (10u) */
 .explore__center {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: calc(10 * var(--u));
 }
 [data-revealed] .explore { opacity: 1; }
 
-/* the 140px hero title (130:674) */
+/* the 140px hero title (130:674). Reveal: each line rises in as faint
+   transparent-white text, then fills to solid white with a left-to-right
+   sweep (terminal-industries-style, grey instead of a color shade). */
 .slogan {
   width: 100%;
   text-align: center;
@@ -394,14 +408,36 @@ body[data-state="done-loading"] .loader { display: none; }
   line-height: 0.8;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: var(--white);
 }
 .slogan--big { font-size: calc(140 * var(--u)); }
 .sl {
   display: block;
-  overflow: hidden;
+  color: transparent;
+  background-image: linear-gradient(90deg,
+    #fff 0%, #fff 42%,
+    rgba(255, 255, 255, 0.22) 58%, rgba(255, 255, 255, 0.22) 100%);
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+          background-clip: text;
+  opacity: 0;
+  transform: translateY(calc(30 * var(--u)));
+  transition:
+    background-position 1.5s cubic-bezier(0.4, 0, 0.2, 1) calc(0.55s + var(--i, 0) * 0.22s),
+    opacity 0.7s linear calc(0.15s + var(--i, 0) * 0.18s),
+    transform 1.1s var(--ease-out) calc(0.15s + var(--i, 0) * 0.18s);
 }
-.sl--dim { color: rgba(255, 255, 255, 0.4); }
+/* HOME settles at 40% white (130:674) */
+.sl--dim {
+  background-image: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.4) 42%,
+    rgba(255, 255, 255, 0.14) 58%, rgba(255, 255, 255, 0.14) 100%);
+}
+[data-revealed] .sl {
+  background-position: 0% 0;
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* bottom-left paragraph (130:675) */
 .hero-para {
@@ -521,12 +557,6 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   text-transform: uppercase;
 }
 
-/* the hero slogan rises out of its masks on reveal */
-.slogan .wi {
-  transform: translateY(115%);
-  transition: transform 1.2s var(--ease-out) calc(0.12s + var(--i, 0) * 0.09s);
-}
-[data-revealed] .slogan .wi { transform: translateY(0); }
 
 /* request-sample button, bottom right (130:661) */
 .cta--right {
@@ -624,5 +654,5 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .tl__inner, .cta--right .btn, .wi, .benefits__desc, .explore, .slogan .wi, .hero-para, .grid__v, .grid__x { transition: none !important; }
+  .reveal, .tl__inner, .cta--right .btn, .wi, .benefits__desc, .explore, .sl, .hero-para, .grid__v, .grid__x { transition: none !important; }
 }
