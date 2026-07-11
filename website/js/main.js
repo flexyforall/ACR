@@ -25,9 +25,14 @@
   const MORPH = [0.02, 0.115];
   const PROGRESS_START = 64 / 1360; // hero progress segment (122:428)
 
-  // loader sequence: [phrase, dot] lit in order, then the window expands
-  const LOADER_STEP_T = [1350, 1900, 2450];
-  const LOADER_MIN_MS = 3150;
+  // loader sequence: phrases lit one at a time (previous dims back),
+  // then the window expands
+  const LOADER_STEP_T = [1350, 1950, 2550];
+  const LOADER_MIN_MS = 3250;
+
+  // hero intro: the film nudges forward this many frames right after the
+  // loader — a small push toward the house — then waits for the scroll
+  const INTRO_FRAMES = 14;
 
   // copy per step — verbatim from Figma (130:118 / 130:147 / 130:176)
   const STEPS = [
@@ -69,9 +74,9 @@
   const ctx = canvas.getContext('2d');
 
   const seqEls = [
-    [document.getElementById('tlLeft'), document.getElementById('dotTL')],
-    [document.getElementById('tlRight'), document.getElementById('dotTR')],
-    [document.getElementById('tlHome'), document.getElementById('dotBR')],
+    document.getElementById('tlLeft'),
+    document.getElementById('tlRight'),
+    document.getElementById('tlHome'),
   ];
 
   const u = () => window.innerWidth / (window.innerWidth <= 720 ? 720 : 1440);
@@ -156,20 +161,23 @@
   // ------------------------------------------------------------------
   // loader timeline
   // 1. tagline slides in (all 20% white)
-  // 2. "the roof" → white + top-left dot
-  // 3. "that makes it" → white + top-right dot
-  // 4. "home" → white + bottom-right dot
+  // 2. "the roof" lights up, a square appearing before it
+  // 3. "that makes it" lights up, "the roof" dims back
+  // 4. "home" lights up, "that makes it" dims back
   // 5. the window expands into the hero
   // ------------------------------------------------------------------
   const t0 = performance.now();
 
   requestAnimationFrame(() => loader.setAttribute('data-in', ''));
   if (!reducedMotion) {
-    seqEls.forEach(([txt, dot], i) => {
-      setTimeout(() => { txt.classList.add('lit'); dot.classList.add('lit'); }, LOADER_STEP_T[i]);
+    seqEls.forEach((txt, i) => {
+      setTimeout(() => {
+        if (i > 0) seqEls[i - 1].classList.remove('lit');
+        txt.classList.add('lit');
+      }, LOADER_STEP_T[i]);
     });
   } else {
-    seqEls.forEach(([txt, dot]) => { txt.classList.add('lit'); dot.classList.add('lit'); });
+    seqEls[seqEls.length - 1].classList.add('lit');
   }
 
   function loaderTick() {
@@ -196,12 +204,15 @@
         { duration: reducedMotion ? 1 : 1100, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards' }
       );
       win.onfinish = () => {
+        // the canvas already shows the same frame the window revealed, so
+        // the loader can be dropped immediately — otherwise it covers the
+        // page and the hero text animations play invisibly beneath it
         drawFrame(0);
-        body.dataset.state = 'revealed';
+        body.dataset.state = 'done-loading';
         body.setAttribute('data-revealed', '');
         // hero text: staggered word rise with skew settle
-        wordsIn(headlineTitle);
-        setTimeout(() => wordsIn(heroDesc), reducedMotion ? 0 : 250);
+        setTimeout(() => wordsIn(headlineTitle), reducedMotion ? 0 : 120);
+        setTimeout(() => wordsIn(heroDesc), reducedMotion ? 0 : 380);
         // progress segment draws in to its 64px hero width
         const anim = ruleProgress.animate(
           [{ transform: 'scaleX(0)' }, { transform: `scaleX(${PROGRESS_START})` }],
@@ -211,9 +222,28 @@
           anim.cancel();
           ruleProgress.style.transform = `scaleX(${PROGRESS_START})`;
         };
-        setTimeout(() => { body.dataset.state = 'done-loading'; }, reducedMotion ? 50 : 1600);
+        // hero intro: a gentle push into the scene
+        setTimeout(playIntro, reducedMotion ? 0 : 350);
       };
     };
+  }
+
+  // ------------------------------------------------------------------
+  // hero intro scrub — the film eases forward INTRO_FRAMES after the
+  // reveal; scrolling then continues from that frame
+  // ------------------------------------------------------------------
+  let introFrame = 0;
+
+  function playIntro() {
+    if (reducedMotion) { introFrame = INTRO_FRAMES; return; }
+    const start = performance.now();
+    const dur = 2200;
+    const tick = now => {
+      const t = clamp01((now - start) / dur);
+      introFrame = INTRO_FRAMES * (1 - Math.pow(1 - t, 3)); // easeOutCubic
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 
   // ------------------------------------------------------------------
@@ -272,7 +302,7 @@
   const lerp = (a, b, t) => a + (b - a) * t;
   const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-  let targetFrame = 0;
+  let scrubPos = 0;
   let shownFrame = 0;
 
   function onScroll() {
@@ -281,9 +311,10 @@
     const total = stage.offsetHeight - vh;
     const p = total > 0 ? clamp01(window.scrollY / total) : 0;
 
-    // scrub position 0..1 across the film
+    // scrub position 0..1 across the film (the scroll picks up after the
+    // intro's frames, so the film never jumps backwards)
     const scrub = range(p, SCRUB_IN, SCRUB_OUT);
-    targetFrame = scrub * (FRAME_COUNT - 1);
+    scrubPos = scrub;
 
     // ---- headline morph: hero → benefits position/size ----
     const m = easeInOut(range(p, MORPH[0], MORPH[1]));
@@ -319,6 +350,7 @@
   }
 
   function rafLoop() {
+    const targetFrame = introFrame + scrubPos * (FRAME_COUNT - 1 - INTRO_FRAMES);
     const k = reducedMotion ? 1 : 0.16;
     shownFrame += (targetFrame - shownFrame) * k;
     if (Math.abs(targetFrame - shownFrame) < 0.02) shownFrame = targetFrame;

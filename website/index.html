@@ -12,23 +12,16 @@
 
   <!-- ======================= LOADER (Figma 122:199 → 122:375) ======================= -->
   <div class="loader" id="loader" aria-hidden="true">
-    <!-- top track: two 8px dots at the ends (122:208) -->
-    <div class="loader__track">
-      <span class="dot dot--dim" id="dotTL"></span>
-      <span class="dot dot--dim" id="dotTR"></span>
-    </div>
-
-    <!-- centered tagline revealed through a collapsing band (122:236) -->
+    <!-- centered tagline revealed through a collapsing band (122:236);
+         each phrase lights up white with a square appearing before it,
+         dimming again when the next one lights -->
     <div class="loader__band" id="loaderBand">
       <div class="loader__tagline">
-        <p class="tl tl--left"><span class="tl__inner" id="tlLeft">the&nbsp;&nbsp;roof</span></p>
-        <p class="tl tl--home"><span class="tl__inner" id="tlHome">home</span></p>
-        <p class="tl tl--right"><span class="tl__inner" id="tlRight">that makes it</span></p>
+        <p class="tl tl--left"><span class="tl__inner" id="tlLeft"><span class="tl__dot"></span>the&nbsp;&nbsp;roof</span></p>
+        <p class="tl tl--home"><span class="tl__inner" id="tlHome"><span class="tl__dot"></span>home</span></p>
+        <p class="tl tl--right"><span class="tl__inner" id="tlRight"><span class="tl__dot"></span>that makes it</span></p>
       </div>
     </div>
-
-    <!-- bottom-right dot (122:207) -->
-    <span class="dot dot--dim loader__dotbr" id="dotBR"></span>
 
     <!-- window onto the hero image: starts as the 100×100 square (122:206),
          expands to full bleed (122:334) -->
@@ -79,7 +72,6 @@
       <div class="cta" id="cta">
         <div class="cta__mask">
           <div class="cta__row reveal" data-reveal>
-            <p class="cta__tagline">the&nbsp;&nbsp;roof that makes it home</p>
             <a class="btn" href="#request-sample">
               <span class="btn__label">
                 <span class="dot dot--solid"></span>
