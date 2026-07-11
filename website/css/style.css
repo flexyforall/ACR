@@ -294,7 +294,10 @@ body[data-state="done-loading"] .loader { display: none; }
   will-change: opacity, transform;
 }
 
-/* horizontal hairlines at y453 / y524 (143:418/420) */
+/* horizontal hairlines striking HOME's cap top / baseline (143:418/420).
+   The slogan is centered on viewport height (top: 50% − 135u), so the
+   lines anchor to the same center — Figma y453/y524 on the 800 board are
+   center +53 / +124 — and stay locked to HOME at any viewport size. */
 .hline {
   position: absolute;
   left: 0;
@@ -305,14 +308,16 @@ body[data-state="done-loading"] .loader { display: none; }
   transform-origin: left;
   transition: transform 1.4s var(--ease-out) 1s;
 }
-.hline--a { top: calc(453 * var(--u)); }
-.hline--b { top: calc(524 * var(--u)); }
+.hline--a { top: calc(50% + 53 * var(--u)); }
+.hline--b { top: calc(50% + 124 * var(--u)); }
 [data-revealed] .hline { transform: scaleX(1); }
 
-/* /welcome · keep scrolling to explore · /welcome at y216 (143:481) */
+/* /welcome · keep scrolling to explore · /welcome (143:481). Anchored to
+   the same viewport center as the slogan (Figma y216 ≈ center − 184),
+   lifted a further 24px for breathing room above the title. */
 .explore {
   position: absolute;
-  top: calc(216 * var(--u));
+  top: calc(50% - 208 * var(--u));
   left: 0;
   width: 100%;
   padding: 0 calc(40 * var(--u));

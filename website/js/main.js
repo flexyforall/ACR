@@ -29,12 +29,15 @@
   const BENEFITS_AT = 0.16;       // benefits copy takes over from here
   const VEIL_MAX = 1;             // hero veil opacity multiplier
 
-  // ambient: at rest the sharp film sways gently across its first frames
-  // (drifting smoke and light, no visible rewind); scrolling glides it
-  // back to frame 1 before the film section takes over
-  const AMBIENT_FPS = 10;
-  const AMBIENT_SPAN = 36;        // ping-pong across the first N frames
+  // ambient: at rest the film simply plays in the background; reaching the
+  // end it rewinds quickly and plays again. The moment the user scrolls it
+  // snaps into the same fast rewind back to frame 1, and only then the
+  // scroll scrub toward the second section takes over (scrub is parked at
+  // frame 1 until SCRUB_IN anyway, so the rewind always lands first).
+  const AMBIENT_FPS = 24;
+  const AMBIENT_REWIND_S = 0.9;   // idle-loop rewind duration
   const AMBIENT_AT = 0.02;        // ambient runs below this progress
+  const REWIND_K = 0.3;           // fast catch-up lerp once scrolling starts
 
   // loader sequence: phrases lit one at a time (previous dims back)
   const LOADER_STEP_T = [1350, 1950, 2550];
@@ -282,6 +285,7 @@
   let scrubPos = 0;
   let shownFrame = 0;
   let ambientT = 0;
+  let rewinding = false;
 
   function onScroll() {
     const vh = window.innerHeight;
@@ -324,19 +328,28 @@
     if (Math.abs(rawP - smoothP) < 0.0004) smoothP = rawP;
     if (body.dataset.state !== 'loading') applyScroll(smoothP);
 
-    // frame target: gentle ambient sway at rest, back to frame 1 on scroll
+    // frame target: the film plays at rest; scrolling triggers a fast
+    // rewind to frame 1, after which the scroll scrub takes over
     let targetFrame;
     const ambient = body.hasAttribute('data-revealed') && rawP < AMBIENT_AT && !reducedMotion;
     if (ambient) {
-      ambientT += dt * AMBIENT_FPS;
-      const cycle = ambientT % (2 * AMBIENT_SPAN);
-      targetFrame = cycle <= AMBIENT_SPAN ? cycle : 2 * AMBIENT_SPAN - cycle;
+      ambientT += dt;
+      const playDur = (FRAME_COUNT - 1) / AMBIENT_FPS;
+      const t = ambientT % (playDur + AMBIENT_REWIND_S);
+      if (t < playDur) {
+        targetFrame = t * AMBIENT_FPS;
+      } else {
+        const q = (t - playDur) / AMBIENT_REWIND_S;
+        targetFrame = (FRAME_COUNT - 1) * (1 - q * q * (3 - 2 * q));
+      }
+      rewinding = true; // leaving ambient always opens with the fast rewind
     } else {
       ambientT = 0;
       targetFrame = scrubPos * (FRAME_COUNT - 1);
+      if (rewinding && Math.abs(targetFrame - shownFrame) < 1) rewinding = false;
     }
 
-    const k = reducedMotion ? 1 : (ambient ? 1 : 0.16);
+    const k = reducedMotion ? 1 : ambient ? 1 : rewinding ? REWIND_K : 0.16;
     shownFrame += (targetFrame - shownFrame) * k;
     if (Math.abs(targetFrame - shownFrame) < 0.02) shownFrame = targetFrame;
     const idx = Math.round(shownFrame);
