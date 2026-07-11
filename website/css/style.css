@@ -275,11 +275,11 @@ body[data-state="done-loading"] .loader { display: none; }
    1440-board. JS drives --par (parallax translate) and --bfade. */
 .building {
   position: absolute;
-  left: 50%;
+  left: 0;
   top: calc(267 * var(--u));
   width: calc(1819 * var(--u));
   height: calc(1015 * var(--u));
-  transform: translate(-50%, var(--par, 0px));
+  transform: translateY(var(--par, 0px));
   opacity: var(--bfade, 1);
   z-index: 2;
   pointer-events: none;
@@ -289,8 +289,6 @@ body[data-state="done-loading"] .loader { display: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  -webkit-mask-image: radial-gradient(120% 90% at 50% 55%, #000 62%, rgba(0,0,0,0) 92%);
-          mask-image: radial-gradient(120% 90% at 50% 55%, #000 62%, rgba(0,0,0,0) 92%);
 }
 
 /* fine film grain (130:628) — self-contained SVG turbulence */

@@ -364,6 +364,7 @@
   sizeCanvas();
   window.scrollTo(0, 0);
   loaderWindow.querySelector('img').src = FRAME_PATH(0);
+  if (HIRES) document.getElementById('buildingImg').src = 'assets/house2x.webp';
   preloadAll();
   loaderTick();
   onScroll();
