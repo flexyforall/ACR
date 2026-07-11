@@ -23,10 +23,9 @@
   const SCRUB_OUT = 0.96;       // scroll progress where frame 169 lands
 
   const HERO_OUT = [0.0, 0.09];   // hero UI dissolves over this range
-  const VEIL_OUT = [0.02, 0.14];  // dark veil + blur clear over this range
+  const VEIL_OUT = [0.02, 0.14];  // 50% dark overlay clears over this range
   const BENEFITS_AT = 0.14;       // benefits copy takes over from here
-  const BLUR_MAX = 25;            // design blur, in 1440-board px (130:355)
-  const SCALE_MAX = 1.17;         // blurred scene overscan (936/800)
+  const VEIL_MAX = 0.5;           // hero overlay strength (130:479)
 
   // loader sequence: phrases lit one at a time (previous dims back)
   const LOADER_STEP_T = [1350, 1950, 2550];
@@ -72,7 +71,6 @@
   const benefitsHead = document.getElementById('benefitsHead');
   const benefitTitle = document.getElementById('benefitTitle');
   const ruleProgress = document.getElementById('ruleProgress');
-  const cta = document.getElementById('cta');
   const benefitDesc = document.getElementById('benefitDesc');
   const canvas = document.getElementById('scene');
   const ctx = canvas.getContext('2d');
@@ -221,7 +219,7 @@
   function playIntro() {
     if (reducedMotion) { introFrame = INTRO_FRAMES; return; }
     const start = performance.now();
-    const dur = 2200;
+    const dur = 1500;
     const tick = now => {
       const t = clamp01((now - start) / dur);
       introFrame = INTRO_FRAMES * (1 - Math.pow(1 - t, 3)); // easeOutCubic
@@ -291,14 +289,12 @@
   // ------------------------------------------------------------------
   const clamp01 = v => Math.max(0, Math.min(1, v));
   const range = (p, a, b) => clamp01((p - a) / (b - a));
-  const lerp = (a, b, t) => a + (b - a) * t;
 
   let scrubPos = 0;
   let shownFrame = 0;
 
   function onScroll() {
     const vh = window.innerHeight;
-    const px = u();
     const total = stage.offsetHeight - vh;
     const p = total > 0 ? clamp01(window.scrollY / total) : 0;
 
@@ -310,15 +306,10 @@
     hero2.style.opacity = (1 - hOut).toFixed(3);
     hero2.style.transform = `translateY(${(-30 * hOut).toFixed(1)}px)`;
     hero2.style.visibility = hOut >= 1 ? 'hidden' : '';
-    cta.style.opacity = (1 - hOut).toFixed(3);
-    cta.style.visibility = hOut >= 1 ? 'hidden' : '';
 
-    // ---- the veil and the blur clear, revealing the film as-is ----
+    // ---- the dark overlay clears, revealing the film as-is ----
     const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
-    veil.style.opacity = (1 - vOut).toFixed(3);
-    const blur = BLUR_MAX * (1 - vOut) * px;
-    canvas.style.filter = blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : '';
-    canvas.style.transform = vOut < 1 ? `scale(${lerp(SCALE_MAX, 1, vOut).toFixed(4)})` : '';
+    veil.style.opacity = (VEIL_MAX * (1 - vOut)).toFixed(3);
 
     // ---- benefits copy ----
     const next = p < BENEFITS_AT ? 'hero'

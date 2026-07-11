@@ -14,8 +14,8 @@
   font-display: swap;
 }
 @font-face {
-  font-family: "Owners TRIAL Text";
-  src: url("../assets/fonts/OwnersTextTRIAL-Regular.woff2") format("woff2");
+  font-family: "GT Eesti Text Trial";
+  src: url("../assets/fonts/GTEestiTextTrial-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
@@ -54,7 +54,7 @@
   --grey: #d9d9d9;
   --white-12: rgba(255, 255, 255, 0.12);
   --font-display: "OwnersTRIAL", "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-text: "Owners TRIAL Text", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-text: "GT Eesti Text Trial", "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Neue Montreal", "Inter", "Helvetica Neue", Arial, sans-serif;
   --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
 }
@@ -222,17 +222,11 @@ body[data-state="done-loading"] .loader { display: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(calc(25 * var(--u)));
-  transform: scale(1.17);
-  transform-origin: 50% 100%;
 }
 .loader__veil {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================================
@@ -251,25 +245,22 @@ body[data-state="done-loading"] .loader { display: none; }
   inset: 0;
   width: 100%;
   height: 100%;
-  transform-origin: 50% 100%;
-  will-change: filter, transform;
 }
 
-/* triple black→transparent gradient (130:400..402); JS fades it out */
+/* 50% black overlay (130:479: the scene sits at 50% opacity on black);
+   JS fades it out on scroll into the film */
 .veil {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background-image:
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%),
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 100%);
+  background: #000;
+  opacity: 0.5;
   will-change: opacity;
 }
 
 /* ============================================================
-   HERO (Figma 130:352)
+   HERO (Figma 130:476)
    ============================================================ */
 .hero2 {
   position: absolute;
@@ -279,58 +270,30 @@ body[data-state="done-loading"] .loader { display: none; }
   will-change: opacity, transform;
 }
 
-/* hairline grid, white 12% (130:405/407) */
-.grid__v, .grid__h, .grid__x { position: absolute; }
-.grid__v {
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--white-12);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 1.4s var(--ease-out) 0.9s;
-}
-.grid__v--a { left: calc(440.5 * var(--u)); }
-.grid__v--b { left: calc(998.5 * var(--u)); }
-.grid__h {
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--white-12);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 1.4s var(--ease-out) 1.05s;
-}
-.grid__h--a { top: calc(50% - 100 * var(--u)); }
-.grid__h--b { top: calc(50% + 100 * var(--u)); }
-[data-revealed] .grid__v { transform: scaleY(1); }
-[data-revealed] .grid__h { transform: scaleX(1); }
-/* + crosses at the intersections (130:410..421) */
-.grid__x {
-  width: calc(5 * var(--u));
-  height: calc(5 * var(--u));
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.6s linear 1.7s;
-}
-.grid__x::before, .grid__x::after {
-  content: "";
-  position: absolute;
-  background: var(--grey);
-}
-.grid__x::before { left: 50%; top: 0; width: 1px; height: 100%; }
-.grid__x::after { top: 50%; left: 0; height: 1px; width: 100%; }
-[data-revealed] .grid__x { opacity: 1; }
-.grid__x--tl { left: calc(441 * var(--u)); top: calc(50% - 100 * var(--u)); }
-.grid__x--tr { left: calc(999 * var(--u)); top: calc(50% - 100 * var(--u)); }
-.grid__x--bl { left: calc(441 * var(--u)); top: calc(50% + 100 * var(--u)); }
-.grid__x--br { left: calc(999 * var(--u)); top: calc(50% + 100 * var(--u)); }
-
-/* central slogan (130:387): 80px, three masked lines, HOME. at 40% */
-.slogan {
+/* centered stack (130:522): slogan + request-sample, gap 40 */
+.hero-stack {
   position: absolute;
   top: calc(50% - 108 * var(--u));
   left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(40 * var(--u));
+}
+/* the button rises out of its own mask after the slogan */
+.hero-stack__cta {
+  overflow: hidden;
+  pointer-events: auto;
+}
+.hero-stack__cta .btn {
+  transform: translateY(115%);
+  transition: transform 1.2s var(--ease-out) 0.7s;
+}
+[data-revealed] .hero-stack__cta .btn { transform: translateY(0); }
+
+/* central slogan (130:511): 80px, three masked lines, HOME. at 40% */
+.slogan {
   width: 100%;
   text-align: center;
   font-family: var(--font-display);
@@ -347,9 +310,11 @@ body[data-state="done-loading"] .loader { display: none; }
 }
 .sl--dim { color: rgba(255, 255, 255, 0.4); }
 
-/* /WELCOME TO CEDUR labels (130:456/457) */
+/* welcome / to cedur labels on the center axis (130:525) */
 .welcome {
   position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   font-family: var(--font-text);
   font-weight: 400;
   font-size: calc(10 * var(--u));
@@ -358,29 +323,11 @@ body[data-state="done-loading"] .loader { display: none; }
   text-transform: uppercase;
   color: var(--white);
   opacity: 0;
-  transition: opacity 0.8s linear 1.5s;
+  transition: opacity 0.8s linear 1.3s;
 }
 [data-revealed] .welcome { opacity: 1; }
-.welcome--l { left: calc(40 * var(--u)); top: calc(50% - 83 * var(--u)); }
-.welcome--r { right: calc(40 * var(--u)); top: calc(50% + 73 * var(--u)); text-align: right; }
-
-/* bottom-left lead paragraph (130:390) */
-.lead {
-  position: absolute;
-  left: calc(40 * var(--u));
-  bottom: calc(40 * var(--u));
-  width: calc(336 * var(--u));
-  font-family: var(--font-body);
-  font-size: calc(14 * var(--u));
-  letter-spacing: 0.01em;
-  line-height: normal;
-  color: rgba(255, 255, 255, 0.8);
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.9s linear 1.1s, transform 1.1s var(--ease-out) 1.1s;
-}
-.lead p + p { margin-top: calc(14 * var(--u)); }
-[data-revealed] .lead { opacity: 1; transform: translateY(0); }
+.welcome--l { left: calc(40 * var(--u)); }
+.welcome--r { right: calc(40 * var(--u)); text-align: right; }
 
 /* ---------- nav (122:432) ---------- */
 .nav {
@@ -430,7 +377,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .nav__burger-lines {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: calc(4 * var(--u));
 }
 .nav__burger-lines span {
@@ -482,20 +429,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   will-change: transform;
 }
 
-/* ---------- request-sample button (130:392) ---------- */
-.cta {
-  position: absolute;
-  right: calc(40 * var(--u));
-  bottom: calc(40 * var(--u));
-  z-index: 4;
-}
-.cta__mask { overflow: hidden; }
-.cta__row {
-  display: flex;
-  align-items: center;
-  gap: calc(24 * var(--u));
-  transition: transform 1.2s var(--ease-out) 0.5s;
-}
+/* ---------- request-sample button (130:514) ---------- */
 .btn {
   display: flex;
   align-items: center;
@@ -574,5 +508,5 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .tl__inner, .cta__row, .wi, .benefits__desc { transition: none !important; }
+  .reveal, .tl__inner, .hero-stack__cta, .wi, .benefits__desc { transition: none !important; }
 }

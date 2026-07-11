@@ -38,40 +38,34 @@
   <div class="stage" id="stage">
     <div class="stage__pin">
 
-      <!-- the scene: scroll-scrubbed frame sequence (blurred + veiled while
-           in the hero; clears as you scroll into the film) -->
+      <!-- the scene: scroll-scrubbed frame sequence, dimmed 50% while in
+           the hero; the dim clears as you scroll into the film -->
       <canvas id="scene" class="scene"></canvas>
 
-      <!-- triple black-to-transparent gradient over the blurred scene (130:400..402) -->
+      <!-- 50% black overlay over the scene (130:479: video at 50% on black) -->
       <div class="veil" id="veil"></div>
 
-      <!-- hero UI (Figma 130:352) — dissolves as the veil clears -->
+      <!-- hero UI (Figma 130:476) — dissolves as the overlay clears -->
       <div class="hero2" id="hero2">
-        <!-- hairline grid: verticals at 441/999, horizontals ±100 around center (130:405..421) -->
-        <div class="grid">
-          <span class="grid__v grid__v--a"></span>
-          <span class="grid__v grid__v--b"></span>
-          <span class="grid__h grid__h--a"></span>
-          <span class="grid__h grid__h--b"></span>
-          <span class="grid__x grid__x--tl"></span>
-          <span class="grid__x grid__x--tr"></span>
-          <span class="grid__x grid__x--bl"></span>
-          <span class="grid__x grid__x--br"></span>
+        <div class="hero-stack">
+          <h1 class="slogan" id="slogan">
+            <span class="sl"><span class="wi" style="--i:0">THE ROOF</span></span>
+            <span class="sl"><span class="wi" style="--i:1">THAT MAKES IT</span></span>
+            <span class="sl sl--dim"><span class="wi" style="--i:2">HOME.</span></span>
+          </h1>
+          <div class="hero-stack__cta">
+            <a class="btn" href="#request-sample">
+              <span class="btn__label">
+                <span class="dot dot--sm"></span>
+                <span>REQUEST SAMPLE</span>
+              </span>
+              <span class="btn__img"><img src="assets/thumb.jpg" alt="" /></span>
+            </a>
+          </div>
         </div>
 
-        <h1 class="slogan" id="slogan">
-          <span class="sl"><span class="wi" style="--i:0">THE ROOF</span></span>
-          <span class="sl"><span class="wi" style="--i:1">THAT MAKES IT</span></span>
-          <span class="sl sl--dim"><span class="wi" style="--i:2">HOME.</span></span>
-        </h1>
-
-        <p class="welcome welcome--l">/WELCOME TO CEDUR</p>
-        <p class="welcome welcome--r">/WELCOME TO CEDUR</p>
-
-        <div class="lead">
-          <p>CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof.</p>
-          <p>True strength doesn&rsquo;t shout, it endures. Each our roof combines intention, innovation, and integrity to create lasting protection with quiet, beautiful confidence.</p>
-        </div>
+        <p class="welcome welcome--l">welcome</p>
+        <p class="welcome welcome--r">to cedur</p>
       </div>
 
       <!-- nav (130:356) -->
@@ -92,21 +86,6 @@
           </button>
         </div>
       </header>
-
-      <!-- request-sample button (130:392) — fades out with the hero -->
-      <div class="cta" id="cta">
-        <div class="cta__mask">
-          <div class="cta__row reveal" data-reveal>
-            <a class="btn" href="#request-sample">
-              <span class="btn__label">
-                <span class="dot dot--sm"></span>
-                <span>REQUEST SAMPLE</span>
-              </span>
-              <span class="btn__img"><img src="assets/thumb.jpg" alt="" /></span>
-            </a>
-          </div>
-        </div>
-      </div>
 
       <!-- benefits heading block (130:142): title + rule + progress -->
       <div class="benefits-head" id="benefitsHead">
