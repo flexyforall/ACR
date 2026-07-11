@@ -83,10 +83,11 @@
   const canvas = document.getElementById('scene');
   const ctx = canvas.getContext('2d');
 
+  // lit in reading order: the roof → that makes it (center) → home (right)
   const seqEls = [
     document.getElementById('tlLeft'),
+    document.getElementById('tlCenter'),
     document.getElementById('tlRight'),
-    document.getElementById('tlHome'),
   ];
 
   const u = () => window.innerWidth / (window.innerWidth <= 720 ? 720 : 1440);

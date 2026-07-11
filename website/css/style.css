@@ -178,10 +178,12 @@ body[data-state="done-loading"] .loader { display: none; }
   color: var(--white-20);
 }
 .tl { overflow: hidden; }
-.tl--home {
+/* the middle phrase is truly centered: absolute at 50%, and the dot's
+   width + gap is offset so the TEXT (not the dot+text box) is centered */
+.tl--center {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% - 10 * var(--u)));
 }
 .tl__inner {
   display: inline-flex;
@@ -206,7 +208,7 @@ body[data-state="done-loading"] .loader { display: none; }
 .tl__inner.lit .tl__dot { opacity: 1; transform: scale(1); }
 .loader[data-in] .tl__inner { transform: translateY(0); }
 .loader[data-in] .tl--left .tl__inner { transition-delay: 0.05s, 0s; }
-.loader[data-in] .tl--home .tl__inner { transition-delay: 0.2s, 0s; }
+.loader[data-in] .tl--center .tl__inner { transition-delay: 0.2s, 0s; }
 .loader[data-in] .tl--right .tl__inner { transition-delay: 0.35s, 0s; }
 
 /* window onto the hero frame: 100×100 at bottom-center → full-bleed;
