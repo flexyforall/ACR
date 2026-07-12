@@ -24,7 +24,13 @@
     </div>
 
     <!-- load counter, centered at the bottom of the panel -->
-    <div class="loader__count" id="loaderCount">0</div>
+    <div class="loader__count" id="loaderCount">0%</div>
+
+    <!-- curved leading edge: bows downward while the panel lifts,
+         flattening out as the motion settles -->
+    <svg class="loader__curve" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden="true">
+      <path id="loaderCurve" d="M0,0 Q720,0 1440,0 Z" fill="#000"></path>
+    </svg>
   </div>
 
   <!-- ======================= PINNED STAGE: hero + scroll-scrubbed benefits ======================= -->

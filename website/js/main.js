@@ -224,7 +224,7 @@
     const minMs = reducedMotion ? 400 : LOADER_MIN_MS;
     const p = Math.min(loadedCount / GATE_FRAMES, (performance.now() - t0) / minMs);
     countShown += (Math.min(1, p) * 100 - countShown) * 0.12;
-    if (loaderCount) loaderCount.textContent = String(Math.round(countShown));
+    if (loaderCount) loaderCount.textContent = `${Math.round(countShown)}%`;
     const ready = loadedCount >= GATE_FRAMES && performance.now() - t0 >= minMs;
     if (ready) reveal();
     else requestAnimationFrame(loaderTick);
@@ -232,33 +232,42 @@
 
   function reveal() {
     body.dataset.state = 'revealing';
-    if (loaderCount) loaderCount.textContent = '100';
+    if (loaderCount) loaderCount.textContent = '100%';
     // the film starts playing under the loader panel, so the lift
     // reveals footage already in motion
     ambientOn = true;
 
-    // vectr-style hand-off: after a beat on 100, the whole loader panel
-    // lifts off the top while its content sinks against the motion
-    // (inner parallax), unveiling the hero settling from a soft zoom
-    const dur = reducedMotion ? 1 : 950;
-    const delay = reducedMotion ? 0 : 400;
-    const lift = loader.animate(
-      [{ transform: 'translateY(0)' }, { transform: 'translateY(-100%)' }],
-      { duration: dur, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards', delay }
-    );
-    loaderBand.animate(
-      [{ transform: 'translateY(0)' }, { transform: 'translateY(38vh)' }],
-      { duration: dur, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards', delay }
-    );
+    // hand-off: after a beat on 100%, the panel lifts off the top with
+    // its leading edge bowing downward (flattening as it settles) while
+    // the content sinks against the motion; the hero arrives from a
+    // soft zoom and plays sharp and empty for a few seconds before the
+    // blur rolls in and the copy reveals
+    const curve = document.getElementById('loaderCurve');
+    const dur = reducedMotion ? 1 : 1000;
+    const delay = reducedMotion ? 0 : 450;
     canvas.animate(
       [{ transform: 'scale(1.08)' }, { transform: 'scale(1)' }],
       { duration: dur + 550, easing: 'cubic-bezier(0.22,1,0.36,1)', fill: 'forwards', delay }
     );
-    lift.onfinish = () => {
+    const tStart = performance.now() + delay;
+    (function lift(now) {
+      const k = clamp01((now - tStart) / dur);
+      const e = k < 0.5 ? 8 * k * k * k * k : 1 - 8 * Math.pow(1 - k, 4);
+      loader.style.transform = `translateY(${(-e * 100).toFixed(3)}%)`;
+      loaderBand.style.transform = `translateY(${(e * 38).toFixed(2)}vh)`;
+      if (curve) {
+        const D = 200 * Math.sin(Math.PI * e); // bows with the speed
+        curve.setAttribute('d', `M0,0 Q720,${D.toFixed(1)} 1440,0 Z`);
+      }
+      if (k < 1) { requestAnimationFrame(lift); return; }
       body.dataset.state = 'done-loading';
-      body.setAttribute('data-revealed', '');
-      setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
-    };
+      // sharp, uncovered playback for a beat...
+      setTimeout(() => {
+        // ...then the blur eases in and the hero content appears
+        body.setAttribute('data-revealed', '');
+        setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
+      }, reducedMotion ? 0 : 3000);
+    })(tStart);
   }
 
   // ------------------------------------------------------------------
@@ -556,6 +565,13 @@
   const s3GhostsBox = document.getElementById('s3Ghosts');
 
   function s3MakeCard(c, i, box, ghost) {
+    // cards whose lane would cross the pinned text get a dodge budget:
+    // as they pass the text band they bend outward around it, then
+    // return to their lane (trajectory curves instead of overlapping)
+    const cx = c.x + 136; // rendered center (scale keeps the box center)
+    const clear = 334 + 30 + 136 * (c.s || 1); // text half + gap + card half
+    c.dodge = Math.max(0, clear - Math.abs(cx - 720));
+    c.dir = cx < 720 ? -1 : 1;
     const el = document.createElement('div');
     el.className = ghost ? 's3card s3card--ghost' : 's3card';
     el.style.setProperty('--x', c.x);
@@ -626,8 +642,8 @@
     // the whole field floats/tilts after the cursor by depth, and each
     // card unveils bottom-up with its photo settling from a slight zoom
     const px = u();
-    const float = (d, sc) =>
-      `translate3d(${(s3Mx * 34 * px * d).toFixed(1)}px, ${(s3My * 26 * px * d).toFixed(1)}px, 0) ` +
+    const float = (d, sc, dx) =>
+      `translate3d(${(s3Mx * 34 * px * d + dx).toFixed(1)}px, ${(s3My * 26 * px * d).toFixed(1)}px, 0) ` +
       `perspective(900px) rotateX(${(-s3My * 2.4 * d).toFixed(2)}deg) rotateY(${(s3Mx * 3.2 * d).toFixed(2)}deg) ` +
       `scale(${sc.toFixed(3)})`;
     const unveil = (c, topY) => {
@@ -635,20 +651,22 @@
       c.el.style.clipPath = r < 0.995 ? `inset(${((1 - r) * 100).toFixed(2)}% 0 0 0)` : '';
       c.im.style.transform = r < 0.995 ? `scale(${(1.3 - 0.3 * r).toFixed(3)})` : '';
     };
-    S3_CARDS.forEach(c => {
-      const half = (245 * c.s * px) / 2;
-      const centerY = sTop + c.y * px + half + reveal - window.scrollY;
-      const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
-      c.el.style.transform = float(c.d, c.s * (0.72 + 0.28 * Math.min(1, tIn)));
-      unveil(c, centerY - half);
-    });
-    S3_GHOSTS.forEach(c => {
-      const half = (245 * c.s * px) / 2;
-      const centerY = sTop + c.y * px + half + reveal - window.scrollY;
-      const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
-      c.el.style.transform = float(c.d, c.s * (0.85 + 0.15 * Math.min(1, tIn)));
-      unveil(c, centerY - half);
-    });
+    const place = (c, grow) => {
+      const cY = sTop + (c.y + 122.5) * px + reveal - window.scrollY; // rendered center
+      const rh = 122.5 * c.s * px;                                    // rendered half height
+      const tIn = clamp01((vh * 1.15 - cY) / (vh * 0.85));
+      // bend around the pinned text: full dodge for as long as the card
+      // overlaps the text band, easing back to the lane beyond it
+      const bandTop = vh / 2 - 220 * px;
+      const bandBot = vh / 2 + 220 * px;
+      const gap = Math.max(0, Math.max(bandTop - (cY + rh), (cY - rh) - bandBot));
+      const bell = smooth01(clamp01(1 - gap / (vh * 0.22)));
+      const dx = c.dodge * c.dir * bell * px;
+      c.el.style.transform = float(c.d, c.s * (grow + (1 - grow) * Math.min(1, tIn)), dx);
+      unveil(c, cY - rh);
+    };
+    S3_CARDS.forEach(c => place(c, 0.72));
+    S3_GHOSTS.forEach(c => place(c, 0.85));
 
     // reading effect: starts only once the film screen is fully gone
     // (q past the reveal window), words lighting from 20% black to

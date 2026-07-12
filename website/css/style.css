@@ -232,6 +232,17 @@ body[data-state="done-loading"] .loader { display: none; }
 }
 .loader[data-in] .loader__count { opacity: 1; }
 
+/* curved curtain edge riding under the panel during the lift */
+.loader__curve {
+  position: absolute;
+  top: calc(100% - 1px); /* overlap a hair so no seam shows */
+  left: 0;
+  width: 100%;
+  height: 200px;
+  display: block;
+  pointer-events: none;
+}
+
 /* ============================================================
    PINNED STAGE
    ============================================================ */
@@ -494,8 +505,9 @@ body[data-state="done-loading"] .loader { display: none; }
   opacity: 0;
   transition: opacity 0.9s ease 0.15s;
 }
-body[data-state="revealed"] .nav,
-body[data-state="done-loading"] .nav { opacity: 1; }
+/* the header waits with the rest of the hero content: the film plays
+   clean for a beat before anything appears */
+body[data-revealed] .nav { opacity: 1; }
 /* over the white third section the header inverts for legibility; the
    dark hero/film sections show it as-is */
 .nav--blend { mix-blend-mode: difference; }
