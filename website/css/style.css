@@ -68,10 +68,11 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { background: #000; }
+/* the root canvas is the section-3 grey, so any overscroll rubber-band
+   past the end shows that colour instead of a black container. The hero
+   and film get their black from .stage and .loader, not the page bg. */
+html { background: #d3cdc7; }
 html, body { width: 100%; }
-/* no rubber-band past the white section's end (the black page canvas
-   would peek through as a phantom section after the third screen) */
 html, body { overscroll-behavior-y: none; }
 
 body {
