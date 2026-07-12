@@ -392,9 +392,9 @@
     const homeCut = clamp01((t - 0.05) / 0.85);
     slEls[2].style.clipPath = homeCut > 0 ? `inset(${(homeCut * 100).toFixed(2)}% 0 0 0)` : '';
 
-    // ---- 2. the bottom hairline sinks 48u to y547, where it stays as
-    // the film section's progress track ----
-    const sink = 48 * smooth01(range(p, 0.02, 0.14));
+    // ---- 2. the bottom hairline sinks from HOME's baseline (502) to
+    // y547, where it stays as the film section's progress track ----
+    const sink = 45 * smooth01(range(p, 0.02, 0.14));
     hlineB.style.setProperty('--sink', sink.toFixed(2));
 
     // ---- 3. plus markers ride their lines, spinning shut ----

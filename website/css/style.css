@@ -319,7 +319,7 @@ body[data-state="done-loading"] .loader { display: none; }
    travels up wiping the title as it crosses it; the bottom line sinks
    48u to y547 where it becomes the film section's progress track */
 .hline--a { top: calc(50% + (44 - var(--rise, 0)) * var(--u)); }
-.hline--b { top: calc(50% + (99 + var(--sink, 0)) * var(--u)); }
+.hline--b { top: calc(50% + (102 + var(--sink, 0)) * var(--u)); } /* Neue Montreal baseline */
 [data-revealed] .hline { transform: scaleX(1); }
 
 /* full-height vertical hairlines bracketing the title (146:488/489) */
