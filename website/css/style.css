@@ -247,6 +247,8 @@ body[data-state="done-loading"] .loader { display: none; }
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  /* soft edge under the film screen as it lifts off the white section */
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
 }
 .scene {
   position: absolute;
@@ -624,7 +626,12 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .cta__mask { overflow: hidden; }
 .cta--right .btn {
   transform: translateY(120%);
-  transition: transform 1.2s var(--ease-out) 0.55s;
+  /* keep the hover fill/color easing alongside the entrance transform —
+     this rule overrides .btn's transition list entirely */
+  transition:
+    transform 1.2s var(--ease-out) 0.55s,
+    background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    color 0.45s cubic-bezier(0.65, 0, 0.35, 1);
 }
 [data-revealed] .cta--right .btn { transform: translateY(0); }
 

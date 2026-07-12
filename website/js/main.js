@@ -338,8 +338,9 @@
     const famSm = '400 22px "Neue Montreal", "Inter", Arial, sans-serif';
     // THAT MAKES IT: line box 354–426 on the board, baseline ≈ 420
     const src = fxSample('That makes it', fam, '-2.4px', 'center', 720, 420, FX_N);
-    // Made to weather the storm: title box top 411, baseline ≈ 431
-    const tgt = fxSample('Made to weather the storm', famSm, '0.22px', 'left', 40, 431, src.length);
+    // Made to weather the storm: matches the DOM title (box top 528,
+    // baseline ≈ 548) so the assembled text hands off in place
+    const tgt = fxSample('Made to weather the storm', famSm, '0.22px', 'left', 40, 548, src.length);
     if (!src.length || !tgt.length) return;
     // pair source and target left-to-right so the swarm sweeps coherently
     src.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
@@ -461,12 +462,17 @@
     })();
   }
 
+  // the square stays open for as long as its line holds the capture;
+  // it only closes when the pair moves on to another line
   function bloomLine(idx) {
     if (reducedMotion) return;
     slEls[idx].querySelectorAll('.tw').forEach((tw, i) => {
-      setTimeout(() => tw.classList.add('on'), i * 140);
-      setTimeout(() => tw.classList.remove('on'), 1500 + i * 140);
+      setTimeout(() => { if (captured === idx) tw.classList.add('on'); }, i * 140);
     });
+  }
+
+  function closeBloom(idx) {
+    slEls[idx].querySelectorAll('.tw').forEach(tw => tw.classList.remove('on'));
   }
 
   window.addEventListener('mousemove', e => {
@@ -477,6 +483,7 @@
     const zone = by < -46 ? 0 : by < 26 ? 1 : 2;
     mouseYT = CAPTURE_OFFSETS[zone];
     if (zone !== captured) {
+      closeBloom(captured);
       captured = zone;
       setVlineTargets(zone);
       scrambleLine(zone);
@@ -540,11 +547,20 @@
     // the curtain reveal is the scroll window [s3top, s3top + vh]: the
     // stage screen (stacked above) slides up while s3's own pin holds.
     // Counter the document scroll exactly (raw scrollY, no smoothing)
-    // so nothing inside moves until the film screen is fully gone;
-    // after that the offset caps at vh and the cards ride the scroll.
+    // so nothing inside moves until the film screen is fully gone; then,
+    // instead of snapping to full scroll speed, the cards accelerate
+    // from rest over the next half viewport (no velocity jump).
     const sTop = s3.offsetTop;
-    const reveal = Math.max(0, Math.min(vh, window.scrollY - sTop));
-    const rv = vh > 0 ? reveal / vh : 1;
+    const x = window.scrollY - sTop;
+    const easeD = vh * 0.4;
+    let reveal;
+    if (x <= 0) reveal = 0;
+    else if (x <= vh) reveal = x;                       // frozen under the curtain
+    else if (x <= vh + easeD) {
+      const e = x - vh;
+      reveal = vh + e - (e * e) / (2 * easeD);          // velocity ramps 0 → 1
+    } else reveal = vh + easeD / 2;                     // riding the scroll
+    const rv = vh > 0 ? clamp01(x / vh) : 1;
     s3CardsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
 
     // entrance: text + cards arrive out of a blur as the film lifts
