@@ -233,15 +233,17 @@
   function reveal() {
     body.dataset.state = 'revealing';
     if (loaderCount) loaderCount.textContent = '100%';
-    // the film starts playing under the loader panel, so the lift
-    // reveals footage already in motion
+    // the film starts playing under the loader panel — pre-rolled to
+    // the 2-second mark, so the curtain lifts on footage visibly
+    // mid-motion
     ambientOn = true;
+    ambientT = 2;
 
     // hand-off: after a beat on 100%, the panel lifts off the top with
     // its leading edge bowing downward (flattening as it settles) while
     // the content sinks against the motion; the hero arrives from a
-    // soft zoom and plays sharp and empty for a few seconds before the
-    // blur rolls in and the copy reveals
+    // soft zoom with its content revealing right away as the blur
+    // rolls in over the moving film
     const curve = document.getElementById('loaderCurve');
     const dur = reducedMotion ? 1 : 1000;
     const delay = reducedMotion ? 0 : 450;
@@ -261,12 +263,11 @@
       }
       if (k < 1) { requestAnimationFrame(lift); return; }
       body.dataset.state = 'done-loading';
-      // sharp, uncovered playback for a beat...
-      setTimeout(() => {
-        // ...then the blur eases in and the hero content appears
-        body.setAttribute('data-revealed', '');
-        setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
-      }, reducedMotion ? 0 : 3000);
+      body.setAttribute('data-revealed', '');
+      // the film keeps playing sharp for a beat with the content coming
+      // in, then the hero blur is armed and eases over the moving footage
+      setTimeout(() => { blurArmed = true; }, reducedMotion ? 0 : 800);
+      setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
     })(tStart);
   }
 
@@ -676,6 +677,11 @@
     const qq = range(q, revealFrac, 1);
     const lit = Math.round(range(qq, 0.02, 0.8) * s3Words.length);
     if (lit !== s3LitCount) {
+      // words newly crossing into the lit range get the orange wave as
+      // they light, so the highlight travels with the reading
+      if (lit > s3LitCount && s3LitCount >= 0) {
+        gwaveEls(s3Words.slice(s3LitCount, lit), 0, 40);
+      }
       s3Words.forEach((w, i) => w.classList.toggle('lit', i < lit));
       s3LitCount = lit;
     }
@@ -697,6 +703,7 @@
       benefitDesc.textContent = STEPS[state].desc;
       benefitDesc.classList.remove('hide');
       benefitDesc.classList.add('show');
+      gwaveEls([benefitDesc], 260, 0); // same orange highlight as the title
     };
     if (benefitDesc.classList.contains('show')) {
       benefitDesc.classList.remove('show');
@@ -708,12 +715,31 @@
     }
   }
 
+  // orange gradient wave: a highlight sweeps once through text as it
+  // appears, then hands the color back to the stylesheet. Targets are
+  // the individual glyph runs so it works even while the words rise
+  // into place; a per-target stagger makes the sweep travel the line.
+  function gwaveEls(nodes, delay, stagger) {
+    if (reducedMotion) return;
+    nodes.forEach((el, i) => {
+      clearTimeout(el._gwT);
+      el._gwT = setTimeout(() => {
+        el.classList.remove('gwave');
+        void el.offsetWidth; // restart the animation cleanly
+        el.classList.add('gwave');
+        el._gwT = setTimeout(() => el.classList.remove('gwave'), 1300);
+      }, (delay || 0) + i * (stagger || 0));
+    });
+  }
+
   function applyBenefitTitle(state) {
     setWords(benefitTitle, STEPS[state].title);
     // the Figma title box is wider than its glyphs; the desc right-aligns
     // to the box edge, so it reaches a little past the title text
     benefitTitle.style.minWidth = `calc(${STEPS[state].titleW} * var(--u))`;
     requestAnimationFrame(() => requestAnimationFrame(() => wordsIn(benefitTitle)));
+    // the highlight travels the line as the words settle in
+    gwaveEls(Array.from(benefitTitle.querySelectorAll('.wi')), 320, 90);
   }
 
   function transitionBenefits(next) {
@@ -759,6 +785,7 @@
   let ambientOn = false; // playback starts as the loader window opens
   let heroVOut = 0;      // veil-out progress, shared with the blur lerp
   let blurNow = 0;       // current hero blur, eased toward its target
+  let blurArmed = false; // held off for a beat after reveal (sharp film)
   let mouseYT = 0;       // cursor-follow target for the hairlines (u units)
   let mouseShift = 0;    // eased cursor-follow offset
 
@@ -883,7 +910,7 @@
 
     // hero blur: fades in once the film fills the screen, plays blurred,
     // and clears with the veil as the user scrolls into the film section
-    const blurTarget = body.hasAttribute('data-revealed') ? BLUR_MAX * (1 - heroVOut) : 0;
+    const blurTarget = (blurArmed && body.hasAttribute('data-revealed')) ? BLUR_MAX * (1 - heroVOut) : 0;
     blurNow += (blurTarget - blurNow) * (reducedMotion ? 1 : 0.05);
     if (Math.abs(blurTarget - blurNow) < 0.05) blurNow = blurTarget;
     canvas.style.filter = blurNow > 0.2 ? `blur(${(blurNow * u()).toFixed(1)}px)` : '';

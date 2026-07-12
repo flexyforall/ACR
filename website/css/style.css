@@ -751,6 +751,24 @@ body[data-revealed] .nav { opacity: 1; }
   .nav__contact { font-size: calc(12 * var(--u)); }
 }
 
+/* gradient wave: an orange highlight sweeps once through text as it
+   appears (terminal-industries style) */
+.gwave {
+  background-image: linear-gradient(100deg,
+    var(--gw-base, #fff) 42%, #e8622c 50%, var(--gw-base, #fff) 58%);
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gwave 1.2s cubic-bezier(0.5, 0, 0.3, 1) both;
+}
+@keyframes gwave {
+  from { background-position: 100% 0; }
+  to { background-position: 0% 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal, .tl__inner, .cta--right .btn, .wi, .benefits__desc, .explore, .sl, .hero-para, .hline, .vline, .cross { transition: none !important; }
 }
@@ -799,7 +817,7 @@ body[data-revealed] .nav { opacity: 1; }
   height: calc(4939 * var(--u));
   margin-top: -100vh; /* tucks under the stage for the curtain reveal */
   z-index: 0;
-  background: #fff;
+  background: #d3cdc7;
 }
 .s3__pin {
   position: sticky;
@@ -827,6 +845,8 @@ body[data-revealed] .nav { opacity: 1; }
 }
 .s3__read .s3w { transition: color 0.3s linear; }
 .s3__read .s3w.lit { color: #000; }
+/* on the warm-grey section the wave settles to black, not white */
+.s3__read .s3w.gwave { --gw-base: #000; }
 .s3__cards {
   position: absolute;
   inset: 0;
