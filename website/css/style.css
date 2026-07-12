@@ -825,10 +825,12 @@ body[data-revealed] .nav { opacity: 1; }
    ============================================================ */
 .s3 {
   position: relative;
-  /* ends right as the reading + card flow finish, so there's no dead
-     scroll after the section */
-  height: calc(4200 * var(--u));
-  margin-top: -100vh; /* tucks under the stage for the curtain reveal */
+  /* one viewport-tall composed screen: 100vh of scroll lifts the film
+     curtain and reveals it, then the page ends — nothing scrolls beyond
+     the viewport. (The -100vh margin overlaps the stage, so the net
+     added scroll is a single viewport.) */
+  height: 200vh;
+  margin-top: -100vh;
   z-index: 0;
   background: #d3cdc7;
 }
@@ -895,19 +897,20 @@ body[data-revealed] .nav { opacity: 1; }
   transform-origin: 50% 50%;
 }
 
-/* ---------- elastic blob cursor (unseen.co-style) ----------
-   a small solid dot; JS stretches it along the movement direction by
-   speed and eases it back to a circle at rest. Difference blend keeps
-   it legible on both the dark film and the grey section. ---------- */
+/* ---------- ring cursor ----------
+   a larger stroke-only circle that follows the pointer with a soft lag;
+   it never fills or deforms. Difference blend keeps it legible on both
+   the dark film and the grey section. ---------- */
 .cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 16px;
-  height: 16px;
-  margin: -8px 0 0 -8px;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
   border-radius: 50%;
-  background: #fff;
+  background: transparent;
+  border: 1px solid #fff;
   mix-blend-mode: difference;
   pointer-events: none;
   z-index: 100;

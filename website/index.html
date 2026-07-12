@@ -131,12 +131,13 @@
        revealing a white canvas — the 56px text is pinned mid-screen and
        reads itself in while photo cards scroll past in two columns ======================= -->
   <section class="s3" id="s3">
-    <!-- faint placeholder imagery drifting behind the pinned text -->
-    <div class="s3__ghosts" id="s3Ghosts" aria-hidden="true"></div>
+    <!-- everything lives inside the sticky pin so it's positioned to the
+         viewport (one composed screen), not the scroll length -->
     <div class="s3__pin">
+      <div class="s3__ghosts" id="s3Ghosts" aria-hidden="true"></div>
       <p class="s3__read" id="s3Read">Whether you&rsquo;re designing, building, or protecting a home for generations, CEDUR delivers beauty and performance you can trust.</p>
+      <div class="s3__cards" id="s3Cards"></div>
     </div>
-    <div class="s3__cards" id="s3Cards"></div>
   </section>
 
   <!-- nav (130:356): fixed at body level so the difference blend sees
