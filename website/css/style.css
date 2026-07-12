@@ -264,7 +264,7 @@ body[data-state="done-loading"] .loader { display: none; }
   will-change: filter, transform;
   /* the hero film sits at 70% over black (150:688); JS eases it to
      full brightness as the hero clears into the film section */
-  opacity: 0.7;
+  opacity: 0.7; /* held in both sections */
 }
 
 /* top black→transparent gradient (143:414); JS fades it on scroll */

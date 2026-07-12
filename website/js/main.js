@@ -49,16 +49,19 @@
       title: 'Made to weather the storm',
       desc: 'Exceptional impact resistance provides dependable protection against hail and severe weather, season after season.',
       bar: 80 / 1440,
-    },
+      titleW: 435, // Figma title box — wider than the glyphs; the desc
+    },             // right-aligns to this box, reaching past the text
     {
       title: 'Standalone Class A Fire Rated',
       desc: 'Engineered for elevated fire protection, helping safeguard the home and everything beneath it when it matters most.',
       bar: 811 / 1440,
+      titleW: 461,
     },
     {
       title: 'Strength, thoughtfully engineered',
       desc: 'CEDUR delivers the depth and dimension of natural cedar in a lighter roofing system designed for easier installation and lasting structural confidence.',
       bar: 1314 / 1440,
+      titleW: 538,
     },
   ];
   const STEP_BOUNDS = [0.38, 0.7]; // in scrub progress
@@ -311,6 +314,9 @@
 
   function applyBenefitTitle(state) {
     setWords(benefitTitle, STEPS[state].title);
+    // the Figma title box is wider than its glyphs; the desc right-aligns
+    // to the box edge, so it reaches a little past the title text
+    benefitTitle.style.minWidth = `calc(${STEPS[state].titleW} * var(--u))`;
     requestAnimationFrame(() => requestAnimationFrame(() => wordsIn(benefitTitle)));
   }
 
@@ -407,11 +413,10 @@
     cta.style.opacity = fade;
     cta.style.visibility = t >= 1 ? 'hidden' : '';
 
-    // ---- 5. the top gradient fades and the film brightens from its
-    // 70%-over-black hero state to full; the grain overlay stays ----
+    // ---- 5. the top gradient fades; the film stays at its 70%-over-
+    // black tone (hero and film section alike); the grain stays too ----
     const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
     veil.style.opacity = (VEIL_MAX * (1 - vOut)).toFixed(3);
-    canvas.style.opacity = (0.7 + 0.3 * vOut).toFixed(3);
 
     // ---- benefits copy + progress bar ----
     const next = p < BENEFITS_AT ? 'hero'
