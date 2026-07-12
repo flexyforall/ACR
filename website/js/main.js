@@ -75,7 +75,6 @@
   const loader = document.getElementById('loader');
   const navEl = document.getElementById('nav');
   const loaderBand = document.getElementById('loaderBand');
-  const loaderWindow = document.getElementById('loaderWindow');
   const stage = document.getElementById('stage');
   const hero2 = document.getElementById('hero2');
   const cta = document.getElementById('cta');
@@ -165,17 +164,11 @@
   // of stepping visibly from frame to frame
   // ------------------------------------------------------------------
   let lastDrawn = -1;
-  const loaderScene = document.getElementById('loaderScene');
-  const loaderCtx = loaderScene ? loaderScene.getContext('2d') : null;
 
   function sizeCanvas() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(canvas.clientWidth * dpr);
     canvas.height = Math.round(canvas.clientHeight * dpr);
-    if (loaderScene && body.dataset.state !== 'done-loading') {
-      loaderScene.width = canvas.width;
-      loaderScene.height = canvas.height;
-    }
     const fxEl = document.getElementById('fx');
     if (fxEl) {
       fxEl.width = Math.round(fxEl.clientWidth * dpr);
@@ -202,43 +195,13 @@
     paintCover(a, 1);
     const b = frames[i1];
     if (b && b !== a && frac > 0.01) paintCover(b, frac);
-    // mirror into the loader's window while it is on screen
-    if (loaderCtx && body.dataset.state !== 'done-loading') {
-      loaderCtx.drawImage(canvas, 0, 0);
-    }
-  }
-
-  // ------------------------------------------------------------------
-  // loader window: the square drifts after the cursor with a soft lag;
-  // the full-bleed expansion later takes off from wherever it sits, so
-  // the hero hand-off is untouched (it still ends at inset 0)
-  // ------------------------------------------------------------------
-  let winFollowOn = !reducedMotion;
-  const winPos = { x: window.innerWidth / 2, y: window.innerHeight - 50 * u() };
-  const winTgt = { x: winPos.x, y: winPos.y };
-  // two echo squares trail the window at slower easings — the trace
-  // shows while it moves and settles away when it rests
-  const echo1El = document.getElementById('loaderEcho1');
-  const echo2El = document.getElementById('loaderEcho2');
-  const echo1 = { x: winPos.x, y: winPos.y };
-  const echo2 = { x: winPos.x, y: winPos.y };
-
-  window.addEventListener('mousemove', e => {
-    if (!winFollowOn) return;
-    const s = 50 * u(), m = 24;
-    winTgt.x = Math.max(s + m, Math.min(window.innerWidth - s - m, e.clientX));
-    winTgt.y = Math.max(s + m, Math.min(window.innerHeight - s, e.clientY));
-  }, { passive: true });
-
-  function winClip() {
-    const s = 50 * u();
-    return `inset(${(winPos.y - s).toFixed(1)}px ${(window.innerWidth - winPos.x - s).toFixed(1)}px ${(window.innerHeight - winPos.y - s).toFixed(1)}px ${(winPos.x - s).toFixed(1)}px)`;
   }
 
   // ------------------------------------------------------------------
   // loader timeline
   // ------------------------------------------------------------------
   const t0 = performance.now();
+  const loaderCount = document.getElementById('loaderCount');
 
   requestAnimationFrame(() => loader.setAttribute('data-in', ''));
   if (!reducedMotion) {
@@ -252,42 +215,49 @@
     seqEls[seqEls.length - 1].classList.add('lit');
   }
 
+  let countShown = 0;
+
   function loaderTick() {
     if (body.dataset.state !== 'loading') return;
-    const ready = loadedCount >= GATE_FRAMES &&
-      performance.now() - t0 >= (reducedMotion ? 400 : LOADER_MIN_MS);
+    // the counter tracks whichever gate is slower: frames loaded or the
+    // minimum hold, easing so the number never jumps
+    const minMs = reducedMotion ? 400 : LOADER_MIN_MS;
+    const p = Math.min(loadedCount / GATE_FRAMES, (performance.now() - t0) / minMs);
+    countShown += (Math.min(1, p) * 100 - countShown) * 0.12;
+    if (loaderCount) loaderCount.textContent = String(Math.round(countShown));
+    const ready = loadedCount >= GATE_FRAMES && performance.now() - t0 >= minMs;
     if (ready) reveal();
     else requestAnimationFrame(loaderTick);
   }
 
   function reveal() {
     body.dataset.state = 'revealing';
+    if (loaderCount) loaderCount.textContent = '100';
+    // the film starts playing under the loader panel, so the lift
+    // reveals footage already in motion
+    ambientOn = true;
 
-    const bandCollapse = loaderBand.animate(
-      [{ clipPath: 'inset(-100px 0 -100px 0)' }, { clipPath: 'inset(50% 0 50% 0)' }],
-      { duration: reducedMotion ? 1 : 650, easing: 'cubic-bezier(0.65,0,0.35,1)', fill: 'forwards' }
+    // vectr-style hand-off: after a beat on 100, the whole loader panel
+    // lifts off the top while its content sinks against the motion
+    // (inner parallax), unveiling the hero settling from a soft zoom
+    const dur = reducedMotion ? 1 : 950;
+    const delay = reducedMotion ? 0 : 400;
+    const lift = loader.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(-100%)' }],
+      { duration: dur, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards', delay }
     );
-
-    bandCollapse.onfinish = () => {
-      // the film starts playing right as the square window opens up —
-      // the loader's canvas mirrors the main one, so the expansion
-      // reveals footage already in motion
-      ambientOn = true;
-      winFollowOn = false;              // freeze the drift; expand from here
-      echo1El.style.opacity = '0';      // the trace fades out with it
-      echo2El.style.opacity = '0';
-      const openFrom = winClip();
-      const win = loaderWindow.animate(
-        [{ clipPath: openFrom }, { clipPath: 'inset(0px 0px 0px 0px)' }],
-        { duration: reducedMotion ? 1 : 1100, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards' }
-      );
-      win.onfinish = () => {
-        // the main canvas carries the same playing scene, so the loader
-        // can drop immediately and the hero reveals play visibly
-        body.dataset.state = 'done-loading';
-        body.setAttribute('data-revealed', '');
-        setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
-      };
+    loaderBand.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(38vh)' }],
+      { duration: dur, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards', delay }
+    );
+    canvas.animate(
+      [{ transform: 'scale(1.08)' }, { transform: 'scale(1)' }],
+      { duration: dur + 550, easing: 'cubic-bezier(0.22,1,0.36,1)', fill: 'forwards', delay }
+    );
+    lift.onfinish = () => {
+      body.dataset.state = 'done-loading';
+      body.setAttribute('data-revealed', '');
+      setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
     };
   }
 
@@ -552,33 +522,35 @@
     s3MyT = (e.clientY / window.innerHeight) * 2 - 1;
   }, { passive: true });
 
-  // (x, y) card anchors on the 4939-tall canvas — two loose columns;
-  // d is the cursor-parallax depth (bigger = drifts/tilts more)
+  // (x, y) card anchors on the 4939-tall canvas — Getty-style: the
+  // imagery rings the centered text from the side corridors, alternating
+  // and varying in size (s), never parking on top of the copy
+  // (d is the cursor-parallax depth: bigger = drifts/tilts more)
   const S3_CARDS = [
-    { x: 40, y: -41, d: 1.1 }, { x: 1128, y: 625, d: 0.85 },
-    { x: 40, y: 870, d: 0.9 }, { x: 1128, y: 1536, d: 1.2 },
-    { x: 40, y: 1781, d: 0.8 }, { x: 1128, y: 2447, d: 1.05 },
-    { x: 40, y: 2861, d: 1.15 }, { x: 1128, y: 3527, d: 0.9 },
+    { x: 60, y: -10, s: 1.0, d: 1.0 },
+    { x: 1128, y: 330, s: 0.78, d: 0.85 },
+    { x: 205, y: 760, s: 0.6, d: 0.95 },
+    { x: 1055, y: 1010, s: 1.05, d: 1.15 },
+    { x: 45, y: 1360, s: 0.85, d: 0.8 },
+    { x: 1185, y: 1725, s: 0.6, d: 1.0 },
+    { x: 140, y: 2085, s: 1.0, d: 1.1 },
+    { x: 1090, y: 2405, s: 0.75, d: 0.9 },
+    { x: 60, y: 2770, s: 0.65, d: 1.0 },
+    { x: 1145, y: 3055, s: 0.95, d: 1.05 },
+    { x: 230, y: 3420, s: 0.8, d: 0.9 },
+    { x: 1080, y: 3700, s: 0.7, d: 1.0 },
   ];
-  // faint extras scattered between the columns, behind the pinned text
-  // (s = base size factor, o = opacity, d = parallax depth). All start
-  // below the first screen (y ≥ 780) so the text opens on a clean page;
-  // they emerge as the scroll brings them up
+  // small faint pieces that slip closer to the middle and drift past
+  // behind the text (o = opacity)
   const S3_GHOSTS = [
-    { x: 300, y: 780, s: 0.42, o: 0.3, d: 0.45 },
-    { x: 930, y: 940, s: 0.34, o: 0.26, d: 0.38 },
-    { x: 560, y: 1150, s: 0.5, o: 0.34, d: 0.52 },
-    { x: 150, y: 1420, s: 0.36, o: 0.27, d: 0.4 },
-    { x: 1010, y: 1560, s: 0.44, o: 0.3, d: 0.46 },
-    { x: 680, y: 1800, s: 0.3, o: 0.24, d: 0.34 },
-    { x: 340, y: 2020, s: 0.55, o: 0.35, d: 0.55 },
-    { x: 880, y: 2260, s: 0.38, o: 0.28, d: 0.42 },
-    { x: 520, y: 2520, s: 0.46, o: 0.31, d: 0.48 },
-    { x: 120, y: 2780, s: 0.32, o: 0.25, d: 0.36 },
-    { x: 960, y: 2940, s: 0.52, o: 0.33, d: 0.5 },
-    { x: 640, y: 3200, s: 0.36, o: 0.27, d: 0.4 },
-    { x: 260, y: 3440, s: 0.48, o: 0.31, d: 0.46 },
-    { x: 840, y: 3680, s: 0.4, o: 0.29, d: 0.44 },
+    { x: 420, y: 620, s: 0.4, o: 0.4, d: 0.5 },
+    { x: 950, y: 880, s: 0.34, o: 0.34, d: 0.45 },
+    { x: 385, y: 1560, s: 0.45, o: 0.4, d: 0.5 },
+    { x: 985, y: 1905, s: 0.38, o: 0.34, d: 0.42 },
+    { x: 430, y: 2300, s: 0.42, o: 0.38, d: 0.48 },
+    { x: 940, y: 2645, s: 0.36, o: 0.32, d: 0.4 },
+    { x: 400, y: 3005, s: 0.44, o: 0.38, d: 0.5 },
+    { x: 975, y: 3350, s: 0.38, o: 0.34, d: 0.44 },
   ];
   const S3_IMGS = ['assets/card1.jpg', 'assets/card2.jpg', 'assets/card3.jpg'];
   const s3GhostsBox = document.getElementById('s3Ghosts');
@@ -664,10 +636,10 @@
       c.im.style.transform = r < 0.995 ? `scale(${(1.3 - 0.3 * r).toFixed(3)})` : '';
     };
     S3_CARDS.forEach(c => {
-      const half = (245 * px) / 2;
+      const half = (245 * c.s * px) / 2;
       const centerY = sTop + c.y * px + half + reveal - window.scrollY;
       const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
-      c.el.style.transform = float(c.d, 0.72 + 0.28 * Math.min(1, tIn));
+      c.el.style.transform = float(c.d, c.s * (0.72 + 0.28 * Math.min(1, tIn)));
       unveil(c, centerY - half);
     });
     S3_GHOSTS.forEach(c => {
@@ -886,25 +858,6 @@
 
     wheelGlide();
 
-    // loader window drifts after the cursor until the expansion starts;
-    // the echo squares chase it and glow only while there's a gap
-    if (winFollowOn && body.dataset.state !== 'done-loading') {
-      winPos.x += (winTgt.x - winPos.x) * 0.06;
-      winPos.y += (winTgt.y - winPos.y) * 0.06;
-      loaderWindow.style.clipPath = winClip();
-      echo1.x += (winPos.x - echo1.x) * 0.055;
-      echo1.y += (winPos.y - echo1.y) * 0.055;
-      echo2.x += (echo1.x - echo2.x) * 0.05;
-      echo2.y += (echo1.y - echo2.y) * 0.05;
-      const es = 50 * u();
-      echo1El.style.transform = `translate(${(echo1.x - es).toFixed(1)}px, ${(echo1.y - es).toFixed(1)}px)`;
-      echo2El.style.transform = `translate(${(echo2.x - es).toFixed(1)}px, ${(echo2.y - es).toFixed(1)}px)`;
-      const d1 = Math.hypot(winPos.x - echo1.x, winPos.y - echo1.y);
-      const d2 = Math.hypot(echo1.x - echo2.x, echo1.y - echo2.y);
-      echo1El.style.opacity = Math.min(0.55, d1 / 70).toFixed(2);
-      echo2El.style.opacity = Math.min(0.35, d2 / 70).toFixed(2);
-    }
-
     // smooth-scroll inertia: everything glides toward the real position
     smoothP += (rawP - smoothP) * (reducedMotion ? 1 : 0.11);
     if (Math.abs(rawP - smoothP) < 0.0004) smoothP = rawP;
@@ -977,79 +930,7 @@
       lastDrawn = key;
     }
 
-    drawCursor();
-
     requestAnimationFrame(rafLoop);
-  }
-
-  // ------------------------------------------------------------------
-  // custom cursor: a dot on the pointer, a thin stroke-only ring easing
-  // after it, and a grey trail (white at low alpha) snaking behind —
-  // the whole thing fades away while the page scrolls and returns when
-  // the scroll settles. Difference blend keeps it visible on white.
-  // ------------------------------------------------------------------
-  const curCv = document.getElementById('cursor');
-  const curCtx = curCv ? curCv.getContext('2d') : null;
-  const CUR_TRAIL_N = 24;
-  const curTrail = [];
-  let curOn = false;
-  let curX = -100, curY = -100, ringX = -100, ringY = -100;
-  let curFade = 1;
-  let curLastScroll = 0;
-
-  function sizeCursor() {
-    if (!curCv) return;
-    const d = Math.min(2, window.devicePixelRatio || 1);
-    curCv.width = Math.round(window.innerWidth * d);
-    curCv.height = Math.round(window.innerHeight * d);
-    curCtx.setTransform(d, 0, 0, d, 0, 0);
-  }
-
-  window.addEventListener('mousemove', e => {
-    curX = e.clientX;
-    curY = e.clientY;
-    if (!curOn && !reducedMotion && curCtx) {
-      curOn = true;
-      document.documentElement.classList.add('has-cursor');
-      ringX = curX;
-      ringY = curY;
-    }
-  }, { passive: true });
-
-  function drawCursor() {
-    if (!curCtx || !curOn) return;
-    // scrolling fades the cursor out; stillness brings it back
-    const sp = Math.abs(window.scrollY - curLastScroll);
-    curLastScroll = window.scrollY;
-    curFade += ((sp > 3 ? 0 : 1) - curFade) * (sp > 3 ? 0.22 : 0.06);
-    ringX += (curX - ringX) * 0.16;
-    ringY += (curY - ringY) * 0.16;
-    curTrail.push({ x: ringX, y: ringY });
-    if (curTrail.length > CUR_TRAIL_N) curTrail.shift();
-    curCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    if (curFade < 0.02) return;
-    // trail: grey beads shrinking toward the tail
-    curCtx.fillStyle = '#fff';
-    for (let i = 0; i < curTrail.length; i++) {
-      const k = i / CUR_TRAIL_N;
-      curCtx.globalAlpha = k * k * 0.14 * curFade;
-      curCtx.beginPath();
-      curCtx.arc(curTrail[i].x, curTrail[i].y, 1 + k * 5.5, 0, 6.2832);
-      curCtx.fill();
-    }
-    // thin stroke-only ellipse riding behind the pointer
-    curCtx.globalAlpha = 0.85 * curFade;
-    curCtx.strokeStyle = '#fff';
-    curCtx.lineWidth = 1;
-    curCtx.beginPath();
-    curCtx.ellipse(ringX, ringY, 17, 17, 0, 0, 6.2832);
-    curCtx.stroke();
-    // the dot marks the true pointer position
-    curCtx.globalAlpha = 0.9 * curFade;
-    curCtx.beginPath();
-    curCtx.arc(curX, curY, 2.5, 0, 6.2832);
-    curCtx.fill();
-    curCtx.globalAlpha = 1;
   }
 
   // ------------------------------------------------------------------
@@ -1060,14 +941,12 @@
     drawFrame(shownFrame);
     onScroll();
     applyScroll(smoothP);
-    sizeCursor();
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onResize);
 
   sizeCanvas();
-  sizeCursor();
   window.scrollTo(0, 0);
   document.fonts.ready.then(() => { buildParticles(); measureLineWidths(); });
   preloadAll();

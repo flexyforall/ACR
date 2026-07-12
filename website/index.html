@@ -23,20 +23,8 @@
       </div>
     </div>
 
-    <!-- ghost squares trailing the window as it chases the cursor -->
-    <div class="loader__echo loader__echo--far" id="loaderEcho2" aria-hidden="true"></div>
-    <div class="loader__echo" id="loaderEcho1" aria-hidden="true"></div>
-
-    <!-- window onto the hero: starts as the 100×100 square (122:206),
-         expands to full bleed; shows the same blurred/veiled scene the
-         hero opens on, for a seamless hand-off -->
-    <div class="loader__window" id="loaderWindow">
-      <div class="loader__scene">
-        <!-- live mirror of the main canvas: the film is already playing
-             while the square window fills the screen -->
-        <canvas id="loaderScene"></canvas>
-      </div>
-    </div>
+    <!-- load counter, centered at the bottom of the panel -->
+    <div class="loader__count" id="loaderCount">0</div>
   </div>
 
   <!-- ======================= PINNED STAGE: hero + scroll-scrubbed benefits ======================= -->
@@ -164,9 +152,6 @@
       </button>
     </div>
   </header>
-
-  <!-- custom cursor overlay: dot + eased ring + fading grey trail -->
-  <canvas id="cursor" class="cursor" aria-hidden="true"></canvas>
 
   <script src="js/main.js"></script>
 </body>
