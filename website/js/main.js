@@ -158,24 +158,47 @@
   }
 
   // ------------------------------------------------------------------
-  // canvas
+  // canvas — fractional frame positions render as a crossfade between
+  // the two neighbouring frames, so slow playback stays fluid instead
+  // of stepping visibly from frame to frame
   // ------------------------------------------------------------------
   let lastDrawn = -1;
+  const loaderScene = document.getElementById('loaderScene');
+  const loaderCtx = loaderScene ? loaderScene.getContext('2d') : null;
 
   function sizeCanvas() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(canvas.clientWidth * dpr);
     canvas.height = Math.round(canvas.clientHeight * dpr);
+    if (loaderScene && body.dataset.state !== 'done-loading') {
+      loaderScene.width = canvas.width;
+      loaderScene.height = canvas.height;
+    }
     lastDrawn = -1;
   }
 
-  function drawFrame(index) {
-    const img = nearestFrame(index);
-    if (!img) return;
+  function paintCover(img, alpha) {
     const cw = canvas.width, ch = canvas.height;
     const s = Math.max(cw / FRAME_W, ch / FRAME_H);
     const dw = FRAME_W * s, dh = FRAME_H * s;
+    ctx.globalAlpha = alpha;
     ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawFrame(pos) {
+    const i0 = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(pos)));
+    const i1 = Math.min(FRAME_COUNT - 1, i0 + 1);
+    const frac = Math.min(1, Math.max(0, pos - i0));
+    const a = frames[i0] || nearestFrame(i0);
+    if (!a) return;
+    paintCover(a, 1);
+    const b = frames[i1];
+    if (b && b !== a && frac > 0.01) paintCover(b, frac);
+    // mirror into the loader's window while it is on screen
+    if (loaderCtx && body.dataset.state !== 'done-loading') {
+      loaderCtx.drawImage(canvas, 0, 0);
+    }
   }
 
   // ------------------------------------------------------------------
@@ -212,6 +235,10 @@
     );
 
     bandCollapse.onfinish = () => {
+      // the film starts playing right as the square window opens up —
+      // the loader's canvas mirrors the main one, so the expansion
+      // reveals footage already in motion
+      ambientOn = true;
       const px = u();
       const openFrom = `inset(calc(100% - ${100 * px}px) calc(50% - ${50 * px}px) 0px calc(50% - ${50 * px}px))`;
       const win = loaderWindow.animate(
@@ -219,13 +246,10 @@
         { duration: reducedMotion ? 1 : 1100, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards' }
       );
       win.onfinish = () => {
-        // the canvas behind carries the same blurred/veiled scene, so the
-        // loader can drop immediately and the hero reveals play visibly
-        drawFrame(0);
+        // the main canvas carries the same playing scene, so the loader
+        // can drop immediately and the hero reveals play visibly
         body.dataset.state = 'done-loading';
         body.setAttribute('data-revealed', '');
-        // the slogan fill-sweep and the rest run off [data-revealed];
-        // the ambient background loop starts on its own in the raf loop
         setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
         setTimeout(startSquareLoop, reducedMotion ? 0 : 3200);
       };
@@ -358,6 +382,7 @@
   let shownFrame = 0;
   let ambientT = 0;
   let rewinding = false;
+  let ambientOn = false; // playback starts as the loader window opens
 
   function onScroll() {
     const vh = window.innerHeight;
@@ -439,7 +464,7 @@
     // frame target: the film plays at rest; scrolling triggers a fast
     // rewind to frame 1, after which the scroll scrub takes over
     let targetFrame;
-    const ambient = body.hasAttribute('data-revealed') && rawP < AMBIENT_AT && !reducedMotion;
+    const ambient = ambientOn && rawP < AMBIENT_AT && !reducedMotion;
     if (ambient) {
       ambientT += dt;
       const playDur = (FRAME_COUNT - 1) / AMBIENT_FPS;
@@ -460,10 +485,11 @@
     const k = reducedMotion ? 1 : ambient ? 1 : rewinding ? REWIND_K : 0.16;
     shownFrame += (targetFrame - shownFrame) * k;
     if (Math.abs(targetFrame - shownFrame) < 0.02) shownFrame = targetFrame;
-    const idx = Math.round(shownFrame);
-    if (idx !== lastDrawn && body.dataset.state !== 'loading') {
-      drawFrame(idx);
-      lastDrawn = idx;
+    // quantize the fractional position so we only repaint on real change
+    const key = Math.round(shownFrame * 64);
+    if (key !== lastDrawn && body.dataset.state !== 'loading') {
+      drawFrame(shownFrame);
+      lastDrawn = key;
     }
     requestAnimationFrame(rafLoop);
   }
@@ -473,7 +499,7 @@
   // ------------------------------------------------------------------
   function onResize() {
     sizeCanvas();
-    drawFrame(Math.round(shownFrame));
+    drawFrame(shownFrame);
     onScroll();
     applyScroll(smoothP);
   }
@@ -483,7 +509,6 @@
 
   sizeCanvas();
   window.scrollTo(0, 0);
-  loaderWindow.querySelector('img').src = FRAME_PATH(0);
   preloadAll();
   loaderTick();
   onScroll();

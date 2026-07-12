@@ -28,7 +28,9 @@
          hero opens on, for a seamless hand-off -->
     <div class="loader__window" id="loaderWindow">
       <div class="loader__scene">
-        <img src="assets/frames/frame_001.webp" alt="" draggable="false" />
+        <!-- live mirror of the main canvas: the film is already playing
+             while the square window fills the screen -->
+        <canvas id="loaderScene"></canvas>
         <div class="loader__veil"></div>
       </div>
     </div>
