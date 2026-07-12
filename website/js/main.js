@@ -175,6 +175,11 @@
       loaderScene.width = canvas.width;
       loaderScene.height = canvas.height;
     }
+    const fxEl = document.getElementById('fx');
+    if (fxEl) {
+      fxEl.width = Math.round(fxEl.clientWidth * dpr);
+      fxEl.height = Math.round(fxEl.clientHeight * dpr);
+    }
     lastDrawn = -1;
   }
 
@@ -311,118 +316,107 @@
   }
 
   // ------------------------------------------------------------------
-  // SECTION 3 (101:648) — floating cards + reading text on white; the
-  // room then darkens, the last card docks, the point copy appears.
-  // The section slides beneath the stage, so the film screen lifts off
-  // it like a curtain; local progress q covers that reveal too.
+  // particle hand-off: as the rising line crosses THAT MAKES IT, the
+  // glyphs decay into particles row by row; the particles linger and
+  // drift, then assemble into "Made to weather the storm" right as the
+  // film section's real title takes over. Everything is a function of
+  // scroll progress (reversible) plus a time-based wobble (organic).
   // ------------------------------------------------------------------
-  const s3 = document.getElementById('s3');
-  const s3World = document.getElementById('s3World');
-  const s3CardsBox = document.getElementById('s3Cards');
-  const s3Read = document.getElementById('s3Read');
-  const s3Dark = document.getElementById('s3Dark');
-  const s3Hero = document.getElementById('s3Hero');
-  const s3Final = document.getElementById('s3Final');
-  const s3Line = s3Final ? s3Final.querySelector('.s3__line') : null;
-  let s3Raw = 0;
-  let s3Smooth = 0;
+  const fx = document.getElementById('fx');
+  const fxCtx = fx ? fx.getContext('2d') : null;
+  const FX_N = 1400;               // particle budget
+  const FX_FORM = [0.115, 0.15];   // particles assemble into the new title
+  const FX_FADE = [0.155, 0.17];   // hand over to the real DOM title
+  let fxParts = null;
+  let fxDirty = false;
 
-  const S3_REVEAL = 0.2;        // first fifth of the section = curtain reveal
-  const S3_TRAVEL = 1800;       // card scroll distance in board units
-  const S3_FIX_AT = 0.55;       // the last two cards stop here
-  // (x, y at q=0, w, h, parallax speed, image) — two loose columns
-  const S3_CARDS = [
-    { x: 40,   y0: 830,  w: 220, h: 198, sp: 1.0,  img: 'assets/card2.jpg' },
-    { x: 1030, y0: 420,  w: 370, h: 333, sp: 0.9,  img: 'assets/card1.jpg' },
-    { x: 1220, y0: 900,  w: 180, h: 162, sp: 0.85, img: 'assets/card3.jpg' },
-    { x: 40,   y0: 1750, w: 322, h: 290, sp: 1.15, img: 'assets/card3.jpg' },
-    { x: 1078, y0: 2100, w: 322, h: 290, sp: 1.05, img: 'assets/card2.jpg' },
-    // the top-left card: rides up, fixes at y40, then exits upward
-    { x: 40,   y0: 1030, w: 241, h: 217, sp: 1.0,  img: 'assets/card1.jpg', tl: true },
-  ];
-  // the docking card: rides the right column, fixes at (1078, 470),
-  // then morphs to the finale slot (295, 200, 552×480 — 100:592)
-  const S3_HERO = { x: 1078, y0: 1262, w: 322, h: 290, sp: 0.8, to: { x: 295, y: 200, w: 552, h: 480 } };
-
-  let s3Words = [];
-  let s3LitCount = -1;
-
-  if (s3) {
-    S3_CARDS.forEach(c => {
-      const el = document.createElement('div');
-      el.className = 's3card';
-      el.style.setProperty('--x', c.x);
-      el.style.setProperty('--w', c.w);
-      el.style.setProperty('--h', c.h);
-      const im = document.createElement('img');
-      im.src = c.img;
-      im.alt = '';
-      im.draggable = false;
-      el.appendChild(im);
-      s3CardsBox.appendChild(el);
-      c.el = el;
-    });
-    // wrap each word of the reading text for the digitalflagship-style
-    // light-up-as-you-scroll effect
-    const words = s3Read.textContent.trim().split(/\s+/);
-    s3Read.textContent = '';
-    words.forEach((word, i) => {
-      const sp = document.createElement('span');
-      sp.className = 's3w';
-      sp.textContent = word;
-      s3Read.appendChild(sp);
-      if (i < words.length - 1) s3Read.appendChild(document.createTextNode(' '));
-      s3Words.push(sp);
-    });
+  // rasterize a line of text on the 1440×800 board and sample its pixels
+  function fxSample(text, font, spacing, align, x, baseline, maxPts) {
+    const off = document.createElement('canvas');
+    off.width = 1440;
+    off.height = 800;
+    const c = off.getContext('2d', { willReadFrequently: true });
+    c.fillStyle = '#fff';
+    c.font = font;
+    if ('letterSpacing' in c) c.letterSpacing = spacing;
+    c.textAlign = align;
+    c.fillText(text.toUpperCase(), x, baseline);
+    const data = c.getImageData(0, 0, 1440, 800).data;
+    const pts = [];
+    for (let y = 0; y < 800; y += 2) {
+      for (let px = 0; px < 1440; px += 2) {
+        if (data[(y * 1440 + px) * 4 + 3] > 128) pts.push([px, y]);
+      }
+    }
+    const out = [];
+    const step = Math.max(1, pts.length / maxPts);
+    for (let i = 0; i < pts.length; i += step) out.push(pts[Math.floor(i)]);
+    return out;
   }
 
-  function applyS3(q) {
-    if (!s3) return;
+  function buildParticles() {
+    if (!fxCtx || reducedMotion) return;
+    const fam = '400 80px "Neue Montreal", "Inter", Arial, sans-serif';
+    const famSm = '400 22px "Neue Montreal", "Inter", Arial, sans-serif';
+    // THAT MAKES IT: line box 364–436 on the board, baseline ≈ 430
+    const src = fxSample('That makes it', fam, '-2.4px', 'center', 720, 430, FX_N);
+    // Made to weather the storm: title box top 411, baseline ≈ 431
+    const tgt = fxSample('Made to weather the storm', famSm, '0.22px', 'left', 40, 431, src.length);
+    if (!src.length || !tgt.length) return;
+    // pair source and target left-to-right so the swarm sweeps coherently
+    src.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    tgt.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    fxParts = src.map((s, i) => ({
+      sx: s[0],
+      sy: s[1],
+      tx: tgt[Math.min(tgt.length - 1, Math.floor(i * tgt.length / src.length))][0],
+      ty: tgt[Math.min(tgt.length - 1, Math.floor(i * tgt.length / src.length))][1],
+      // the rising line (y = 444 − 184t across HERO_OUT) cuts this pixel at:
+      spawnP: HERO_OUT[0] + (HERO_OUT[1] - HERO_OUT[0]) * clamp01((444 - s[1]) / 184),
+      a1: 0.55 + Math.random() * 0.45,
+      wob: 2 + Math.random() * 3,        // wobble amplitude (board units)
+      f1: 0.6 + Math.random() * 1.1,     // wobble frequency
+      ph: Math.random() * Math.PI * 2,   // wobble phase
+      dx: (Math.random() - 0.5) * 520,   // drift per unit of scroll progress
+      dy: -120 - Math.random() * 480,
+      sz: 1.1 + Math.random() * 1.7,
+    }));
+  }
+
+  function fxDraw(p, now) {
+    if (!fxCtx) return;
+    const active = fxParts && p > HERO_OUT[0] + 0.002 && p < FX_FADE[1];
+    if (!active) {
+      if (fxDirty) { fxCtx.clearRect(0, 0, fx.width, fx.height); fxDirty = false; }
+      return;
+    }
     const vh = window.innerHeight;
     const px = u();
-    const boardY = y => vh / 2 + (y - 400) * px; // board coord → viewport px
-    const v = clamp01(q / S3_REVEAL);            // curtain-reveal progress
-    const qq = range(q, S3_REVEAL, 1);           // in-section progress
-
-    // ---- entrance: the whole world arrives out of a blur ----
-    const bl = 18 * (1 - smooth01(clamp01((v - 0.3) / 0.7)));
-    const blCss = bl > 0.15 ? `blur(${(bl * px).toFixed(1)}px)` : '';
-    s3World.style.filter = blCss;
-    s3Hero.style.filter = blCss;
-
-    // ---- reading effect: words light up as the scroll passes ----
-    const lit = Math.round(range(qq, 0.06, 0.5) * s3Words.length);
-    if (lit !== s3LitCount) {
-      s3Words.forEach((w, i) => w.classList.toggle('lit', i < lit));
-      s3LitCount = lit;
+    const sc = fx.width / window.innerWidth; // css px → canvas px
+    fxCtx.clearRect(0, 0, fx.width, fx.height);
+    fxDirty = true;
+    const form = smooth01(range(p, FX_FORM[0], FX_FORM[1]));
+    const fade = range(p, FX_FADE[0], FX_FADE[1]);
+    const tsec = now / 1000;
+    fxCtx.fillStyle = '#fff';
+    for (const q of fxParts) {
+      const born = range(p, q.spawnP, q.spawnP + 0.008);
+      if (born <= 0) continue;
+      const alpha = q.a1 * born * (1 - fade);
+      if (alpha < 0.02) continue;
+      const drift = p - q.spawnP; // scroll-driven, so scrubbing back reforms the text
+      const loose = 1 - form;
+      let bx = q.sx + q.dx * drift * loose + Math.sin(tsec * q.f1 + q.ph) * q.wob * loose;
+      let by = q.sy + q.dy * drift * loose + Math.cos(tsec * q.f1 * 1.4 + q.ph * 1.6) * q.wob * loose;
+      bx += (q.tx - bx) * form;
+      by += (q.ty - by) * form;
+      const X = bx * px * sc;
+      const Y = (vh / 2 + (by - 400) * px) * sc;
+      const S = q.sz * px * sc;
+      fxCtx.globalAlpha = alpha;
+      fxCtx.fillRect(X, Y, S, S);
     }
-    s3Read.style.opacity = (1 - range(qq, 0.56, 0.64)).toFixed(3);
-
-    // ---- cards ride up; the TL card fixes, then exits ----
-    S3_CARDS.forEach(c => {
-      let y = c.y0 - S3_TRAVEL * c.sp * (c.tl ? Math.min(qq, S3_FIX_AT) : qq);
-      if (c.tl) y -= 1600 * smooth01(range(qq, 0.62, 0.74)); // the exit
-      c.el.style.transform = `translate3d(0, ${boardY(y).toFixed(1)}px, 0)`;
-    });
-
-    // ---- the docking card: column → fix → morph to the finale slot ----
-    const hColY = S3_HERO.y0 - S3_TRAVEL * S3_HERO.sp * Math.min(qq, S3_FIX_AT);
-    const m = smooth01(range(qq, 0.62, 0.78));
-    const hx = S3_HERO.x + (S3_HERO.to.x - S3_HERO.x) * m;
-    const hy = hColY + (S3_HERO.to.y - hColY) * m;
-    const hw = S3_HERO.w + (S3_HERO.to.w - S3_HERO.w) * m;
-    const hh = S3_HERO.h + (S3_HERO.to.h - S3_HERO.h) * m;
-    s3Hero.style.left = (hx * px).toFixed(1) + 'px';
-    s3Hero.style.width = (hw * px).toFixed(1) + 'px';
-    s3Hero.style.height = (hh * px).toFixed(1) + 'px';
-    s3Hero.style.transform = `translate3d(0, ${boardY(hy).toFixed(1)}px, 0)`;
-
-    // ---- the room darkens, then the point copy appears (101:747) ----
-    s3Dark.style.opacity = range(qq, 0.6, 0.78).toFixed(3);
-    const fIn = smooth01(range(qq, 0.8, 0.92));
-    s3Final.style.opacity = fIn.toFixed(3);
-    s3Final.style.transform = `translateY(${(24 * (1 - fIn)).toFixed(1)}px)`;
-    if (s3Line) s3Line.style.transform = `scaleX(${fIn.toFixed(3)})`;
+    fxCtx.globalAlpha = 1;
   }
 
   // ------------------------------------------------------------------
@@ -506,10 +500,6 @@
     const vh = window.innerHeight;
     const total = stage.offsetHeight - vh;
     rawP = total > 0 ? clamp01(window.scrollY / total) : 0;
-    if (s3) {
-      const s3Total = s3.offsetHeight - vh;
-      s3Raw = s3Total > 0 ? clamp01((window.scrollY - s3.offsetTop) / s3Total) : 0;
-    }
   }
 
   // hero geometry on the 800-tall board (all relative to center 400):
@@ -585,17 +575,15 @@
     if (Math.abs(rawP - smoothP) < 0.0004) smoothP = rawP;
     if (body.dataset.state !== 'loading') applyScroll(smoothP);
 
-    // section 3 runs on its own smoothed progress
-    s3Smooth += (s3Raw - s3Smooth) * (reducedMotion ? 1 : 0.11);
-    if (Math.abs(s3Raw - s3Smooth) < 0.0004) s3Smooth = s3Raw;
-    if (body.dataset.state !== 'loading') applyS3(s3Smooth);
-
     // hero blur: fades in once the film fills the screen, plays blurred,
     // and clears with the veil as the user scrolls into the film section
     const blurTarget = body.hasAttribute('data-revealed') ? BLUR_MAX * (1 - heroVOut) : 0;
     blurNow += (blurTarget - blurNow) * (reducedMotion ? 1 : 0.05);
     if (Math.abs(blurTarget - blurNow) < 0.05) blurNow = blurTarget;
     canvas.style.filter = blurNow > 0.2 ? `blur(${(blurNow * u()).toFixed(1)}px)` : '';
+
+    // particle hand-off rides the same smoothed progress
+    if (body.dataset.state !== 'loading') fxDraw(smoothP, now);
 
     // frame target: the film plays at rest; scrolling triggers a fast
     // rewind to frame 1, after which the scroll scrub takes over
@@ -645,6 +633,7 @@
 
   sizeCanvas();
   window.scrollTo(0, 0);
+  document.fonts.ready.then(buildParticles);
   preloadAll();
   loaderTick();
   onScroll();

@@ -50,6 +50,11 @@
       <!-- fine film grain overlaid on the video (143:416) — persistent -->
       <div class="noise" id="noise" aria-hidden="true"></div>
 
+      <!-- particle layer: THAT MAKES IT decays into drifting particles
+           as the line crosses it; they linger, then assemble into the
+           film section's first title -->
+      <canvas id="fx" class="fx" aria-hidden="true"></canvas>
+
       <!-- hero UI (Figma 143:410) — dissolves into the film section -->
       <div class="hero2" id="hero2">
         <!-- hairlines at HOME's cap/baseline (143:418/420), vertical lines
@@ -131,34 +136,6 @@
 
     </div>
   </div>
-
-  <!-- ======================= SECTION 3 (101:648): the film lifts away to
-       reveal a white canvas — floating cards ride the scroll while the
-       center text reads itself in; then the stage goes dark, the last
-       card docks into place and the point copy appears ======================= -->
-  <section class="s3" id="s3">
-    <div class="s3__pin">
-      <!-- blurred-in world: floating cards (built by main.js) + reading text -->
-      <div class="s3__world" id="s3World">
-        <div id="s3Cards"></div>
-        <p class="s3__read" id="s3Read">Whether you&rsquo;re designing, building, or protecting a home for generations, CEDUR delivers beauty and performance you can trust.</p>
-      </div>
-
-      <!-- dark backdrop for the finale (101:747) -->
-      <div class="s3__dark" id="s3Dark"></div>
-
-      <!-- the bottom-right card that docks to 295×200 552×480 (100:592) -->
-      <div class="s3card s3card--hero" id="s3Hero"><img src="assets/card3.jpg" alt="" draggable="false"></div>
-
-      <!-- finale copy (101:747): label, hairline, point title + desc -->
-      <div class="s3__final" id="s3Final">
-        <span class="s3__label">001/ about</span>
-        <span class="s3__line"></span>
-        <div class="s3__point-title"><span class="s3__dot"></span><span>Standalone class a firerated</span></div>
-        <p class="s3__point-desc">Protection where it matters most. Noncombustible and engineered to slow, resist, and even stop flames when every second counts. Because peace of mind should come standard.</p>
-      </div>
-    </div>
-  </section>
 
   <script src="js/main.js"></script>
 </body>
