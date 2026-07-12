@@ -23,6 +23,10 @@
       </div>
     </div>
 
+    <!-- ghost squares trailing the window as it chases the cursor -->
+    <div class="loader__echo loader__echo--far" id="loaderEcho2" aria-hidden="true"></div>
+    <div class="loader__echo" id="loaderEcho1" aria-hidden="true"></div>
+
     <!-- window onto the hero: starts as the 100×100 square (122:206),
          expands to full bleed; shows the same blurred/veiled scene the
          hero opens on, for a seamless hand-off -->
@@ -160,6 +164,9 @@
       </button>
     </div>
   </header>
+
+  <!-- custom cursor overlay: dot + eased ring + fading grey trail -->
+  <canvas id="cursor" class="cursor" aria-hidden="true"></canvas>
 
   <script src="js/main.js"></script>
 </body>

@@ -216,6 +216,12 @@
   let winFollowOn = !reducedMotion;
   const winPos = { x: window.innerWidth / 2, y: window.innerHeight - 50 * u() };
   const winTgt = { x: winPos.x, y: winPos.y };
+  // two echo squares trail the window at slower easings — the trace
+  // shows while it moves and settles away when it rests
+  const echo1El = document.getElementById('loaderEcho1');
+  const echo2El = document.getElementById('loaderEcho2');
+  const echo1 = { x: winPos.x, y: winPos.y };
+  const echo2 = { x: winPos.x, y: winPos.y };
 
   window.addEventListener('mousemove', e => {
     if (!winFollowOn) return;
@@ -268,6 +274,8 @@
       // reveals footage already in motion
       ambientOn = true;
       winFollowOn = false;              // freeze the drift; expand from here
+      echo1El.style.opacity = '0';      // the trace fades out with it
+      echo2El.style.opacity = '0';
       const openFrom = winClip();
       const win = loaderWindow.animate(
         [{ clipPath: openFrom }, { clipPath: 'inset(0px 0px 0px 0px)' }],
@@ -553,16 +561,24 @@
     { x: 40, y: 2861, d: 1.15 }, { x: 1128, y: 3527, d: 0.9 },
   ];
   // faint extras scattered between the columns, behind the pinned text
-  // (s = base size factor, o = opacity, d = parallax depth)
+  // (s = base size factor, o = opacity, d = parallax depth). All start
+  // below the first screen (y ≥ 780) so the text opens on a clean page;
+  // they emerge as the scroll brings them up
   const S3_GHOSTS = [
-    { x: 430, y: 190, s: 0.55, o: 0.34, d: 0.5 },
-    { x: 820, y: 520, s: 0.48, o: 0.28, d: 0.4 },
-    { x: 250, y: 1180, s: 0.62, o: 0.36, d: 0.55 },
-    { x: 905, y: 1310, s: 0.44, o: 0.26, d: 0.35 },
-    { x: 540, y: 2060, s: 0.56, o: 0.32, d: 0.5 },
-    { x: 150, y: 2620, s: 0.5, o: 0.28, d: 0.42 },
-    { x: 870, y: 3060, s: 0.6, o: 0.35, d: 0.55 },
-    { x: 470, y: 3690, s: 0.5, o: 0.3, d: 0.42 },
+    { x: 300, y: 780, s: 0.42, o: 0.3, d: 0.45 },
+    { x: 930, y: 940, s: 0.34, o: 0.26, d: 0.38 },
+    { x: 560, y: 1150, s: 0.5, o: 0.34, d: 0.52 },
+    { x: 150, y: 1420, s: 0.36, o: 0.27, d: 0.4 },
+    { x: 1010, y: 1560, s: 0.44, o: 0.3, d: 0.46 },
+    { x: 680, y: 1800, s: 0.3, o: 0.24, d: 0.34 },
+    { x: 340, y: 2020, s: 0.55, o: 0.35, d: 0.55 },
+    { x: 880, y: 2260, s: 0.38, o: 0.28, d: 0.42 },
+    { x: 520, y: 2520, s: 0.46, o: 0.31, d: 0.48 },
+    { x: 120, y: 2780, s: 0.32, o: 0.25, d: 0.36 },
+    { x: 960, y: 2940, s: 0.52, o: 0.33, d: 0.5 },
+    { x: 640, y: 3200, s: 0.36, o: 0.27, d: 0.4 },
+    { x: 260, y: 3440, s: 0.48, o: 0.31, d: 0.46 },
+    { x: 840, y: 3680, s: 0.4, o: 0.29, d: 0.44 },
   ];
   const S3_IMGS = ['assets/card1.jpg', 'assets/card2.jpg', 'assets/card3.jpg'];
   const s3GhostsBox = document.getElementById('s3Ghosts');
@@ -584,6 +600,7 @@
     el.appendChild(im);
     box.appendChild(el);
     c.el = el;
+    c.im = im;
   }
 
   if (s3) {
@@ -634,21 +651,31 @@
 
     // cards grow as they come into view (centerY is their true viewport
     // position — constant during the reveal, so the scale holds too),
-    // and the whole field floats/tilts after the cursor by depth
+    // the whole field floats/tilts after the cursor by depth, and each
+    // card unveils bottom-up with its photo settling from a slight zoom
     const px = u();
     const float = (d, sc) =>
       `translate3d(${(s3Mx * 34 * px * d).toFixed(1)}px, ${(s3My * 26 * px * d).toFixed(1)}px, 0) ` +
       `perspective(900px) rotateX(${(-s3My * 2.4 * d).toFixed(2)}deg) rotateY(${(s3Mx * 3.2 * d).toFixed(2)}deg) ` +
       `scale(${sc.toFixed(3)})`;
+    const unveil = (c, topY) => {
+      const r = smooth01(clamp01((vh * 1.05 - topY) / (vh * 0.35)));
+      c.el.style.clipPath = r < 0.995 ? `inset(${((1 - r) * 100).toFixed(2)}% 0 0 0)` : '';
+      c.im.style.transform = r < 0.995 ? `scale(${(1.3 - 0.3 * r).toFixed(3)})` : '';
+    };
     S3_CARDS.forEach(c => {
-      const centerY = sTop + c.y * px + (245 * px) / 2 + reveal - window.scrollY;
+      const half = (245 * px) / 2;
+      const centerY = sTop + c.y * px + half + reveal - window.scrollY;
       const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
       c.el.style.transform = float(c.d, 0.72 + 0.28 * Math.min(1, tIn));
+      unveil(c, centerY - half);
     });
     S3_GHOSTS.forEach(c => {
-      const centerY = sTop + c.y * px + (245 * c.s * px) / 2 + reveal - window.scrollY;
+      const half = (245 * c.s * px) / 2;
+      const centerY = sTop + c.y * px + half + reveal - window.scrollY;
       const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
       c.el.style.transform = float(c.d, c.s * (0.85 + 0.15 * Math.min(1, tIn)));
+      unveil(c, centerY - half);
     });
 
     // reading effect: starts only once the film screen is fully gone
@@ -859,11 +886,23 @@
 
     wheelGlide();
 
-    // loader window drifts after the cursor until the expansion starts
+    // loader window drifts after the cursor until the expansion starts;
+    // the echo squares chase it and glow only while there's a gap
     if (winFollowOn && body.dataset.state !== 'done-loading') {
       winPos.x += (winTgt.x - winPos.x) * 0.06;
       winPos.y += (winTgt.y - winPos.y) * 0.06;
       loaderWindow.style.clipPath = winClip();
+      echo1.x += (winPos.x - echo1.x) * 0.055;
+      echo1.y += (winPos.y - echo1.y) * 0.055;
+      echo2.x += (echo1.x - echo2.x) * 0.05;
+      echo2.y += (echo1.y - echo2.y) * 0.05;
+      const es = 50 * u();
+      echo1El.style.transform = `translate(${(echo1.x - es).toFixed(1)}px, ${(echo1.y - es).toFixed(1)}px)`;
+      echo2El.style.transform = `translate(${(echo2.x - es).toFixed(1)}px, ${(echo2.y - es).toFixed(1)}px)`;
+      const d1 = Math.hypot(winPos.x - echo1.x, winPos.y - echo1.y);
+      const d2 = Math.hypot(echo1.x - echo2.x, echo1.y - echo2.y);
+      echo1El.style.opacity = Math.min(0.55, d1 / 70).toFixed(2);
+      echo2El.style.opacity = Math.min(0.35, d2 / 70).toFixed(2);
     }
 
     // smooth-scroll inertia: everything glides toward the real position
@@ -937,7 +976,80 @@
       drawFrame(shownFrame);
       lastDrawn = key;
     }
+
+    drawCursor();
+
     requestAnimationFrame(rafLoop);
+  }
+
+  // ------------------------------------------------------------------
+  // custom cursor: a dot on the pointer, a thin stroke-only ring easing
+  // after it, and a grey trail (white at low alpha) snaking behind —
+  // the whole thing fades away while the page scrolls and returns when
+  // the scroll settles. Difference blend keeps it visible on white.
+  // ------------------------------------------------------------------
+  const curCv = document.getElementById('cursor');
+  const curCtx = curCv ? curCv.getContext('2d') : null;
+  const CUR_TRAIL_N = 24;
+  const curTrail = [];
+  let curOn = false;
+  let curX = -100, curY = -100, ringX = -100, ringY = -100;
+  let curFade = 1;
+  let curLastScroll = 0;
+
+  function sizeCursor() {
+    if (!curCv) return;
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    curCv.width = Math.round(window.innerWidth * d);
+    curCv.height = Math.round(window.innerHeight * d);
+    curCtx.setTransform(d, 0, 0, d, 0, 0);
+  }
+
+  window.addEventListener('mousemove', e => {
+    curX = e.clientX;
+    curY = e.clientY;
+    if (!curOn && !reducedMotion && curCtx) {
+      curOn = true;
+      document.documentElement.classList.add('has-cursor');
+      ringX = curX;
+      ringY = curY;
+    }
+  }, { passive: true });
+
+  function drawCursor() {
+    if (!curCtx || !curOn) return;
+    // scrolling fades the cursor out; stillness brings it back
+    const sp = Math.abs(window.scrollY - curLastScroll);
+    curLastScroll = window.scrollY;
+    curFade += ((sp > 3 ? 0 : 1) - curFade) * (sp > 3 ? 0.22 : 0.06);
+    ringX += (curX - ringX) * 0.16;
+    ringY += (curY - ringY) * 0.16;
+    curTrail.push({ x: ringX, y: ringY });
+    if (curTrail.length > CUR_TRAIL_N) curTrail.shift();
+    curCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    if (curFade < 0.02) return;
+    // trail: grey beads shrinking toward the tail
+    curCtx.fillStyle = '#fff';
+    for (let i = 0; i < curTrail.length; i++) {
+      const k = i / CUR_TRAIL_N;
+      curCtx.globalAlpha = k * k * 0.14 * curFade;
+      curCtx.beginPath();
+      curCtx.arc(curTrail[i].x, curTrail[i].y, 1 + k * 5.5, 0, 6.2832);
+      curCtx.fill();
+    }
+    // thin stroke-only ellipse riding behind the pointer
+    curCtx.globalAlpha = 0.85 * curFade;
+    curCtx.strokeStyle = '#fff';
+    curCtx.lineWidth = 1;
+    curCtx.beginPath();
+    curCtx.ellipse(ringX, ringY, 17, 17, 0, 0, 6.2832);
+    curCtx.stroke();
+    // the dot marks the true pointer position
+    curCtx.globalAlpha = 0.9 * curFade;
+    curCtx.beginPath();
+    curCtx.arc(curX, curY, 2.5, 0, 6.2832);
+    curCtx.fill();
+    curCtx.globalAlpha = 1;
   }
 
   // ------------------------------------------------------------------
@@ -948,12 +1060,14 @@
     drawFrame(shownFrame);
     onScroll();
     applyScroll(smoothP);
+    sizeCursor();
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onResize);
 
   sizeCanvas();
+  sizeCursor();
   window.scrollTo(0, 0);
   document.fonts.ready.then(() => { buildParticles(); measureLineWidths(); });
   preloadAll();

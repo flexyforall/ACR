@@ -218,6 +218,24 @@ body[data-state="done-loading"] .loader { display: none; }
 /* window onto the hero frame: 100×100 at bottom-center → full-bleed;
    the scene inside carries the hero's blur + veil so the hand-off is
    seamless */
+/* ghost squares trailing the cursor-chasing window — visible only
+   while the window is in motion (opacity follows the gap) */
+.loader__echo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(100 * var(--u));
+  height: calc(100 * var(--u));
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: opacity 0.2s linear;
+}
+.loader__echo--far { border-color: rgba(255, 255, 255, 0.2); }
+
 .loader__window {
   position: absolute;
   inset: 0;
@@ -855,4 +873,19 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform-origin: 50% 50%;
 }
+
+/* ---------- custom cursor: dot + thin ring + grey trail, drawn on a
+   fixed canvas; difference blend keeps it visible on the white
+   section. The native cursor hides once the pointer is detected ---- */
+.cursor {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 90;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+html.has-cursor, html.has-cursor * { cursor: none !important; }
