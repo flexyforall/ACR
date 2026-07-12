@@ -523,6 +523,23 @@
   let s3Smooth = 0;
   let s3Words = [];
   let s3LitCount = -1;
+  let s3Lines = [];      // words grouped by wrapped line, for the sweep
+  let s3FiredLine = -1;  // highest line that has played its highlight
+
+  // group the reading words into visual lines by their wrapped top edge,
+  // so the orange highlight can sweep horizontally across each line
+  // (terminal-industries style) instead of cascading word by word
+  function s3MeasureLines() {
+    if (!s3Words.length) return;
+    s3Lines = [];
+    let top = null, cur = null;
+    s3Words.forEach(w => {
+      const t = Math.round(w.offsetTop);
+      if (t !== top) { top = t; cur = []; s3Lines.push(cur); }
+      w._line = s3Lines.length - 1;
+      cur.push(w);
+    });
+  }
 
   // cursor field for the floating cards: normalized −1…1 from screen
   // center, eased so the drift trails a little behind the pointer
@@ -677,10 +694,19 @@
     const qq = range(q, revealFrac, 1);
     const lit = Math.round(range(qq, 0.02, 0.8) * s3Words.length);
     if (lit !== s3LitCount) {
-      // words newly crossing into the lit range get the orange wave as
-      // they light, so the highlight travels with the reading
-      if (lit > s3LitCount && s3LitCount >= 0) {
-        gwaveEls(s3Words.slice(s3LitCount, lit), 0, 40);
+      // as reading reaches a new line, the whole line shimmers orange
+      // left→right (a horizontal sweep) rather than a per-word cascade
+      if (lit > s3LitCount) {
+        if (!s3Lines.length) s3MeasureLines();
+        for (let i = Math.max(0, s3LitCount); i < lit; i++) {
+          const ln = s3Words[i] && s3Words[i]._line;
+          if (ln != null && ln > s3FiredLine) {
+            s3FiredLine = ln;
+            gwaveEls(s3Lines[ln], 0, 45); // left→right across the line
+          }
+        }
+      } else if (lit <= 0) {
+        s3FiredLine = -1; // allow the sweep to replay on re-entry
       }
       s3Words.forEach((w, i) => w.classList.toggle('lit', i < lit));
       s3LitCount = lit;
@@ -983,6 +1009,7 @@
     drawFrame(shownFrame);
     onScroll();
     applyScroll(smoothP);
+    s3MeasureLines(); // line grouping shifts when the layout reflows
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -990,7 +1017,7 @@
 
   sizeCanvas();
   window.scrollTo(0, 0);
-  document.fonts.ready.then(() => { buildParticles(); measureLineWidths(); });
+  document.fonts.ready.then(() => { buildParticles(); measureLineWidths(); s3MeasureLines(); });
   preloadAll();
   loaderTick();
   onScroll();

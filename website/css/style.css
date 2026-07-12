@@ -538,11 +538,12 @@ body[data-revealed] .nav { opacity: 1; }
   line-height: 0.9;
   letter-spacing: 0.01em;
   text-transform: uppercase;
+  /* fill + label roll share one easing so they start together */
   transition:
-    background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
-    color 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    background-color 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    color 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.nav__contact .dot { transition: background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
+.nav__contact .dot { transition: background-color 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .nav__contact:hover {
   background: #fff;
   color: #000;
@@ -663,13 +664,13 @@ body[data-revealed] .nav { opacity: 1; }
   pointer-events: auto;
   transition: color 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-/* orange fill panel, clipped by the button's chamfer, growing bottom→top */
+/* black fill panel, clipped by the button's chamfer, growing bottom→top */
 .btn::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(#f2703a, #e8622c);
+  background: #0a0a0a;
   transform: scaleY(0);
   transform-origin: 50% 100%;
   transition: transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -763,7 +764,7 @@ body[data-revealed] .nav { opacity: 1; }
 /* gradient wave: an orange highlight sweeps once through text as it
    appears (terminal-industries style) */
 .gwave {
-  background-image: linear-gradient(100deg,
+  background-image: linear-gradient(90deg,
     var(--gw-base, #fff) 42%, #e8622c 50%, var(--gw-base, #fff) 58%);
   background-size: 250% 100%;
   background-repeat: no-repeat;
