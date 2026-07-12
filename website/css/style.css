@@ -311,8 +311,11 @@ body[data-state="done-loading"] .loader { display: none; }
   transform-origin: left;
   transition: transform 1.4s var(--ease-out) 1s;
 }
-.hline--a { top: calc(50% + 44 * var(--u)); }
-.hline--b { top: calc(50% + 99 * var(--u)); }
+/* --rise/--sink are scroll-driven (main.js): on scroll the top line
+   travels up wiping the title as it crosses it; the bottom line sinks
+   48u to y547 where it becomes the film section's progress track */
+.hline--a { top: calc(50% + (44 - var(--rise, 0)) * var(--u)); }
+.hline--b { top: calc(50% + (99 + var(--sink, 0)) * var(--u)); }
 [data-revealed] .hline { transform: scaleX(1); }
 
 /* full-height vertical hairlines bracketing the title (146:488/489) */
@@ -334,7 +337,8 @@ body[data-state="done-loading"] .loader { display: none; }
 .cross {
   position: absolute;
   left: calc(var(--cx) * var(--u));
-  top: calc(50% + var(--cy) * var(--u));
+  /* --dy follows the moving line each cross sits on (scroll-driven) */
+  top: calc(50% + (var(--cy) + var(--dy, 0)) * var(--u));
   width: calc(5 * var(--u));
   height: calc(5 * var(--u));
   transform: translate(-50%, -50%);
@@ -350,6 +354,13 @@ body[data-state="done-loading"] .loader { display: none; }
 .cross::before { left: 50%; top: 0; width: 1px; height: 100%; transform: translateX(-50%); }
 .cross::after { top: 50%; left: 0; width: 100%; height: 1px; transform: translateY(-50%); }
 [data-revealed] .cross { opacity: 1; }
+
+/* while scrolling, these are driven frame-by-frame from main.js — their
+   reveal transitions must not lag the inline values */
+[data-scrolling] .explore,
+[data-scrolling] .cross,
+[data-scrolling] .hero-para,
+[data-scrolling] .vline { transition: none; }
 
 /* /welcome · keep scrolling to explore · /welcome (143:481). Anchored to
    the same viewport center as the slogan (Figma y196 = center − 204). */
@@ -466,8 +477,9 @@ body[data-state="done-loading"] .loader { display: none; }
   font-weight: 400;
   font-size: calc(10 * var(--u));
   letter-spacing: 0.01em;
-  line-height: normal;
+  line-height: 1.4;
   text-transform: uppercase;
+  text-indent: calc(30 * var(--u)); /* first-line gap (150:750) */
   color: var(--white-70);
   opacity: 0;
   transform: translateY(14px);
@@ -499,7 +511,8 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   align-items: center;
   gap: calc(12 * var(--u));
 }
-/* contact: frosted 40-tall button, 24px side padding (146:487) */
+/* contact: frosted 40-tall button (146:487); hover fills white with a
+   rolling label */
 .nav__contact {
   display: flex;
   align-items: center;
@@ -515,7 +528,16 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   line-height: 0.9;
   letter-spacing: 0.01em;
   text-transform: uppercase;
+  transition:
+    background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    color 0.45s cubic-bezier(0.65, 0, 0.35, 1);
 }
+.nav__contact .dot { transition: background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
+.nav__contact:hover {
+  background: #fff;
+  color: #000;
+}
+.nav__contact:hover .dot { background: #000; }
 /* burger matches the logo height, lines centered, square corners (143:439) */
 .nav__burger {
   width: calc(40 * var(--u));
@@ -559,12 +581,16 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 }
 .benefits-band.show { opacity: 1; }
 
-/* heading bottom edge sits at 435u on the 800-board → bottom 365u */
+/* text block mid-left (150:867, y411 = center + 11): the description
+   sits 24u under the title, right-aligned to the title's right edge */
 .benefits-head {
   position: absolute;
   left: calc(40 * var(--u));
-  bottom: calc(365 * var(--u));
-  width: calc(351 * var(--u));
+  top: calc(50% + 11 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(24 * var(--u));
   z-index: 3;
   pointer-events: none;
   opacity: 0;
@@ -579,6 +605,26 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   line-height: 1.1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* progress line (150:862, y547 = center + 147): the sunken hero line is
+   the dim track; this bright bar grows across the three steps */
+.progress {
+  position: absolute;
+  left: 0;
+  top: calc(50% + 147 * var(--u));
+  width: 100%;
+  height: 1px;
+  z-index: 3;
+  pointer-events: none;
+}
+.progress__bar {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--white);
+  transition: width 0.9s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 
@@ -596,7 +642,9 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 }
 [data-revealed] .cta--right .btn { transform: translateY(0); }
 
-/* ---------- request-sample button: solid white, black text (143:468) ---------- */
+/* ---------- request-sample button: solid white, black text (143:468).
+   Hover: the fill drains away leaving a white-16 stroke, and the
+   label rolls over itself (fill + text-spin treatment) ---------- */
 .btn {
   display: flex;
   align-items: center;
@@ -606,11 +654,38 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   padding-right: calc(5 * var(--u));
   background: #fff;
   color: #000;
+  border: 1px solid #fff;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   pointer-events: auto;
+  transition:
+    background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    border-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    color 0.45s cubic-bezier(0.65, 0, 0.35, 1);
 }
-.btn .dot { background: #000; }
+.btn .dot { background: #000; transition: background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
+.btn:hover {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--white);
+}
+.btn:hover .dot { background: var(--white); }
+
+/* rolling label: two stacked copies inside a one-line mask; hovering
+   the parent rolls the stack up one line (the "text spins" treatment) */
+.roll {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.1em;
+}
+.roll__stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.btn:hover .roll__stack,
+.nav__contact:hover .roll__stack { transform: translateY(-50%); }
 .btn__label {
   display: flex;
   align-items: center;
@@ -633,11 +708,8 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   object-fit: cover;
 }
 
-/* ---------- benefits paragraph (130:146) ---------- */
+/* ---------- benefits paragraph: under the title (150:866) ---------- */
 .benefits__desc {
-  position: absolute;
-  right: calc(40 * var(--u));
-  bottom: calc(40 * var(--u));
   width: calc(238 * var(--u));
   font-family: var(--font-text);
   font-weight: 400;
@@ -645,7 +717,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   line-height: normal;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  z-index: 3;
+  text-indent: calc(30 * var(--u)); /* first-line gap, per Figma */
   pointer-events: none;
   opacity: 0;
   filter: blur(6px);

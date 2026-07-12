@@ -48,17 +48,17 @@
     {
       title: 'Made to weather the storm',
       desc: 'Exceptional impact resistance provides dependable protection against hail and severe weather, season after season.',
-      width: 351,
+      bar: 80 / 1440,
     },
     {
       title: 'Standalone Class A Fire Rated',
       desc: 'Engineered for elevated fire protection, helping safeguard the home and everything beneath it when it matters most.',
-      width: 351,
+      bar: 811 / 1440,
     },
     {
       title: 'Strength, thoughtfully engineered',
       desc: 'CEDUR delivers the depth and dimension of natural cedar in a lighter roofing system designed for easier installation and lasting structural confidence.',
-      width: 420,
+      bar: 1314 / 1440,
     },
   ];
   const STEP_BOUNDS = [0.38, 0.7]; // in scrub progress
@@ -80,8 +80,18 @@
   const benefitTitle = document.getElementById('benefitTitle');
   const benefitsBand = document.getElementById('benefitsBand');
   const benefitDesc = document.getElementById('benefitDesc');
+  const progressBar = document.getElementById('progressBar');
   const canvas = document.getElementById('scene');
   const ctx = canvas.getContext('2d');
+
+  // hero pieces choreographed individually during the scroll transition
+  const hlineA = document.querySelector('.hline--a');
+  const hlineB = document.querySelector('.hline--b');
+  const vlineEls = Array.from(document.querySelectorAll('.vline'));
+  const crossEls = Array.from(document.querySelectorAll('.cross'));
+  const exploreEl = document.getElementById('explore');
+  const heroPara = document.querySelector('.hero-para');
+  const slEls = Array.from(document.querySelectorAll('.slogan .sl'));
 
   // lit in reading order: the roof → that makes it (center) → home (right)
   const seqEls = [
@@ -262,6 +272,7 @@
     if (reducedMotion || !titleSquares.length) return;
     let i = 0;
     (function cycle() {
+      if (rawP > 0.02) { setTimeout(cycle, 900); return; } // wait out the film
       const el = titleSquares[i];
       el.classList.add('on');
       setTimeout(() => {
@@ -310,6 +321,9 @@
     benefitState = next;
     const token = ++swapLock;
 
+    // the bright bar grows along the sunken hero line (80/811/1314 of 1440)
+    progressBar.style.width = next === 'hero' ? '0' : `${(STEPS[next].bar * 100).toFixed(2)}%`;
+
     if (next === 'hero') {
       benefitsHead.classList.remove('show');
       benefitsBand.classList.remove('show');
@@ -348,24 +362,59 @@
     rawP = total > 0 ? clamp01(window.scrollY / total) : 0;
   }
 
+  // hero geometry on the 800-tall board (all relative to center 400):
+  // title line boxes L1 292–364, L2 364–436, HOME 436–508;
+  // the top hairline starts at HOME's cap (444), the bottom at 499
+  const smooth01 = q => q * q * (3 - 2 * q);
+
   // all scroll-driven effects run off the smoothed progress
   function applyScroll(p) {
-    const vh = window.innerHeight;
-
-    // scrub position 0..1 across the film (starts after the unblur)
+    // scrub position 0..1 across the film (starts after the hero leaves)
     scrubPos = range(p, SCRUB_IN, SCRUB_OUT);
 
-    // ---- 1. the hero copy dissolves ----
-    const hOut = range(p, HERO_OUT[0], HERO_OUT[1]);
-    hero2.style.opacity = (1 - hOut).toFixed(3);
-    hero2.style.transform = `translateY(${(-24 * hOut).toFixed(1)}px)`;
-    hero2.style.visibility = hOut >= 1 ? 'hidden' : '';
+    const t = range(p, HERO_OUT[0], HERO_OUT[1]);
+    body.toggleAttribute('data-scrolling', p > 0.001);
 
-    // ---- 2. the top gradient fades; the grain overlay stays ----
+    // ---- 1. the top hairline travels up, wiping the title as it goes:
+    // each line it crosses disappears bottom-to-top under it, while
+    // HOME dissolves top-to-bottom on its own ----
+    const lineY = 444 - 184 * t; // 444 → 260 (past the title's top)
+    hlineA.style.setProperty('--rise', (444 - lineY).toFixed(2));
+    hlineA.style.opacity = String(Math.min(1, Math.max(0, (lineY - 270) / 30)));
+
+    const cut2 = clamp01((436 - lineY) / 72); // THAT MAKES IT
+    const cut1 = clamp01((364 - lineY) / 72); // THE ROOF
+    slEls[1].style.clipPath = cut2 > 0 ? `inset(0 0 ${(cut2 * 100).toFixed(2)}% 0)` : '';
+    slEls[0].style.clipPath = cut1 > 0 ? `inset(0 0 ${(cut1 * 100).toFixed(2)}% 0)` : '';
+    const homeCut = clamp01((t - 0.05) / 0.85);
+    slEls[2].style.clipPath = homeCut > 0 ? `inset(${(homeCut * 100).toFixed(2)}% 0 0 0)` : '';
+
+    // ---- 2. the bottom hairline sinks 48u to y547, where it stays as
+    // the film section's progress track ----
+    const sink = 48 * smooth01(range(p, 0.02, 0.14));
+    hlineB.style.setProperty('--sink', sink.toFixed(2));
+
+    // ---- 3. plus markers ride their lines, spinning shut ----
+    crossEls.forEach((el, i) => {
+      const top = i < 2;
+      el.style.setProperty('--dy', top ? (lineY - 444).toFixed(2) : sink.toFixed(2));
+      el.style.transform = `translate(-50%, -50%) rotate(${(90 * t).toFixed(1)}deg) scale(${(1 - 0.5 * t).toFixed(3)})`;
+      if (t > 0) el.style.opacity = (1 - t).toFixed(3);
+    });
+
+    // ---- 4. the rest of the hero copy dissolves ----
+    const fade = (1 - t).toFixed(3);
+    exploreEl.style.opacity = t > 0 ? fade : '';
+    heroPara.style.opacity = t > 0 ? fade : '';
+    vlineEls.forEach(el => { el.style.opacity = t > 0 ? fade : ''; });
+    cta.style.opacity = fade;
+    cta.style.visibility = t >= 1 ? 'hidden' : '';
+
+    // ---- 5. the top gradient fades; the grain overlay stays ----
     const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
     veil.style.opacity = (VEIL_MAX * (1 - vOut)).toFixed(3);
 
-    // ---- benefits copy ----
+    // ---- benefits copy + progress bar ----
     const next = p < BENEFITS_AT ? 'hero'
       : scrubPos < STEP_BOUNDS[0] ? 0
       : scrubPos < STEP_BOUNDS[1] ? 1 : 2;

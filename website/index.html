@@ -81,13 +81,13 @@
         <!-- bottom-left paragraph (143:475) -->
         <p class="hero-para">CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof.</p>
 
-        <!-- REQUEST SAMPLE, bottom right (130:661) -->
+        <!-- REQUEST SAMPLE, bottom right (143:468) -->
         <div class="cta cta--right" id="cta">
           <div class="cta__mask">
             <a class="btn" href="#request-sample">
               <span class="btn__label">
                 <span class="dot dot--xs"></span>
-                <span>REQUEST SAMPLE</span>
+                <span class="roll"><span class="roll__stack"><span>REQUEST SAMPLE</span><span aria-hidden="true">REQUEST SAMPLE</span></span></span>
               </span>
               <span class="btn__img"><img src="assets/thumb.jpg" alt="" /></span>
             </a>
@@ -103,7 +103,7 @@
         <div class="nav__right">
           <a class="nav__contact" href="#contact">
             <span class="dot dot--xs"></span>
-            <span class="nav__contact-label">contact</span>
+            <span class="roll"><span class="roll__stack"><span class="nav__contact-label">contact</span><span aria-hidden="true">contact</span></span></span>
           </a>
           <button class="nav__burger" aria-label="Menu">
             <span class="nav__burger-lines">
@@ -117,13 +117,18 @@
       <!-- bottom fade band for the film section (130:771) -->
       <div class="benefits-band" id="benefitsBand"></div>
 
-      <!-- benefits heading, mid-left (130:769) -->
+      <!-- benefits text block, mid-left (150:867): the description sits
+           under the title, right-aligned to the title's right edge -->
       <div class="benefits-head" id="benefitsHead">
         <h2 class="benefits-head__title" id="benefitTitle"></h2>
+        <p class="benefits__desc" id="benefitDesc" aria-live="polite"></p>
       </div>
 
-      <!-- benefits paragraph, bottom right (130:714) -->
-      <p class="benefits__desc" id="benefitDesc" aria-live="polite"></p>
+      <!-- progress line (150:862): the hero's bottom hairline sinks into
+           this y and serves as the track; the bright bar grows per step -->
+      <div class="progress" id="progress">
+        <span class="progress__bar" id="progressBar"></span>
+      </div>
 
     </div>
   </div>
