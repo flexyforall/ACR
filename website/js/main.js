@@ -73,6 +73,7 @@
   // ------------------------------------------------------------------
   const body = document.body;
   const loader = document.getElementById('loader');
+  const navEl = document.getElementById('nav');
   const loaderBand = document.getElementById('loaderBand');
   const loaderWindow = document.getElementById('loaderWindow');
   const stage = document.getElementById('stage');
@@ -431,7 +432,6 @@
   // ------------------------------------------------------------------
   const SCRAMBLE_CHARS = 'ABCDEFGHIKLMNORSTUVXZ</>[]#*+';
   const CAPTURE_OFFSETS = [-144, -72, 0];
-  let scrambleBusy = false;
   let captured = 2; // the pair rests on HOME
   // per-line text widths (board units) so the vertical pair can hug the
   // captured line horizontally; measured once the fonts are ready
@@ -453,18 +453,29 @@
     vxRT = 720 + half;
   }
 
+  // one scramble state per line: capturing any line always plays its
+  // animation (HOME included — it just has no imagery to bloom), lines
+  // scramble independently, and re-capturing a line mid-run restarts it
+  // cleanly from the stored original text
+  const scrambleState = [null, null, null];
+
   function scrambleLine(idx) {
-    if (scrambleBusy || reducedMotion) return;
-    scrambleBusy = true;
-    const nodes = [];
-    slEls[idx].childNodes.forEach(n => {
-      if (n.nodeType === 3 && n.textContent.trim()) nodes.push({ n, orig: n.textContent });
-    });
+    if (reducedMotion) return;
+    let st = scrambleState[idx];
+    if (!st) {
+      const nodes = [];
+      slEls[idx].childNodes.forEach(n => {
+        if (n.nodeType === 3 && n.textContent.trim()) nodes.push({ n, orig: n.textContent });
+      });
+      st = scrambleState[idx] = { nodes, token: 0 };
+    }
+    const token = ++st.token;
     const t0 = performance.now();
     const DUR = 620;
     (function tick() {
+      if (st.token !== token) return; // superseded by a newer run
       const k = (performance.now() - t0) / DUR;
-      nodes.forEach(({ n, orig }) => {
+      st.nodes.forEach(({ n, orig }) => {
         let out = '';
         for (let i = 0; i < orig.length; i++) {
           const ch = orig[i];
@@ -477,8 +488,7 @@
       if (k < 1) {
         requestAnimationFrame(tick);
       } else {
-        nodes.forEach(({ n, orig }) => { n.textContent = orig; });
-        scrambleBusy = false;
+        st.nodes.forEach(({ n, orig }) => { n.textContent = orig; });
       }
     })();
   }
@@ -841,6 +851,13 @@
     vlineEls[0].style.setProperty('--vx', vxL.toFixed(2));
     vlineEls[1].style.setProperty('--vx', vxR.toFixed(2));
     crossEls.forEach((el, i) => el.style.setProperty('--cx', (i % 2 === 0 ? vxL : vxR).toFixed(2)));
+
+    // the header inverts only once the white section slides under it —
+    // the dark hero and film sections show it in its true colors
+    if (navEl && s3) {
+      navEl.classList.toggle('nav--blend',
+        window.scrollY >= s3.offsetTop + window.innerHeight - 110 * u());
+    }
 
     // section 3 runs on its own smoothed progress
     s3Smooth += (s3Raw - s3Smooth) * (reducedMotion ? 1 : 0.11);

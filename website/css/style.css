@@ -492,7 +492,6 @@ body[data-state="done-loading"] .loader { display: none; }
 /* ---------- nav (122:432) ---------- */
 .nav {
   position: fixed;
-  mix-blend-mode: difference;
   top: calc(40 * var(--u));
   left: calc(40 * var(--u));
   right: calc(40 * var(--u));
@@ -505,6 +504,9 @@ body[data-state="done-loading"] .loader { display: none; }
 }
 body[data-state="revealed"] .nav,
 body[data-state="done-loading"] .nav { opacity: 1; }
+/* over the white third section the header inverts for legibility; the
+   dark hero/film sections show it as-is */
+.nav--blend { mix-blend-mode: difference; }
 .nav__logo img {
   width: calc(40 * var(--u));
   height: calc(32 * var(--u));
