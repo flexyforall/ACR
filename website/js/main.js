@@ -28,7 +28,6 @@
   const HERO_OUT = [0.0, 0.10];   // hero copy dissolves
   const VEIL_OUT = [0.06, 0.16];  // top gradient fades
   const BENEFITS_AT = 0.16;       // benefits copy takes over from here
-  const VEIL_MAX = 1;             // hero veil opacity multiplier
 
   // ambient: at rest the film simply plays in the background; reaching the
   // end it rewinds quickly and plays again. The moment the user scrolls it
@@ -78,7 +77,6 @@
   const loaderWindow = document.getElementById('loaderWindow');
   const stage = document.getElementById('stage');
   const hero2 = document.getElementById('hero2');
-  const veil = document.getElementById('veil');
   const cta = document.getElementById('cta');
   const benefitsHead = document.getElementById('benefitsHead');
   const benefitTitle = document.getElementById('benefitTitle');
@@ -358,8 +356,8 @@
     if (!fxCtx || reducedMotion) return;
     const fam = '400 80px "Neue Montreal", "Inter", Arial, sans-serif';
     const famSm = '400 22px "Neue Montreal", "Inter", Arial, sans-serif';
-    // THAT MAKES IT: line box 364–436 on the board, baseline ≈ 430
-    const src = fxSample('That makes it', fam, '-2.4px', 'center', 720, 430, FX_N);
+    // THAT MAKES IT: line box 354–426 on the board, baseline ≈ 420
+    const src = fxSample('That makes it', fam, '-2.4px', 'center', 720, 420, FX_N);
     // Made to weather the storm: title box top 411, baseline ≈ 431
     const tgt = fxSample('Made to weather the storm', famSm, '0.22px', 'left', 40, 431, src.length);
     if (!src.length || !tgt.length) return;
@@ -372,14 +370,14 @@
       tx: tgt[Math.min(tgt.length - 1, Math.floor(i * tgt.length / src.length))][0],
       ty: tgt[Math.min(tgt.length - 1, Math.floor(i * tgt.length / src.length))][1],
       // the rising line (y = 444 − 184t across HERO_OUT) cuts this pixel at:
-      spawnP: HERO_OUT[0] + (HERO_OUT[1] - HERO_OUT[0]) * clamp01((444 - s[1]) / 184),
-      a1: 0.55 + Math.random() * 0.45,
+      spawnP: HERO_OUT[0] + (HERO_OUT[1] - HERO_OUT[0]) * clamp01((436 - s[1]) / 184),
+      a1: 0.22 + Math.random() * 0.4,
       wob: 2 + Math.random() * 3,        // wobble amplitude (board units)
       f1: 0.6 + Math.random() * 1.1,     // wobble frequency
       ph: Math.random() * Math.PI * 2,   // wobble phase
       dx: (Math.random() - 0.5) * 520,   // drift per unit of scroll progress
       dy: -120 - Math.random() * 480,
-      sz: 1.1 + Math.random() * 1.7,
+      sz: 0.45 + Math.random() * 0.75, // dot radius, board units
     }));
   }
 
@@ -412,11 +410,141 @@
       by += (q.ty - by) * form;
       const X = bx * px * sc;
       const Y = (vh / 2 + (by - 400) * px) * sc;
-      const S = q.sz * px * sc;
+      const R = Math.max(0.5, q.sz * px * sc);
       fxCtx.globalAlpha = alpha;
-      fxCtx.fillRect(X, Y, S, S);
+      fxCtx.beginPath();
+      fxCtx.arc(X, Y, R, 0, 6.2832);
+      fxCtx.fill();
     }
     fxCtx.globalAlpha = 1;
+  }
+
+  // ------------------------------------------------------------------
+  // cursor play (hero at rest): the hairlines and their plus markers
+  // drift up or down after the cursor, and big cursor sweeps make the
+  // title re-arrange itself through a code-style character scramble
+  // ------------------------------------------------------------------
+  const SCRAMBLE_CHARS = 'ABCDEFGHIKLMNORSTUVXZ</>[]#*+';
+  let scrambleBusy = false;
+  let lastScrambleAt = 0;
+  let mouseAcc = 0;
+  let lastMouseY = null;
+
+  function scrambleTitle() {
+    if (scrambleBusy || reducedMotion) return;
+    scrambleBusy = true;
+    // scramble only the text nodes — the product-square spans stay put
+    const nodes = [];
+    slEls.forEach(sl => sl.childNodes.forEach(n => {
+      if (n.nodeType === 3 && n.textContent.trim()) nodes.push({ n, orig: n.textContent });
+    }));
+    const t0 = performance.now();
+    const DUR = 620;
+    (function tick() {
+      const k = (performance.now() - t0) / DUR;
+      nodes.forEach(({ n, orig }) => {
+        let out = '';
+        for (let i = 0; i < orig.length; i++) {
+          const ch = orig[i];
+          // characters resolve left to right; spaces never scramble
+          out += (ch === ' ' || k >= (i + 1) / (orig.length + 1))
+            ? ch
+            : SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+        }
+        n.textContent = out;
+      });
+      if (k < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        nodes.forEach(({ n, orig }) => { n.textContent = orig; });
+        scrambleBusy = false;
+      }
+    })();
+  }
+
+  window.addEventListener('mousemove', e => {
+    if (reducedMotion || !body.hasAttribute('data-revealed')) return;
+    const vh = window.innerHeight;
+    // lines lean up to ±26u toward the cursor's half of the screen
+    mouseYT = Math.max(-1, Math.min(1, (e.clientY / vh - 0.5) * 2)) * 26;
+    if (lastMouseY !== null) mouseAcc += Math.abs(e.clientY - lastMouseY);
+    lastMouseY = e.clientY;
+    const now = performance.now();
+    if (mouseAcc > 150 && now - lastScrambleAt > 1400 && rawP < 0.02) {
+      mouseAcc = 0;
+      lastScrambleAt = now;
+      scrambleTitle();
+    }
+  }, { passive: true });
+
+  // ------------------------------------------------------------------
+  // SECTION 3 (157:1192 frame 3): the film screen lifts away (curtain
+  // via the negative margin under the higher-z stage) onto a white
+  // canvas. The 56px text is pinned mid-screen and reads itself in
+  // word by word while 272×245 cards scroll past in two columns.
+  // ------------------------------------------------------------------
+  const s3 = document.getElementById('s3');
+  const s3Read = document.getElementById('s3Read');
+  const s3CardsBox = document.getElementById('s3Cards');
+  let s3Raw = 0;
+  let s3Smooth = 0;
+  let s3Words = [];
+  let s3LitCount = -1;
+
+  // (x, y) card anchors on the 4939-tall canvas — two loose columns
+  const S3_CARDS = [
+    { x: 40, y: -41 }, { x: 1128, y: 625 },
+    { x: 40, y: 870 }, { x: 1128, y: 1536 },
+    { x: 40, y: 1781 }, { x: 1128, y: 2447 },
+    { x: 40, y: 2861 }, { x: 1128, y: 3527 },
+  ];
+  const S3_IMGS = ['assets/card1.jpg', 'assets/card2.jpg', 'assets/card3.jpg'];
+
+  if (s3) {
+    S3_CARDS.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 's3card';
+      el.style.setProperty('--x', c.x);
+      el.style.setProperty('--y', c.y);
+      const im = document.createElement('img');
+      im.src = S3_IMGS[i % S3_IMGS.length];
+      im.alt = '';
+      im.draggable = false;
+      el.appendChild(im);
+      s3CardsBox.appendChild(el);
+    });
+    const words = s3Read.textContent.trim().split(/\s+/);
+    s3Read.textContent = '';
+    words.forEach((word, i) => {
+      const sp = document.createElement('span');
+      sp.className = 's3w';
+      sp.textContent = word;
+      s3Read.appendChild(sp);
+      if (i < words.length - 1) s3Read.appendChild(document.createTextNode(' '));
+      s3Words.push(sp);
+    });
+  }
+
+  function applyS3(q) {
+    if (!s3) return;
+    const vh = window.innerHeight;
+    const total = s3.offsetHeight - vh;
+    const revealFrac = total > 0 ? Math.min(0.9, vh / total) : 0.2;
+    const v = clamp01(q / revealFrac);   // curtain-reveal progress
+    const qq = range(q, revealFrac, 1);  // in-section progress
+
+    // entrance: text + cards arrive out of a blur while the film lifts
+    const bl = 16 * (1 - smooth01(clamp01((v - 0.25) / 0.75)));
+    const blCss = bl > 0.15 ? `blur(${(bl * u()).toFixed(1)}px)` : '';
+    s3Read.style.filter = blCss;
+    s3CardsBox.style.filter = blCss;
+
+    // reading effect: words light from 20% black to black as you scroll
+    const lit = Math.round(range(qq, 0.04, 0.82) * s3Words.length);
+    if (lit !== s3LitCount) {
+      s3Words.forEach((w, i) => w.classList.toggle('lit', i < lit));
+      s3LitCount = lit;
+    }
   }
 
   // ------------------------------------------------------------------
@@ -495,16 +623,22 @@
   let ambientOn = false; // playback starts as the loader window opens
   let heroVOut = 0;      // veil-out progress, shared with the blur lerp
   let blurNow = 0;       // current hero blur, eased toward its target
+  let mouseYT = 0;       // cursor-follow target for the hairlines (u units)
+  let mouseShift = 0;    // eased cursor-follow offset
 
   function onScroll() {
     const vh = window.innerHeight;
     const total = stage.offsetHeight - vh;
     rawP = total > 0 ? clamp01(window.scrollY / total) : 0;
+    if (s3) {
+      const s3Total = s3.offsetHeight - vh;
+      s3Raw = s3Total > 0 ? clamp01((window.scrollY - s3.offsetTop) / s3Total) : 0;
+    }
   }
 
   // hero geometry on the 800-tall board (all relative to center 400):
-  // title line boxes L1 292–364, L2 364–436, HOME 436–508;
-  // the top hairline starts at HOME's cap (444), the bottom at 499
+  // title line boxes L1 282–354, L2 354–426, HOME 426–498;
+  // the top hairline starts at HOME's cap (436), the bottom at 492
   const smooth01 = q => q * q * (3 - 2 * q);
 
   // all scroll-driven effects run off the smoothed progress
@@ -518,26 +652,29 @@
     // ---- 1. the top hairline travels up, wiping the title as it goes:
     // each line it crosses disappears bottom-to-top under it, while
     // HOME dissolves top-to-bottom on its own ----
-    const lineY = 444 - 184 * t; // 444 → 260 (past the title's top)
-    hlineA.style.setProperty('--rise', (444 - lineY).toFixed(2));
-    hlineA.style.opacity = String(Math.min(1, Math.max(0, (lineY - 270) / 30)));
+    const lineY = 436 - 184 * t; // 436 → 252 (past the title's top)
+    hlineA.style.setProperty('--rise', (436 - lineY).toFixed(2));
+    hlineA.style.opacity = String(Math.min(1, Math.max(0, (lineY - 262) / 30)));
+    const my = (mouseShift * (1 - t)).toFixed(2);
+    hlineA.style.setProperty('--my', my);
+    hlineB.style.setProperty('--my', my);
 
-    const cut2 = clamp01((436 - lineY) / 72); // THAT MAKES IT
-    const cut1 = clamp01((364 - lineY) / 72); // THE ROOF
+    const cut2 = clamp01((426 - lineY) / 72); // THAT MAKES IT
+    const cut1 = clamp01((354 - lineY) / 72); // THE ROOF
     slEls[1].style.clipPath = cut2 > 0 ? `inset(0 0 ${(cut2 * 100).toFixed(2)}% 0)` : '';
     slEls[0].style.clipPath = cut1 > 0 ? `inset(0 0 ${(cut1 * 100).toFixed(2)}% 0)` : '';
     const homeCut = clamp01((t - 0.05) / 0.85);
     slEls[2].style.clipPath = homeCut > 0 ? `inset(${(homeCut * 100).toFixed(2)}% 0 0 0)` : '';
 
-    // ---- 2. the bottom hairline sinks from HOME's baseline (502) to
+    // ---- 2. the bottom hairline sinks from HOME's baseline (492) to
     // y547, where it stays as the film section's progress track ----
-    const sink = 45 * smooth01(range(p, 0.02, 0.14));
+    const sink = 55 * smooth01(range(p, 0.02, 0.14));
     hlineB.style.setProperty('--sink', sink.toFixed(2));
 
     // ---- 3. plus markers ride their lines, spinning shut ----
     crossEls.forEach((el, i) => {
       const top = i < 2;
-      el.style.setProperty('--dy', top ? (lineY - 444).toFixed(2) : sink.toFixed(2));
+      el.style.setProperty('--dy', top ? (lineY - 436 + mouseShift * (1 - t)).toFixed(2) : (sink + mouseShift * (1 - t)).toFixed(2));
       el.style.transform = `translate(-50%, -50%) rotate(${(90 * t).toFixed(1)}deg) scale(${(1 - 0.5 * t).toFixed(3)})`;
       if (t > 0) el.style.opacity = (1 - t).toFixed(3);
     });
@@ -550,12 +687,9 @@
     cta.style.opacity = fade;
     cta.style.visibility = t >= 1 ? 'hidden' : '';
 
-    // ---- 5. the top gradient fades; the film stays at its 70%-over-
-    // black tone (hero and film section alike); the grain stays too.
-    // The hero's 32px blur also clears across this range ----
-    const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
-    veil.style.opacity = (VEIL_MAX * (1 - vOut)).toFixed(3);
-    heroVOut = vOut;
+    // ---- 5. the hero's 32px blur clears across this range (the film
+    // stays at its 70%-over-black tone; the grain stays too) ----
+    heroVOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
 
     // ---- benefits copy + progress bar ----
     const next = p < BENEFITS_AT ? 'hero'
@@ -584,6 +718,14 @@
 
     // particle hand-off rides the same smoothed progress
     if (body.dataset.state !== 'loading') fxDraw(smoothP, now);
+
+    // hairlines lean toward the cursor
+    mouseShift += (mouseYT - mouseShift) * (reducedMotion ? 1 : 0.07);
+
+    // section 3 runs on its own smoothed progress
+    s3Smooth += (s3Raw - s3Smooth) * (reducedMotion ? 1 : 0.11);
+    if (Math.abs(s3Raw - s3Smooth) < 0.0004) s3Smooth = s3Raw;
+    if (body.dataset.state !== 'loading') applyS3(s3Smooth);
 
     // frame target: the film plays at rest; scrolling triggers a fast
     // rewind to frame 1, after which the scroll scrub takes over

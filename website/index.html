@@ -31,7 +31,6 @@
         <!-- live mirror of the main canvas: the film is already playing
              while the square window fills the screen -->
         <canvas id="loaderScene"></canvas>
-        <div class="loader__veil"></div>
       </div>
     </div>
   </div>
@@ -43,9 +42,6 @@
       <!-- the scene: scroll-scrubbed frame sequence, sharp from the start
            (143:410 — no blur); a slow ambient sway plays at rest -->
       <canvas id="scene" class="scene"></canvas>
-
-      <!-- top black→transparent gradient (143:414); fades on scroll -->
-      <div class="veil" id="veil"></div>
 
       <!-- fine film grain overlaid on the video (143:416) — persistent -->
       <div class="noise" id="noise" aria-hidden="true"></div>
@@ -64,10 +60,10 @@
         <span class="hline hline--b"></span>
         <span class="vline vline--a"></span>
         <span class="vline vline--b"></span>
-        <span class="cross" style="--cx:441; --cy:44"></span>
-        <span class="cross" style="--cx:999; --cy:44"></span>
-        <span class="cross" style="--cx:441; --cy:102"></span>
-        <span class="cross" style="--cx:999; --cy:102"></span>
+        <span class="cross" style="--cx:441; --cy:36"></span>
+        <span class="cross" style="--cx:999; --cy:36"></span>
+        <span class="cross" style="--cx:441; --cy:92"></span>
+        <span class="cross" style="--cx:999; --cy:92"></span>
 
         <!-- /welcome · keep scrolling to explore · /welcome at y216 (143:481) -->
         <div class="explore" id="explore">
@@ -84,6 +80,13 @@
           <span class="sl" style="--i:1">THAT <span class="tw"><img src="assets/sq2.jpg" alt="" draggable="false"></span>MAKES <span class="tw"><img src="assets/sq3.jpg" alt="" draggable="false"></span>IT</span>
           <span class="sl sl--dim" style="--i:2">HOME</span>
         </h1>
+
+        <!-- /to cedur · keep scrolling to explore · /to cedur at y570 (173:1421) -->
+        <div class="explore explore--below" id="explore2">
+          <span class="explore__side">/to cedur</span>
+          <span class="explore__center">keep scrolling to explore</span>
+          <span class="explore__side">/to cedur</span>
+        </div>
 
         <!-- bottom-left paragraph (143:475) -->
         <p class="hero-para">CEDUR brings the warm aesthetic of natural cedar shakes and the enduring performance of engineered materials to every roof.</p>
@@ -136,6 +139,16 @@
 
     </div>
   </div>
+
+  <!-- ======================= SECTION 3 (157:1192): the film lifts away,
+       revealing a white canvas — the 56px text is pinned mid-screen and
+       reads itself in while photo cards scroll past in two columns ======================= -->
+  <section class="s3" id="s3">
+    <div class="s3__pin">
+      <p class="s3__read" id="s3Read">Whether you&rsquo;re designing, building, or protecting a home for generations, CEDUR delivers beauty and performance you can trust.</p>
+    </div>
+    <div class="s3__cards" id="s3Cards"></div>
+  </section>
 
   <script src="js/main.js"></script>
 </body>
