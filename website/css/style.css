@@ -830,6 +830,16 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   pointer-events: none;
   will-change: filter;
 }
+/* ghost imagery: same cards at low opacity, layered UNDER the pinned
+   text so the reading stays legible while the space fills up */
+.s3__ghosts {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  will-change: filter;
+}
+.s3card--ghost { opacity: var(--o, 0.35); }
 .s3card {
   position: absolute;
   left: calc(var(--x, 0) * var(--u));

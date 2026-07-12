@@ -536,33 +536,59 @@
   let s3Words = [];
   let s3LitCount = -1;
 
-  // (x, y) card anchors on the 4939-tall canvas — two loose columns
+  // cursor field for the floating cards: normalized −1…1 from screen
+  // center, eased so the drift trails a little behind the pointer
+  let s3MxT = 0, s3MyT = 0, s3Mx = 0, s3My = 0;
+  window.addEventListener('mousemove', e => {
+    s3MxT = (e.clientX / window.innerWidth) * 2 - 1;
+    s3MyT = (e.clientY / window.innerHeight) * 2 - 1;
+  }, { passive: true });
+
+  // (x, y) card anchors on the 4939-tall canvas — two loose columns;
+  // d is the cursor-parallax depth (bigger = drifts/tilts more)
   const S3_CARDS = [
-    { x: 40, y: -41 }, { x: 1128, y: 625 },
-    { x: 40, y: 870 }, { x: 1128, y: 1536 },
-    { x: 40, y: 1781 }, { x: 1128, y: 2447 },
-    { x: 40, y: 2861 }, { x: 1128, y: 3527 },
+    { x: 40, y: -41, d: 1.1 }, { x: 1128, y: 625, d: 0.85 },
+    { x: 40, y: 870, d: 0.9 }, { x: 1128, y: 1536, d: 1.2 },
+    { x: 40, y: 1781, d: 0.8 }, { x: 1128, y: 2447, d: 1.05 },
+    { x: 40, y: 2861, d: 1.15 }, { x: 1128, y: 3527, d: 0.9 },
+  ];
+  // faint extras scattered between the columns, behind the pinned text
+  // (s = base size factor, o = opacity, d = parallax depth)
+  const S3_GHOSTS = [
+    { x: 430, y: 190, s: 0.55, o: 0.34, d: 0.5 },
+    { x: 820, y: 520, s: 0.48, o: 0.28, d: 0.4 },
+    { x: 250, y: 1180, s: 0.62, o: 0.36, d: 0.55 },
+    { x: 905, y: 1310, s: 0.44, o: 0.26, d: 0.35 },
+    { x: 540, y: 2060, s: 0.56, o: 0.32, d: 0.5 },
+    { x: 150, y: 2620, s: 0.5, o: 0.28, d: 0.42 },
+    { x: 870, y: 3060, s: 0.6, o: 0.35, d: 0.55 },
+    { x: 470, y: 3690, s: 0.5, o: 0.3, d: 0.42 },
   ];
   const S3_IMGS = ['assets/card1.jpg', 'assets/card2.jpg', 'assets/card3.jpg'];
+  const s3GhostsBox = document.getElementById('s3Ghosts');
+
+  function s3MakeCard(c, i, box, ghost) {
+    const el = document.createElement('div');
+    el.className = ghost ? 's3card s3card--ghost' : 's3card';
+    el.style.setProperty('--x', c.x);
+    el.style.setProperty('--y', c.y);
+    if (ghost) el.style.setProperty('--o', c.o);
+    const im = document.createElement('img');
+    im.src = S3_IMGS[i % S3_IMGS.length];
+    im.alt = '';
+    im.draggable = false;
+    im.decoding = 'async';
+    // decode ahead of the first paint so cards don't hitch as they
+    // enter the viewport
+    if (im.decode) im.decode().catch(() => {});
+    el.appendChild(im);
+    box.appendChild(el);
+    c.el = el;
+  }
 
   if (s3) {
-    S3_CARDS.forEach((c, i) => {
-      const el = document.createElement('div');
-      el.className = 's3card';
-      el.style.setProperty('--x', c.x);
-      el.style.setProperty('--y', c.y);
-      const im = document.createElement('img');
-      im.src = S3_IMGS[i % S3_IMGS.length];
-      im.alt = '';
-      im.draggable = false;
-      im.decoding = 'async';
-      // decode ahead of the first paint so cards don't hitch as they
-      // enter the viewport
-      if (im.decode) im.decode().catch(() => {});
-      el.appendChild(im);
-      s3CardsBox.appendChild(el);
-      c.el = el;
-    });
+    S3_CARDS.forEach((c, i) => s3MakeCard(c, i, s3CardsBox, false));
+    S3_GHOSTS.forEach((c, i) => s3MakeCard(c, i + 1, s3GhostsBox, true));
     const words = s3Read.textContent.trim().split(/\s+/);
     s3Read.textContent = '';
     words.forEach((word, i) => {
@@ -597,20 +623,32 @@
     } else reveal = vh + easeD / 2;                     // riding the scroll
     const rv = vh > 0 ? clamp01(x / vh) : 1;
     s3CardsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
+    s3GhostsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
 
     // entrance: text + cards arrive out of a blur as the film lifts
     const bl = 16 * (1 - smooth01(clamp01((rv - 0.15) / 0.75)));
     const blCss = bl > 0.15 ? `blur(${(bl * u()).toFixed(1)}px)` : '';
     s3Read.style.filter = blCss;
     s3CardsBox.style.filter = blCss;
+    s3GhostsBox.style.filter = blCss;
 
     // cards grow as they come into view (centerY is their true viewport
-    // position — constant during the reveal, so the scale holds too)
+    // position — constant during the reveal, so the scale holds too),
+    // and the whole field floats/tilts after the cursor by depth
     const px = u();
+    const float = (d, sc) =>
+      `translate3d(${(s3Mx * 34 * px * d).toFixed(1)}px, ${(s3My * 26 * px * d).toFixed(1)}px, 0) ` +
+      `perspective(900px) rotateX(${(-s3My * 2.4 * d).toFixed(2)}deg) rotateY(${(s3Mx * 3.2 * d).toFixed(2)}deg) ` +
+      `scale(${sc.toFixed(3)})`;
     S3_CARDS.forEach(c => {
       const centerY = sTop + c.y * px + (245 * px) / 2 + reveal - window.scrollY;
       const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
-      c.el.style.transform = `scale(${(0.72 + 0.28 * Math.min(1, tIn)).toFixed(3)})`;
+      c.el.style.transform = float(c.d, 0.72 + 0.28 * Math.min(1, tIn));
+    });
+    S3_GHOSTS.forEach(c => {
+      const centerY = sTop + c.y * px + (245 * c.s * px) / 2 + reveal - window.scrollY;
+      const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
+      c.el.style.transform = float(c.d, c.s * (0.85 + 0.15 * Math.min(1, tIn)));
     });
 
     // reading effect: starts only once the film screen is fully gone
@@ -859,9 +897,14 @@
         window.scrollY >= s3.offsetTop + window.innerHeight - 110 * u());
     }
 
-    // section 3 runs on its own smoothed progress
+    // section 3 runs on its own smoothed progress; the card field's
+    // cursor drift eases toward the pointer
     s3Smooth += (s3Raw - s3Smooth) * (reducedMotion ? 1 : 0.11);
     if (Math.abs(s3Raw - s3Smooth) < 0.0004) s3Smooth = s3Raw;
+    if (!reducedMotion) {
+      s3Mx += (s3MxT - s3Mx) * 0.055;
+      s3My += (s3MyT - s3My) * 0.055;
+    }
     if (body.dataset.state !== 'loading') applyS3(s3Smooth);
 
     // frame target: the film plays at rest; scrolling triggers a fast
