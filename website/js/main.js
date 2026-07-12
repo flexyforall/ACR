@@ -208,6 +208,27 @@
   }
 
   // ------------------------------------------------------------------
+  // loader window: the square drifts after the cursor with a soft lag;
+  // the full-bleed expansion later takes off from wherever it sits, so
+  // the hero hand-off is untouched (it still ends at inset 0)
+  // ------------------------------------------------------------------
+  let winFollowOn = !reducedMotion;
+  const winPos = { x: window.innerWidth / 2, y: window.innerHeight - 50 * u() };
+  const winTgt = { x: winPos.x, y: winPos.y };
+
+  window.addEventListener('mousemove', e => {
+    if (!winFollowOn) return;
+    const s = 50 * u(), m = 24;
+    winTgt.x = Math.max(s + m, Math.min(window.innerWidth - s - m, e.clientX));
+    winTgt.y = Math.max(s + m, Math.min(window.innerHeight - s, e.clientY));
+  }, { passive: true });
+
+  function winClip() {
+    const s = 50 * u();
+    return `inset(${(winPos.y - s).toFixed(1)}px ${(window.innerWidth - winPos.x - s).toFixed(1)}px ${(window.innerHeight - winPos.y - s).toFixed(1)}px ${(winPos.x - s).toFixed(1)}px)`;
+  }
+
+  // ------------------------------------------------------------------
   // loader timeline
   // ------------------------------------------------------------------
   const t0 = performance.now();
@@ -245,8 +266,8 @@
       // the loader's canvas mirrors the main one, so the expansion
       // reveals footage already in motion
       ambientOn = true;
-      const px = u();
-      const openFrom = `inset(calc(100% - ${100 * px}px) calc(50% - ${50 * px}px) 0px calc(50% - ${50 * px}px))`;
+      winFollowOn = false;              // freeze the drift; expand from here
+      const openFrom = winClip();
       const win = loaderWindow.animate(
         [{ clipPath: openFrom }, { clipPath: 'inset(0px 0px 0px 0px)' }],
         { duration: reducedMotion ? 1 : 1100, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards' }
@@ -524,6 +545,10 @@
       im.src = S3_IMGS[i % S3_IMGS.length];
       im.alt = '';
       im.draggable = false;
+      im.decoding = 'async';
+      // decode ahead of the first paint so cards don't hitch as they
+      // enter the viewport
+      if (im.decode) im.decode().catch(() => {});
       el.appendChild(im);
       s3CardsBox.appendChild(el);
       c.el = el;
@@ -745,11 +770,53 @@
     transitionBenefits(next);
   }
 
+  // ------------------------------------------------------------------
+  // smooth wheel scroll, site-wide: wheel input accumulates a target and
+  // the real scroll position glides toward it every frame. Native scroll
+  // positions are kept (sticky pinning intact); scrollbar drags, keys and
+  // touch stay native and simply resync the target.
+  // ------------------------------------------------------------------
+  let wheelTgt = null;
+  let wheelCur = 0;
+
+  window.addEventListener('wheel', e => {
+    if (reducedMotion || e.ctrlKey) return; // pinch-zoom stays native
+    e.preventDefault();
+    if (body.dataset.state === 'loading') return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const d = e.deltaMode === 1 ? e.deltaY * 16
+      : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
+    if (wheelTgt === null) wheelCur = wheelTgt = window.scrollY;
+    wheelTgt = Math.max(0, Math.min(max, wheelTgt + d));
+  }, { passive: false });
+
+  function wheelGlide() {
+    if (wheelTgt === null) return;
+    if (Math.abs(window.scrollY - wheelCur) > 2) {
+      wheelCur = wheelTgt = window.scrollY; // another input took over
+      return;
+    }
+    if (wheelCur === wheelTgt) return;
+    wheelCur += (wheelTgt - wheelCur) * 0.12;
+    if (Math.abs(wheelTgt - wheelCur) < 0.5) wheelCur = wheelTgt;
+    window.scrollTo(0, wheelCur);
+    onScroll(); // same-frame progress update for everything below
+  }
+
   let lastT = performance.now();
 
   function rafLoop(now) {
     const dt = Math.min(0.05, (now - lastT) / 1000 || 0.016);
     lastT = now;
+
+    wheelGlide();
+
+    // loader window drifts after the cursor until the expansion starts
+    if (winFollowOn && body.dataset.state !== 'done-loading') {
+      winPos.x += (winTgt.x - winPos.x) * 0.06;
+      winPos.y += (winTgt.y - winPos.y) * 0.06;
+      loaderWindow.style.clipPath = winClip();
+    }
 
     // smooth-scroll inertia: everything glides toward the real position
     smoothP += (rawP - smoothP) * (reducedMotion ? 1 : 0.11);

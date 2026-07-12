@@ -70,6 +70,9 @@
 
 html { background: #000; }
 html, body { width: 100%; }
+/* no rubber-band past the white section's end (the black page canvas
+   would peek through as a phantom section after the third screen) */
+html, body { overscroll-behavior-y: none; }
 
 body {
   font-family: var(--font-body);
@@ -832,6 +835,9 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   width: calc(272 * var(--u));
   height: calc(245 * var(--u));
   overflow: hidden;
+  /* scale updates run every frame — keep each card on its own layer so
+     entering cards composite instead of repainting */
+  will-change: transform;
 }
 .s3card img {
   width: 100%;
