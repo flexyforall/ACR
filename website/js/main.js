@@ -91,6 +91,7 @@
   const vlineEls = Array.from(document.querySelectorAll('.vline'));
   const crossEls = Array.from(document.querySelectorAll('.cross'));
   const exploreEl = document.getElementById('explore');
+  const explore2El = document.getElementById('explore2');
   const heroPara = document.querySelector('.hero-para');
   const slEls = Array.from(document.querySelectorAll('.slogan .sl'));
 
@@ -255,7 +256,6 @@
         body.dataset.state = 'done-loading';
         body.setAttribute('data-revealed', '');
         setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
-        setTimeout(startSquareLoop, reducedMotion ? 0 : 3200);
       };
     };
   }
@@ -290,27 +290,6 @@
       setTimeout(tick, delay);
     }
     setTimeout(tick, 2600);
-  }
-
-  // ------------------------------------------------------------------
-  // title squares: product previews bloom open between the title words
-  // (after THE / THAT / MAKES), hold, close, then the next one — looped
-  // ------------------------------------------------------------------
-  const titleSquares = Array.from(document.querySelectorAll('.slogan .tw'));
-
-  function startSquareLoop() {
-    if (reducedMotion || !titleSquares.length) return;
-    let i = 0;
-    (function cycle() {
-      if (rawP > 0.02) { setTimeout(cycle, 900); return; } // wait out the film
-      const el = titleSquares[i];
-      el.classList.add('on');
-      setTimeout(() => {
-        el.classList.remove('on');
-        i = (i + 1) % titleSquares.length;
-        setTimeout(cycle, 1000); // let the slot close before the next opens
-      }, 2100);                  // hold open
-    })();
   }
 
   // ------------------------------------------------------------------
@@ -420,24 +399,25 @@
   }
 
   // ------------------------------------------------------------------
-  // cursor play (hero at rest): the hairlines and their plus markers
-  // drift up or down after the cursor, and big cursor sweeps make the
-  // title re-arrange itself through a code-style character scramble
+  // cursor play (hero at rest): the hairline pair travels to wrap
+  // whichever title line the cursor points at. Capturing a NEW line
+  // plays, on that line only, the code-style character scramble plus
+  // its product-square bloom. The other lines stay untouched.
+  // Line boxes (center-relative): L1 −118…−46, L2 −46…+26, HOME +26…+98;
+  // the pair rests on HOME (offset 0); L2 = −72; L1 = −144.
   // ------------------------------------------------------------------
   const SCRAMBLE_CHARS = 'ABCDEFGHIKLMNORSTUVXZ</>[]#*+';
+  const CAPTURE_OFFSETS = [-144, -72, 0];
   let scrambleBusy = false;
-  let lastScrambleAt = 0;
-  let mouseAcc = 0;
-  let lastMouseY = null;
+  let captured = 2; // the pair rests on HOME
 
-  function scrambleTitle() {
+  function scrambleLine(idx) {
     if (scrambleBusy || reducedMotion) return;
     scrambleBusy = true;
-    // scramble only the text nodes — the product-square spans stay put
     const nodes = [];
-    slEls.forEach(sl => sl.childNodes.forEach(n => {
+    slEls[idx].childNodes.forEach(n => {
       if (n.nodeType === 3 && n.textContent.trim()) nodes.push({ n, orig: n.textContent });
-    }));
+    });
     const t0 = performance.now();
     const DUR = 620;
     (function tick() {
@@ -446,7 +426,6 @@
         let out = '';
         for (let i = 0; i < orig.length; i++) {
           const ch = orig[i];
-          // characters resolve left to right; spaces never scramble
           out += (ch === ' ' || k >= (i + 1) / (orig.length + 1))
             ? ch
             : SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
@@ -462,18 +441,25 @@
     })();
   }
 
+  function bloomLine(idx) {
+    if (reducedMotion) return;
+    slEls[idx].querySelectorAll('.tw').forEach((tw, i) => {
+      setTimeout(() => tw.classList.add('on'), i * 140);
+      setTimeout(() => tw.classList.remove('on'), 1500 + i * 140);
+    });
+  }
+
   window.addEventListener('mousemove', e => {
     if (reducedMotion || !body.hasAttribute('data-revealed')) return;
+    if (rawP > 0.02) { mouseYT = 0; return; }
     const vh = window.innerHeight;
-    // lines lean up to ±26u toward the cursor's half of the screen
-    mouseYT = Math.max(-1, Math.min(1, (e.clientY / vh - 0.5) * 2)) * 26;
-    if (lastMouseY !== null) mouseAcc += Math.abs(e.clientY - lastMouseY);
-    lastMouseY = e.clientY;
-    const now = performance.now();
-    if (mouseAcc > 150 && now - lastScrambleAt > 1400 && rawP < 0.02) {
-      mouseAcc = 0;
-      lastScrambleAt = now;
-      scrambleTitle();
+    const by = (e.clientY - vh / 2) / u(); // cursor in board units, center-rel
+    const zone = by < -46 ? 0 : by < 26 ? 1 : 2;
+    mouseYT = CAPTURE_OFFSETS[zone];
+    if (zone !== captured) {
+      captured = zone;
+      scrambleLine(zone);
+      bloomLine(zone);
     }
   }, { passive: true });
 
@@ -667,8 +653,8 @@
     slEls[2].style.clipPath = homeCut > 0 ? `inset(${(homeCut * 100).toFixed(2)}% 0 0 0)` : '';
 
     // ---- 2. the bottom hairline sinks from HOME's baseline (492) to
-    // y547, where it stays as the film section's progress track ----
-    const sink = 55 * smooth01(range(p, 0.02, 0.14));
+    // y700, where it stays as the film section's progress track ----
+    const sink = 208 * smooth01(range(p, 0.02, 0.14));
     hlineB.style.setProperty('--sink', sink.toFixed(2));
 
     // ---- 3. plus markers ride their lines, spinning shut ----
@@ -682,6 +668,7 @@
     // ---- 4. the rest of the hero copy dissolves ----
     const fade = (1 - t).toFixed(3);
     exploreEl.style.opacity = t > 0 ? fade : '';
+    if (explore2El) explore2El.style.opacity = t > 0 ? fade : '';
     heroPara.style.opacity = t > 0 ? fade : '';
     vlineEls.forEach(el => { el.style.opacity = t > 0 ? fade : ''; });
     cta.style.opacity = fade;
