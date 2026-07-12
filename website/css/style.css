@@ -635,19 +635,20 @@ body[data-revealed] .nav { opacity: 1; }
 .cta__mask { overflow: hidden; }
 .cta--right .btn {
   transform: translateY(120%);
-  /* keep the hover fill/color easing alongside the entrance transform —
+  /* keep the hover colour easing alongside the entrance transform —
      this rule overrides .btn's transition list entirely */
   transition:
     transform 1.2s var(--ease-out) 0.55s,
-    background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
-    color 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    color 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 [data-revealed] .cta--right .btn { transform: translateY(0); }
 
 /* ---------- request-sample button: solid white, black text (143:468).
-   Hover: the fill drains away leaving a white-16 stroke, and the
-   label rolls over itself (fill + text-spin treatment) ---------- */
+   Hover: an orange panel (matching the section-3 highlight) rises up
+   from the bottom to fill the button while the label rolls over
+   itself, its text turning white ---------- */
 .btn {
+  position: relative;
   display: flex;
   align-items: center;
   gap: calc(12 * var(--u));
@@ -660,15 +661,23 @@ body[data-revealed] .nav { opacity: 1; }
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   pointer-events: auto;
-  transition:
-    background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
-    color 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: color 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.btn .dot { background: #000; transition: background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
-.btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--white);
+/* orange fill panel, clipped by the button's chamfer, growing bottom→top */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(#f2703a, #e8622c);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+  transition: transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
+.btn > * { position: relative; z-index: 1; }
+.btn .dot { background: #000; transition: background-color 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.btn:hover { color: var(--white); }
+.btn:hover::before { transform: scaleY(1); }
 .btn:hover .dot { background: var(--white); }
 
 /* rolling label: two stacked copies inside a one-line mask; hovering
@@ -682,7 +691,7 @@ body[data-revealed] .nav { opacity: 1; }
   display: flex;
   flex-direction: column;
   line-height: 1.1;
-  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .btn:hover .roll__stack,
 .nav__contact:hover .roll__stack { transform: translateY(-50%); }
