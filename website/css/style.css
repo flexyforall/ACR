@@ -59,8 +59,9 @@
   --white-08: rgba(255, 255, 255, 0.08);
   --grey: #d9d9d9;
   --white-12: rgba(255, 255, 255, 0.12);
-  --font-display: "OwnersTRIAL", "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-text: "GT Eesti Text Trial", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  /* 150:685 — Neue Montreal across the board */
+  --font-display: "Neue Montreal", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-text: "Neue Montreal", "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Neue Montreal", "Inter", "Helvetica Neue", Arial, sans-serif;
   --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
 }
@@ -170,7 +171,7 @@ body[data-state="done-loading"] .loader { display: none; }
   align-items: center;
   padding: 0 calc(40 * var(--u));
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;
   font-size: calc(14 * var(--u));
   line-height: 0.9;
   letter-spacing: 0.01em;
@@ -391,10 +392,10 @@ body[data-state="done-loading"] .loader { display: none; }
   width: 100%;
   text-align: center;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;
   font-size: calc(80 * var(--u));
   line-height: 0.9;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.03em; /* −2.4px @ 80px (150:697) */
   text-transform: uppercase;
 }
 .slogan--big { font-size: calc(80 * var(--u)); }
@@ -408,10 +409,52 @@ body[data-state="done-loading"] .loader { display: none; }
     opacity 1.1s ease-out calc(0.35s + var(--i, 0) * 0.25s);
   will-change: filter, opacity;
 }
+/* HOME settles at 40% white (150:697) */
+.sl--dim { color: rgba(255, 255, 255, 0.4); letter-spacing: -0.006em; }
 [data-revealed] .sl {
   opacity: 1;
   filter: blur(0);
 }
+
+/* inline product squares that bloom between title words: the slot
+   widens open while the image inside stays fixed-size (a curtain
+   reveal), holds, then closes — one at a time, looped */
+.tw {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: calc(64 * var(--u));
+  margin: 0;
+  overflow: hidden;
+  vertical-align: calc(-4 * var(--u));
+  opacity: 0;
+  transition:
+    width 0.85s cubic-bezier(0.65, 0, 0.35, 1),
+    margin 0.85s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.5s linear 0.1s;
+  will-change: width, opacity;
+}
+.tw img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(64 * var(--u));
+  height: calc(64 * var(--u));
+  max-width: none;
+  object-fit: cover;
+  transform: scale(1.25);
+  transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.tw.on {
+  width: calc(64 * var(--u));
+  margin: 0 calc(18 * var(--u)) 0 calc(4 * var(--u));
+  opacity: 1;
+  transition:
+    width 0.85s cubic-bezier(0.65, 0, 0.35, 1),
+    margin 0.85s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.4s linear;
+}
+.tw.on img { transform: scale(1); }
 
 /* bottom-left paragraph (130:675) */
 .hero-para {
@@ -460,9 +503,9 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .nav__contact {
   display: flex;
   align-items: center;
-  gap: calc(8 * var(--u));
+  gap: calc(16 * var(--u));
   height: calc(40 * var(--u));
-  padding: 0 calc(24 * var(--u));
+  padding: 0 calc(24 * var(--u)) 0 calc(18 * var(--u));
   background: rgba(255, 255, 255, 0.05);
   -webkit-backdrop-filter: blur(1px);
           backdrop-filter: blur(1px);
@@ -531,7 +574,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .benefits-head.show { opacity: 1; transform: translateY(0); }
 .benefits-head__title {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;
   font-size: calc(22 * var(--u));
   line-height: 1.1;
   letter-spacing: 0.01em;

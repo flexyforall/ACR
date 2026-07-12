@@ -215,6 +215,7 @@
         // the slogan fill-sweep and the rest run off [data-revealed];
         // the ambient background loop starts on its own in the raf loop
         setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
+        setTimeout(startSquareLoop, reducedMotion ? 0 : 3200);
       };
     };
   }
@@ -222,7 +223,9 @@
   // ------------------------------------------------------------------
   // typed labels: the /welcome sides and the keep-scrolling line type
   // out letter by letter, delete the same way, and loop — one shared
-  // cursor keeps them in sync (shorter labels finish early and hold)
+  // cursor keeps them in sync (shorter labels finish early and hold).
+  // Each label's box is locked to its full-text width up front so the
+  // layout never reflows while letters come and go.
   // ------------------------------------------------------------------
   const typeEls = Array.from(document.querySelectorAll('.explore__side, .explore__center'))
     .map(el => ({ el, text: el.textContent }));
@@ -230,18 +233,43 @@
 
   function startTypeLoop() {
     if (reducedMotion || !typeEls.length) return;
+    const px = u();
+    typeEls.forEach(t => {
+      t.el.style.width = `calc(${(t.el.offsetWidth / px).toFixed(2)} * var(--u))`;
+      t.el.style.textAlign = 'left';
+    });
     let n = typeMax; // labels fade in complete, then the loop begins
     let dir = -1;
     function tick() {
       n += dir;
       typeEls.forEach(t => { t.el.textContent = t.text.slice(0, n); });
       let delay;
-      if (dir > 0 && n >= typeMax) { dir = -1; delay = 2400; } // hold typed
-      else if (dir < 0 && n <= 0) { dir = 1; delay = 900; }    // hold empty
-      else delay = dir > 0 ? 120 : 60;                         // type / delete
+      if (dir > 0 && n >= typeMax) { dir = -1; delay = 2600; } // hold typed
+      else if (dir < 0 && n <= 0) { dir = 1; delay = 1000; }   // hold empty
+      else delay = dir > 0 ? 76 : 42;                          // type / delete
       setTimeout(tick, delay);
     }
-    setTimeout(tick, 2400);
+    setTimeout(tick, 2600);
+  }
+
+  // ------------------------------------------------------------------
+  // title squares: product previews bloom open between the title words
+  // (after THE / THAT / MAKES), hold, close, then the next one — looped
+  // ------------------------------------------------------------------
+  const titleSquares = Array.from(document.querySelectorAll('.slogan .tw'));
+
+  function startSquareLoop() {
+    if (reducedMotion || !titleSquares.length) return;
+    let i = 0;
+    (function cycle() {
+      const el = titleSquares[i];
+      el.classList.add('on');
+      setTimeout(() => {
+        el.classList.remove('on');
+        i = (i + 1) % titleSquares.length;
+        setTimeout(cycle, 1000); // let the slot close before the next opens
+      }, 2100);                  // hold open
+    })();
   }
 
   // ------------------------------------------------------------------
