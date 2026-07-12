@@ -895,3 +895,27 @@ body[data-revealed] .nav { opacity: 1; }
   transform-origin: 50% 50%;
 }
 
+/* ---------- elastic blob cursor (unseen.co-style) ----------
+   a small solid dot; JS stretches it along the movement direction by
+   speed and eases it back to a circle at rest. Difference blend keeps
+   it legible on both the dark film and the grey section. ---------- */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 0.35s ease;
+}
+.cursor.on { opacity: 1; }
+html.has-cursor,
+html.has-cursor * { cursor: none !important; }
+

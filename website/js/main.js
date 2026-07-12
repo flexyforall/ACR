@@ -998,7 +998,63 @@
       lastDrawn = key;
     }
 
+    drawCursor();
+
     requestAnimationFrame(rafLoop);
+  }
+
+  // ------------------------------------------------------------------
+  // elastic blob cursor (unseen.co-style): the dot eases toward the
+  // pointer, stretches into a capsule along its travel direction by
+  // speed, and relaxes back to a circle when it slows. Grows a little
+  // over interactive elements.
+  // ------------------------------------------------------------------
+  const curEl = document.getElementById('cursor');
+  let curOn = false;
+  let curTX = -100, curTY = -100;   // pointer target
+  let curX = -100, curY = -100;     // eased position
+  let curPX = -100, curPY = -100;   // previous eased position
+  let curStretch = 0, curAng = 0, curHover = 0, curHoverT = 0;
+
+  if (curEl && !reducedMotion) {
+    window.addEventListener('mousemove', e => {
+      curTX = e.clientX;
+      curTY = e.clientY;
+      if (!curOn) {
+        curOn = true;
+        curX = curPX = curTX;
+        curY = curPY = curTY;
+        document.documentElement.classList.add('has-cursor');
+        curEl.classList.add('on');
+      }
+    }, { passive: true });
+    // grow over links / buttons / images
+    const interactive = 'a, button, .btn, .nav__contact, .nav__burger, img';
+    window.addEventListener('mouseover', e => {
+      curHoverT = e.target.closest(interactive) ? 1 : 0;
+    }, { passive: true });
+    window.addEventListener('mouseout', e => {
+      if (!e.relatedTarget || !e.relatedTarget.closest(interactive)) curHoverT = 0;
+    }, { passive: true });
+    document.addEventListener('mouseleave', () => curEl.classList.remove('on'));
+    document.addEventListener('mouseenter', () => { if (curOn) curEl.classList.add('on'); });
+  }
+
+  function drawCursor() {
+    if (!curOn || !curEl) return;
+    curX += (curTX - curX) * 0.2;
+    curY += (curTY - curY) * 0.2;
+    const dx = curX - curPX, dy = curY - curPY;
+    curPX = curX; curPY = curY;
+    const speed = Math.min(1, Math.hypot(dx, dy) / 16);
+    curStretch += (speed - curStretch) * 0.18;         // ease the deform
+    if (speed > 0.06) curAng = Math.atan2(dy, dx) * 180 / Math.PI; // hold angle at rest
+    curHover += (curHoverT - curHover) * 0.15;
+    const grow = 1 + curHover * 0.9;                   // bigger over links
+    const sx = grow * (1 + curStretch * 0.6);
+    const sy = grow * (1 - curStretch * 0.4);
+    curEl.style.transform =
+      `translate(${curX.toFixed(2)}px, ${curY.toFixed(2)}px) rotate(${curAng.toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
   }
 
   // ------------------------------------------------------------------
