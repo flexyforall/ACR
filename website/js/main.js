@@ -78,7 +78,6 @@
   const cta = document.getElementById('cta');
   const benefitsHead = document.getElementById('benefitsHead');
   const benefitTitle = document.getElementById('benefitTitle');
-  const benefitsBand = document.getElementById('benefitsBand');
   const benefitDesc = document.getElementById('benefitDesc');
   const progressBar = document.getElementById('progressBar');
   const canvas = document.getElementById('scene');
@@ -326,14 +325,12 @@
 
     if (next === 'hero') {
       benefitsHead.classList.remove('show');
-      benefitsBand.classList.remove('show');
       setBenefitDesc('hero');
       return;
     }
     if (prev === 'hero' || reducedMotion) {
       applyBenefitTitle(next);
       benefitsHead.classList.add('show');
-      benefitsBand.classList.add('show');
       setBenefitDesc(next);
       return;
     }
@@ -410,9 +407,11 @@
     cta.style.opacity = fade;
     cta.style.visibility = t >= 1 ? 'hidden' : '';
 
-    // ---- 5. the top gradient fades; the grain overlay stays ----
+    // ---- 5. the top gradient fades and the film brightens from its
+    // 70%-over-black hero state to full; the grain overlay stays ----
     const vOut = range(p, VEIL_OUT[0], VEIL_OUT[1]);
     veil.style.opacity = (VEIL_MAX * (1 - vOut)).toFixed(3);
+    canvas.style.opacity = (0.7 + 0.3 * vOut).toFixed(3);
 
     // ---- benefits copy + progress bar ----
     const next = p < BENEFITS_AT ? 'hero'
