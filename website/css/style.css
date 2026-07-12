@@ -764,9 +764,9 @@ body[data-revealed] .nav { opacity: 1; }
 /* gradient wave: an orange highlight sweeps once through text as it
    appears (terminal-industries style) */
 .gwave {
-  background-image: linear-gradient(45deg,
+  background-image: linear-gradient(90deg,
     var(--gw-base, #fff) 42%, #e8622c 50%, var(--gw-base, #fff) 58%);
-  background-size: 250% 250%;
+  background-size: 250% 100%;
   background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
@@ -775,8 +775,8 @@ body[data-revealed] .nav { opacity: 1; }
   animation: gwave 1.2s cubic-bezier(0.5, 0, 0.3, 1) both;
 }
 @keyframes gwave {
-  from { background-position: 100% 100%; }
-  to { background-position: 0% 0%; }
+  from { background-position: 100% 0; }
+  to { background-position: 0% 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
