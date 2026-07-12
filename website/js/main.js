@@ -82,6 +82,7 @@
   const benefitTitle = document.getElementById('benefitTitle');
   const benefitDesc = document.getElementById('benefitDesc');
   const progressBar = document.getElementById('progressBar');
+  const filmLabels = document.getElementById('filmLabels');
   const canvas = document.getElementById('scene');
   const ctx = canvas.getContext('2d');
 
@@ -410,6 +411,25 @@
   const CAPTURE_OFFSETS = [-144, -72, 0];
   let scrambleBusy = false;
   let captured = 2; // the pair rests on HOME
+  // per-line text widths (board units) so the vertical pair can hug the
+  // captured line horizontally; measured once the fonts are ready
+  let lineWidths = [558, 558, 558];
+  let vxLT = 441, vxRT = 999; // targets
+  let vxL = 441, vxR = 999;   // eased
+
+  function measureLineWidths() {
+    const c = document.createElement('canvas').getContext('2d');
+    c.font = '400 80px "Neue Montreal", "Inter", Arial, sans-serif';
+    if ('letterSpacing' in c) c.letterSpacing = '-2.4px';
+    lineWidths = ['THE ROOF', 'THAT MAKES IT', 'HOME'].map(t => c.measureText(t).width);
+    setVlineTargets(captured);
+  }
+
+  function setVlineTargets(idx) {
+    const half = lineWidths[idx] / 2 + 26;
+    vxLT = 720 - half;
+    vxRT = 720 + half;
+  }
 
   function scrambleLine(idx) {
     if (scrambleBusy || reducedMotion) return;
@@ -458,6 +478,7 @@
     mouseYT = CAPTURE_OFFSETS[zone];
     if (zone !== captured) {
       captured = zone;
+      setVlineTargets(zone);
       scrambleLine(zone);
       bloomLine(zone);
     }
@@ -498,6 +519,7 @@
       im.draggable = false;
       el.appendChild(im);
       s3CardsBox.appendChild(el);
+      c.el = el;
     });
     const words = s3Read.textContent.trim().split(/\s+/);
     s3Read.textContent = '';
@@ -514,19 +536,39 @@
   function applyS3(q) {
     if (!s3) return;
     const vh = window.innerHeight;
-    const total = s3.offsetHeight - vh;
-    const revealFrac = total > 0 ? Math.min(0.9, vh / total) : 0.2;
-    const v = clamp01(q / revealFrac);   // curtain-reveal progress
-    const qq = range(q, revealFrac, 1);  // in-section progress
 
-    // entrance: text + cards arrive out of a blur while the film lifts
-    const bl = 16 * (1 - smooth01(clamp01((v - 0.25) / 0.75)));
+    // the curtain reveal is the scroll window [s3top, s3top + vh]: the
+    // stage screen (stacked above) slides up while s3's own pin holds.
+    // Counter the document scroll exactly (raw scrollY, no smoothing)
+    // so nothing inside moves until the film screen is fully gone;
+    // after that the offset caps at vh and the cards ride the scroll.
+    const sTop = s3.offsetTop;
+    const reveal = Math.max(0, Math.min(vh, window.scrollY - sTop));
+    const rv = vh > 0 ? reveal / vh : 1;
+    s3CardsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
+
+    // entrance: text + cards arrive out of a blur as the film lifts
+    const bl = 16 * (1 - smooth01(clamp01((rv - 0.15) / 0.75)));
     const blCss = bl > 0.15 ? `blur(${(bl * u()).toFixed(1)}px)` : '';
     s3Read.style.filter = blCss;
     s3CardsBox.style.filter = blCss;
 
-    // reading effect: words light from 20% black to black as you scroll
-    const lit = Math.round(range(qq, 0.04, 0.82) * s3Words.length);
+    // cards grow as they come into view (centerY is their true viewport
+    // position — constant during the reveal, so the scale holds too)
+    const px = u();
+    S3_CARDS.forEach(c => {
+      const centerY = sTop + c.y * px + (245 * px) / 2 + reveal - window.scrollY;
+      const tIn = clamp01((vh * 1.15 - centerY) / (vh * 0.85));
+      c.el.style.transform = `scale(${(0.72 + 0.28 * Math.min(1, tIn)).toFixed(3)})`;
+    });
+
+    // reading effect: starts only once the film screen is fully gone
+    // (q past the reveal window), words lighting from 20% black to
+    // black as you scroll
+    const total = s3.offsetHeight - vh;
+    const revealFrac = total > 0 ? Math.min(0.9, vh / total) : 0.2;
+    const qq = range(q, revealFrac, 1);
+    const lit = Math.round(range(qq, 0.02, 0.8) * s3Words.length);
     if (lit !== s3LitCount) {
       s3Words.forEach((w, i) => w.classList.toggle('lit', i < lit));
       s3LitCount = lit;
@@ -579,12 +621,14 @@
 
     if (next === 'hero') {
       benefitsHead.classList.remove('show');
+      filmLabels.classList.remove('show');
       setBenefitDesc('hero');
       return;
     }
     if (prev === 'hero' || reducedMotion) {
       applyBenefitTitle(next);
       benefitsHead.classList.add('show');
+      filmLabels.classList.add('show');
       setBenefitDesc(next);
       return;
     }
@@ -653,8 +697,8 @@
     slEls[2].style.clipPath = homeCut > 0 ? `inset(${(homeCut * 100).toFixed(2)}% 0 0 0)` : '';
 
     // ---- 2. the bottom hairline sinks from HOME's baseline (492) to
-    // y700, where it stays as the film section's progress track ----
-    const sink = 208 * smooth01(range(p, 0.02, 0.14));
+    // y664, where it stays as the film section's progress track ----
+    const sink = 172 * smooth01(range(p, 0.02, 0.14));
     hlineB.style.setProperty('--sink', sink.toFixed(2));
 
     // ---- 3. plus markers ride their lines, spinning shut ----
@@ -706,8 +750,14 @@
     // particle hand-off rides the same smoothed progress
     if (body.dataset.state !== 'loading') fxDraw(smoothP, now);
 
-    // hairlines lean toward the cursor
+    // hairlines lean toward the cursor; the vertical pair hugs the
+    // captured line's width
     mouseShift += (mouseYT - mouseShift) * (reducedMotion ? 1 : 0.07);
+    vxL += (vxLT - vxL) * (reducedMotion ? 1 : 0.07);
+    vxR += (vxRT - vxR) * (reducedMotion ? 1 : 0.07);
+    vlineEls[0].style.setProperty('--vx', vxL.toFixed(2));
+    vlineEls[1].style.setProperty('--vx', vxR.toFixed(2));
+    crossEls.forEach((el, i) => el.style.setProperty('--cx', (i % 2 === 0 ? vxL : vxR).toFixed(2)));
 
     // section 3 runs on its own smoothed progress
     s3Smooth += (s3Raw - s3Smooth) * (reducedMotion ? 1 : 0.11);
@@ -762,7 +812,7 @@
 
   sizeCanvas();
   window.scrollTo(0, 0);
-  document.fonts.ready.then(buildParticles);
+  document.fonts.ready.then(() => { buildParticles(); measureLineWidths(); });
   preloadAll();
   loaderTick();
   onScroll();

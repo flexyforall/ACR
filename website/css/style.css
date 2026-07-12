@@ -325,8 +325,8 @@ body[data-state="done-loading"] .loader { display: none; }
   transform-origin: top;
   transition: transform 1.6s var(--ease-out) 1.1s;
 }
-.vline--a { left: calc(441 * var(--u)); }
-.vline--b { left: calc(999 * var(--u)); }
+.vline--a { left: calc(var(--vx, 441) * var(--u)); }
+.vline--b { left: calc(var(--vx, 999) * var(--u)); }
 [data-revealed] .vline { transform: scaleY(1); }
 
 /* 5×5 plus markers at each line intersection (146:490/494/497/500) */
@@ -486,7 +486,8 @@ body[data-state="done-loading"] .loader { display: none; }
 
 /* ---------- nav (122:432) ---------- */
 .nav {
-  position: absolute;
+  position: fixed;
+  mix-blend-mode: difference;
   top: calc(40 * var(--u));
   left: calc(40 * var(--u));
   right: calc(40 * var(--u));
@@ -570,7 +571,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .benefits-head {
   position: absolute;
   left: calc(40 * var(--u));
-  top: calc(50% + 164 * var(--u)); /* y564 (130:772) */
+  top: calc(50% + 128 * var(--u)); /* y528 — labels take the bottom slot */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -586,6 +587,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   font-family: var(--font-display);
   font-weight: 400;
   font-size: calc(22 * var(--u));
+  transition: min-width 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   line-height: 1.1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -597,7 +599,7 @@ body[data-state="done-loading"] .nav { opacity: 1; }
 .progress {
   position: absolute;
   left: 0;
-  top: calc(50% + 300 * var(--u)); /* y700 — 100u above the bottom (130:772) */
+  top: calc(50% + 264 * var(--u)); /* y664 — the labels sit beneath */
   width: 100%;
   height: 1px;
   z-index: 3;
@@ -638,20 +640,17 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   padding-right: calc(5 * var(--u));
   background: #fff;
   color: #000;
-  border: 1px solid #fff;
   clip-path: polygon(calc(12 * var(--u)) 0, 100% 0, 100% 100%, 0 100%, 0 calc(12 * var(--u)));
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   pointer-events: auto;
   transition:
     background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
-    border-color 0.45s cubic-bezier(0.65, 0, 0.35, 1),
     color 0.45s cubic-bezier(0.65, 0, 0.35, 1);
 }
 .btn .dot { background: #000; transition: background-color 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
 .btn:hover {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--white);
 }
 .btn:hover .dot { background: var(--white); }
@@ -740,6 +739,38 @@ body[data-state="done-loading"] .nav { opacity: 1; }
   .reveal, .tl__inner, .cta--right .btn, .wi, .benefits__desc, .explore, .sl, .hero-para, .hline, .vline, .cross { transition: none !important; }
 }
 
+
+/* film-section labels: /welcome · keep scrolling · /welcome, the row
+   ending 100u above the bottom (y691) */
+.film-labels {
+  position: absolute;
+  top: calc(50% + 291 * var(--u));
+  left: 0;
+  width: 100%;
+  height: calc(9 * var(--u));
+  padding: 0 calc(40 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: calc(10 * var(--u));
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.7s linear;
+}
+.film-labels.show { opacity: 1; }
+.film-labels .explore__center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
 
 /* ============================================================
    SECTION 3 (157:1192) — the film screen lifts away revealing a
