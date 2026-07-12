@@ -266,8 +266,8 @@
       body.setAttribute('data-revealed', '');
       // the film keeps playing sharp for a beat with the content coming
       // in, then the hero blur is armed and eases over the moving footage
-      setTimeout(() => { blurArmed = true; }, reducedMotion ? 0 : 800);
-      setTimeout(startTypeLoop, reducedMotion ? 0 : 1200);
+      setTimeout(() => { blurArmed = true; }, reducedMotion ? 0 : 700);
+      setTimeout(startTypeLoop, reducedMotion ? 0 : 700);
     })(tStart);
   }
 
@@ -692,7 +692,7 @@
     const total = s3.offsetHeight - vh;
     const revealFrac = total > 0 ? Math.min(0.9, vh / total) : 0.2;
     const qq = range(q, revealFrac, 1);
-    const lit = Math.round(range(qq, 0.02, 0.8) * s3Words.length);
+    const lit = Math.round(range(qq, 0.02, 0.94) * s3Words.length);
     if (lit !== s3LitCount) {
       // as reading reaches a new line, the whole line shimmers orange
       // left→right (a horizontal sweep) rather than a per-word cascade
