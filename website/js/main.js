@@ -703,7 +703,6 @@
       benefitDesc.textContent = STEPS[state].desc;
       benefitDesc.classList.remove('hide');
       benefitDesc.classList.add('show');
-      gwaveEls([benefitDesc], 260, 0); // same orange highlight as the title
     };
     if (benefitDesc.classList.contains('show')) {
       benefitDesc.classList.remove('show');
@@ -738,8 +737,6 @@
     // to the box edge, so it reaches a little past the title text
     benefitTitle.style.minWidth = `calc(${STEPS[state].titleW} * var(--u))`;
     requestAnimationFrame(() => requestAnimationFrame(() => wordsIn(benefitTitle)));
-    // the highlight travels the line as the words settle in
-    gwaveEls(Array.from(benefitTitle.querySelectorAll('.wi')), 320, 90);
   }
 
   function transitionBenefits(next) {
