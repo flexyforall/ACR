@@ -253,8 +253,6 @@ body[data-state="done-loading"] .loader { display: none; }
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  /* soft edge under the film screen as it lifts off the white section */
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
 }
 .scene {
   position: absolute;

@@ -568,17 +568,16 @@
     { x: 1080, y: 3700, s: 0.7, d: 1.0 },
   ];
   // small faint pieces that slip closer to the middle and drift past
-  // behind the text (o = opacity) — kept well clear of the big cards'
-  // lanes so the field breathes
+  // behind the text (o = opacity)
   const S3_GHOSTS = [
-    { x: 480, y: 560, s: 0.4, o: 0.4, d: 0.5 },
-    { x: 860, y: 790, s: 0.34, o: 0.34, d: 0.45 },
-    { x: 450, y: 1530, s: 0.45, o: 0.4, d: 0.5 },
-    { x: 900, y: 1960, s: 0.38, o: 0.34, d: 0.42 },
-    { x: 520, y: 2260, s: 0.42, o: 0.38, d: 0.48 },
-    { x: 875, y: 2680, s: 0.36, o: 0.32, d: 0.4 },
-    { x: 470, y: 2990, s: 0.44, o: 0.38, d: 0.5 },
-    { x: 900, y: 3390, s: 0.38, o: 0.34, d: 0.44 },
+    { x: 420, y: 620, s: 0.4, o: 0.4, d: 0.5 },
+    { x: 950, y: 880, s: 0.34, o: 0.34, d: 0.45 },
+    { x: 385, y: 1560, s: 0.45, o: 0.4, d: 0.5 },
+    { x: 985, y: 1905, s: 0.38, o: 0.34, d: 0.42 },
+    { x: 430, y: 2300, s: 0.42, o: 0.38, d: 0.48 },
+    { x: 940, y: 2645, s: 0.36, o: 0.32, d: 0.4 },
+    { x: 400, y: 3005, s: 0.44, o: 0.38, d: 0.5 },
+    { x: 975, y: 3350, s: 0.38, o: 0.34, d: 0.44 },
   ];
   const S3_IMGS = ['assets/card1.jpg', 'assets/card2.jpg', 'assets/card3.jpg'];
   const s3GhostsBox = document.getElementById('s3Ghosts');
