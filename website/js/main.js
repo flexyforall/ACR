@@ -544,24 +544,10 @@
   // cursor field for the floating cards: normalized −1…1 from screen
   // center, eased so the drift trails a little behind the pointer
   let s3MxT = 0, s3MyT = 0, s3Mx = 0, s3My = 0;
-  // raw pointer position for the section's line-and-plus cursor play
-  let s3PxT = 0, s3PyT = 0, s3MouseSeen = false;
   window.addEventListener('mousemove', e => {
     s3MxT = (e.clientX / window.innerWidth) * 2 - 1;
     s3MyT = (e.clientY / window.innerHeight) * 2 - 1;
-    s3PxT = e.clientX;
-    s3PyT = e.clientY;
-    s3MouseSeen = true;
   }, { passive: true });
-
-  // line-and-plus cursor (grey section): a full-width hairline tracks
-  // the mouse's Y with a plus marker at its X; whenever it crosses one
-  // of the reading text's lines, that line plays the orange sweep
-  const s3LineEl = document.getElementById('s3Line');
-  const s3PlusEl = document.getElementById('s3Plus');
-  const s3LabelEl = document.getElementById('s3Label');
-  let s3LineX = 0, s3LineY = 0, s3LineInit = false;
-  let s3RowUnder = -1;
 
   // (x, y) card anchors on the 4939-tall canvas — Getty-style: the
   // imagery rings the centered text from the side corridors, alternating
@@ -726,34 +712,6 @@
       s3LitCount = lit;
     }
 
-    // ---- line-and-plus cursor play + fixed label, only while the
-    // section is on screen (the curtain fully lifted) ----
-    const inZone = x >= vh - 60;
-    if (s3LabelEl) s3LabelEl.classList.toggle('on', inZone);
-    const lineOn = inZone && s3MouseSeen;
-    if (s3LineEl) {
-      s3LineEl.classList.toggle('on', lineOn);
-      if (curEl) curEl.classList.toggle('off', lineOn); // ring steps aside
-      if (lineOn) {
-        if (!s3LineInit) { s3LineInit = true; s3LineX = s3PxT; s3LineY = s3PyT; }
-        s3LineX += (s3PxT - s3LineX) * 0.14;
-        s3LineY += (s3PyT - s3LineY) * 0.14;
-        s3LineEl.style.transform = `translateY(${s3LineY.toFixed(1)}px)`;
-        s3PlusEl.style.left = `${s3LineX.toFixed(1)}px`;
-        // the line striking a text row sends the orange wave through it
-        let row = -1;
-        for (let i = 0; i < s3Lines.length; i++) {
-          const r = s3Lines[i][0].getBoundingClientRect();
-          if (s3LineY >= r.top && s3LineY <= r.bottom) { row = i; break; }
-        }
-        if (row !== s3RowUnder) {
-          s3RowUnder = row;
-          if (row >= 0) gwaveEls(s3Lines[row], 0, 45);
-        }
-      } else {
-        s3RowUnder = -1;
-      }
-    }
   }
 
   // ------------------------------------------------------------------
@@ -1080,8 +1038,8 @@
     curY += gapY * 0.22;
     // the ring swells a little with the pointer's speed and eases back
     // to its resting size once the mouse stops
-    const sp = Math.min(1, Math.hypot(gapX, gapY) / 130);
-    curScale += ((1 + sp * 0.5) - curScale) * 0.12;
+    const sp = Math.min(1, Math.hypot(gapX, gapY) / 110);
+    curScale += ((1 + sp * 1.5) - curScale) * 0.14;
     curEl.style.transform = `translate(${curX.toFixed(2)}px, ${curY.toFixed(2)}px) scale(${curScale.toFixed(3)})`;
   }
 
