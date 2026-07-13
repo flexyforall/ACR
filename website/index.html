@@ -17,9 +17,9 @@
          dimming again when the next one lights -->
     <div class="loader__band" id="loaderBand">
       <div class="loader__tagline">
-        <p class="tl tl--left"><span class="tl__inner" id="tlLeft"><span class="tl__dot"></span><span class="tl__txt">the&nbsp;&nbsp;roof</span></span></p>
-        <p class="tl tl--center"><span class="tl__inner" id="tlCenter"><span class="tl__dot"></span><span class="tl__txt">that makes it</span></span></p>
-        <p class="tl tl--right"><span class="tl__inner" id="tlRight"><span class="tl__dot"></span><span class="tl__txt">home</span></span></p>
+        <p class="tl tl--left"><span class="tl__inner" id="tlLeft"><span class="tl__dot"></span>the&nbsp;&nbsp;roof</span></p>
+        <p class="tl tl--center"><span class="tl__inner" id="tlCenter"><span class="tl__dot"></span>that makes it</span></p>
+        <p class="tl tl--right"><span class="tl__inner" id="tlRight"><span class="tl__dot"></span>home</span></p>
       </div>
     </div>
 
@@ -164,6 +164,18 @@
 
   <!-- ring cursor: a stroke-only circle trailing the pointer -->
   <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <!-- liquid-distortion filter for the grey section's imagery: the
+       turbulence undulates on its own; JS eases the displacement scale
+       up on hover and back to zero on leave -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="liquid" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="4" result="n">
+        <animate attributeName="baseFrequency" dur="9s" values="0.012 0.018;0.017 0.024;0.012 0.018" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap id="liquidDisp" in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
 
   <script src="js/main.js"></script>
 </body>

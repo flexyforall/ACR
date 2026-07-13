@@ -568,16 +568,17 @@
     { x: 1080, y: 3700, s: 0.7, d: 1.0 },
   ];
   // small faint pieces that slip closer to the middle and drift past
-  // behind the text (o = opacity)
+  // behind the text (o = opacity) — kept well clear of the big cards'
+  // lanes so the field breathes
   const S3_GHOSTS = [
-    { x: 420, y: 620, s: 0.4, o: 0.4, d: 0.5 },
-    { x: 950, y: 880, s: 0.34, o: 0.34, d: 0.45 },
-    { x: 385, y: 1560, s: 0.45, o: 0.4, d: 0.5 },
-    { x: 985, y: 1905, s: 0.38, o: 0.34, d: 0.42 },
-    { x: 430, y: 2300, s: 0.42, o: 0.38, d: 0.48 },
-    { x: 940, y: 2645, s: 0.36, o: 0.32, d: 0.4 },
-    { x: 400, y: 3005, s: 0.44, o: 0.38, d: 0.5 },
-    { x: 975, y: 3350, s: 0.38, o: 0.34, d: 0.44 },
+    { x: 480, y: 560, s: 0.4, o: 0.4, d: 0.5 },
+    { x: 860, y: 790, s: 0.34, o: 0.34, d: 0.45 },
+    { x: 450, y: 1530, s: 0.45, o: 0.4, d: 0.5 },
+    { x: 900, y: 1960, s: 0.38, o: 0.34, d: 0.42 },
+    { x: 520, y: 2260, s: 0.42, o: 0.38, d: 0.48 },
+    { x: 875, y: 2680, s: 0.36, o: 0.32, d: 0.4 },
+    { x: 470, y: 2990, s: 0.44, o: 0.38, d: 0.5 },
+    { x: 900, y: 3390, s: 0.38, o: 0.34, d: 0.44 },
   ];
   const S3_IMGS = ['assets/card1.jpg', 'assets/card2.jpg', 'assets/card3.jpg'];
   const s3GhostsBox = document.getElementById('s3Ghosts');
@@ -622,6 +623,44 @@
       if (i < words.length - 1) s3Read.appendChild(document.createTextNode(' '));
       s3Words.push(sp);
     });
+  }
+
+  // liquid distortion on hover: the SVG turbulence undulates on its own;
+  // hovering a card applies the filter to its photo and eases the
+  // displacement in, leaving eases it back out before detaching
+  const liquidDisp = document.getElementById('liquidDisp');
+  let liqT = 0, liq = 0, liqImg = null, liqCard = null;
+
+  if (s3 && liquidDisp && !reducedMotion) {
+    document.addEventListener('mouseover', e => {
+      const card = e.target.closest && e.target.closest('.s3card');
+      if (!card || !s3.contains(card)) return;
+      if (liqCard && liqCard !== card) {
+        liqCard.classList.remove('liq');
+        if (liqImg) liqImg.style.filter = '';
+      }
+      liqCard = card;
+      liqImg = card.querySelector('img');
+      liqImg.style.filter = 'url(#liquid)';
+      card.classList.add('liq');
+      liqT = 1;
+    }, { passive: true });
+    document.addEventListener('mouseout', e => {
+      if (!e.relatedTarget || !e.relatedTarget.closest('.s3card')) liqT = 0;
+    }, { passive: true });
+  }
+
+  function easeLiquid() {
+    if (!liquidDisp || !liqImg) return;
+    liq += (liqT - liq) * 0.09;
+    liquidDisp.setAttribute('scale', (liq * 30).toFixed(1));
+    if (liqT === 0 && liq < 0.015) {
+      liq = 0;
+      liquidDisp.setAttribute('scale', '0');
+      liqImg.style.filter = '';
+      liqImg = null;
+      if (liqCard) { liqCard.classList.remove('liq'); liqCard = null; }
+    }
   }
 
   function applyS3(q) {
@@ -1000,6 +1039,7 @@
     }
 
     drawCursor();
+    easeLiquid();
 
     requestAnimationFrame(rafLoop);
   }
@@ -1032,8 +1072,9 @@
   let curScale = 1;
   let curHover = 0, curHoverT = 0;
 
-  // the ring grows over anything readable or clickable
-  const CUR_HOVER_SEL = 'a, button, p, h1, h2, h3, .slogan, .explore, .film-labels, .s3__read, .benefits-head';
+  // the ring grows over anything readable or clickable, and over the
+  // grey section's imagery
+  const CUR_HOVER_SEL = 'a, button, p, h1, h2, h3, .slogan, .explore, .film-labels, .s3__read, .benefits-head, .s3card';
   if (curEl && !reducedMotion) {
     window.addEventListener('mouseover', e => {
       curHoverT = e.target.closest && e.target.closest(CUR_HOVER_SEL) ? 1 : 0;
