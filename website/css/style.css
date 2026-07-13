@@ -68,10 +68,10 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* the root canvas matches the last section's dark tone, so any
-   overscroll rubber-band past the end blends in. The hero and film get
-   their black from .stage and .loader, not the page bg. */
-html { background: #16110e; }
+/* the root canvas is the section-3 grey, so any overscroll rubber-band
+   past the end shows that colour instead of a black container. The hero
+   and film get their black from .stage and .loader, not the page bg. */
+html { background: #d3cdc7; }
 html, body { width: 100%; }
 html, body { overscroll-behavior-y: none; }
 
@@ -921,147 +921,60 @@ body[data-revealed] .nav { opacity: 1; }
 html.has-cursor,
 html.has-cursor * { cursor: none !important; }
 
-/* ============================================================
-   SECTION 4 (201:1647) — points on a warm blurred backdrop.
-   400vh: one pinned screen, three points across the scroll.
-   ============================================================ */
-.s4 {
-  position: relative;
-  height: 400vh;
-  z-index: 0;
-  background: #16110e;
-}
-.s4__pin {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-}
-/* backdrop: the film's night frame blown up under a heavy blur (the
-   design's BG is a blurred photo with the same navy→warm palette) */
-.s4__bg {
-  position: absolute;
-  left: -8%;
-  top: -8%;
-  width: 116%;
-  height: 116%;
-  object-fit: cover;
-  filter: blur(64px) saturate(1.15) brightness(1.05);
-  transform: scale(1.05);
-}
-.s4__tint {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(115deg, rgba(6, 14, 26, 0.55) 0%, rgba(20, 12, 8, 0.1) 55%, rgba(46, 20, 8, 0.25) 100%);
-}
-/* full-width hairline (Line 7, y308 = center −92): drops in from above */
-.s4__line {
-  position: absolute;
+
+/* ---------- grey-section cursor play (fixed overlays, shown only
+   while the third section is on screen) ---------- */
+/* full-width hairline riding the cursor's Y, with a plus at its X */
+.s3line {
+  position: fixed;
   left: 0;
-  top: calc(50% - 92 * var(--u));
+  top: 0;
   width: 100%;
   height: 1px;
-  background: var(--white-12);
-  transform: translateY(-46vh);
+  background: rgba(0, 0, 0, 0.22);
+  z-index: 3;
+  pointer-events: none;
   opacity: 0;
-  transition: transform 1.4s var(--ease-out), opacity 0.6s linear;
+  transition: opacity 0.4s linear;
+  will-change: transform;
 }
-.s4.in .s4__line { transform: none; opacity: 1; }
-
-/* 001/ about — right-aligned to the x40 grid edge (201:1672) */
-.s4__label {
+.s3line.on { opacity: 1; }
+.s3line__plus {
   position: absolute;
-  right: calc(40 * var(--u));
-  top: calc(50% - 290 * var(--u));
+  left: 0;
+  top: 0;
+  width: calc(9 * var(--u));
+  height: calc(9 * var(--u));
+  transform: translate(-50%, -50%);
+}
+.s3line__plus::before,
+.s3line__plus::after {
+  content: "";
+  position: absolute;
+  background: rgba(0, 0, 0, 0.55);
+}
+.s3line__plus::before { left: 50%; top: 0; width: 1px; height: 100%; transform: translateX(-50%); }
+.s3line__plus::after { top: 50%; left: 0; width: 100%; height: 1px; transform: translateY(-50%); }
+
+/* 001/ ABOUT — fixed, centered at the bottom of the grey section */
+.s3label {
+  position: fixed;
+  left: 50%;
+  bottom: calc(28 * var(--u));
+  transform: translateX(-50%);
+  z-index: 3;
   font-family: var(--font-text);
   font-weight: 400;
   font-size: calc(12 * var(--u));
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  opacity: 0;
-  filter: blur(calc(10 * var(--u)));
-  transition: opacity 0.9s linear 0.2s, filter 1.1s var(--ease-out) 0.2s;
-}
-.s4.in .s4__label { opacity: 1; filter: blur(0); }
-.s4__num { color: var(--white-20); margin-right: calc(6 * var(--u)); }
-.s4__word { color: var(--white); }
-
-/* one point = title block (x40) + para (right column); the active one
-   arrives out of a blur, the rest wait hidden */
-.s4point {
-  position: absolute;
-  inset: 0;
+  color: #000;
   pointer-events: none;
-}
-.s4point__title {
-  position: absolute;
-  left: calc(40 * var(--u));
-  top: calc(50% - 200 * var(--u));
-  padding-left: calc(20 * var(--u));
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: calc(24 * var(--u));
-  line-height: calc(28 * var(--u));
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  color: var(--white);
-}
-.s4point__title::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: calc(12 * var(--u));
-  width: calc(8 * var(--u));
-  height: calc(8 * var(--u));
-  border-radius: 50%;
-  background: var(--white);
-}
-.s4point__title span { display: block; }
-.s4point__title span:nth-child(2) { color: rgba(255, 255, 255, 0.45); }
-.s4point__para {
-  position: absolute;
-  left: calc(929 * var(--u) + 40 * var(--u));
-  top: calc(50% + 252 * var(--u));
-  width: calc(431 * var(--u));
-  font-family: var(--font-text);
-  font-weight: 400;
-  font-size: calc(16 * var(--u));
-  line-height: calc(22 * var(--u));
-  color: var(--white);
-}
-/* text visibility: out of a blur when the point is on */
-.s4point__title,
-.s4point__para {
   opacity: 0;
-  filter: blur(calc(12 * var(--u)));
-  transition: opacity 0.7s linear, filter 0.9s var(--ease-out);
+  transition: opacity 0.5s linear;
 }
-.s4point.on .s4point__title,
-.s4point.on .s4point__para {
-  opacity: 1;
-  filter: blur(0);
-}
-.s4point.on .s4point__para { transition-delay: 0.12s; }
+.s3label.on { opacity: 1; }
+.s3label__num { color: rgba(0, 0, 0, 0.35); margin-right: calc(4 * var(--u)); }
 
-/* point cards (552×480 at x295): float up from under the screen, fly
-   away upward when the next point takes over */
-.s4__card {
-  position: absolute;
-  left: calc(295 * var(--u));
-  top: calc(50% - 200 * var(--u));
-  width: calc(552 * var(--u));
-  height: calc(480 * var(--u));
-  overflow: hidden;
-  transform: translateY(120vh);
-  will-change: transform;
-  transition: transform 1.25s cubic-bezier(0.6, 0.05, 0.25, 1);
-}
-.s4__card.in { transform: translateY(0); }
-.s4__card.gone { transform: translateY(-130vh); }
-.s4__card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+/* the ring cursor steps aside while the line-and-plus takes over */
+.cursor.off { opacity: 0 !important; }

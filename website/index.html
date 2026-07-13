@@ -139,24 +139,6 @@
     <div class="s3__cards" id="s3Cards"></div>
   </section>
 
-  <!-- ======================= SECTION 4 (201:1647): points on a blurred
-       backdrop — the background swaps to a warm dark blur, a hairline
-       drops in from above, copy arrives out of a blur, and the point
-       cards float up from the bottom, each flying away as the next
-       one rises beneath it ======================= -->
-  <section class="s4" id="s4">
-    <div class="s4__pin">
-      <img class="s4__bg" id="s4Bg" alt="" draggable="false" aria-hidden="true" />
-      <div class="s4__tint" aria-hidden="true"></div>
-      <span class="s4__line" aria-hidden="true"></span>
-      <div class="s4__label">
-        <span class="s4__num" id="s4Num">001/</span>
-        <span class="s4__word" id="s4Word">about</span>
-      </div>
-      <div class="s4__points" id="s4Points"></div>
-    </div>
-  </section>
-
   <!-- nav (130:356): fixed at body level so the difference blend sees
        every section behind it (film and white canvas alike) -->
   <header class="nav" id="nav">
@@ -179,6 +161,14 @@
 
   <!-- ring cursor: a stroke-only circle trailing the pointer -->
   <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <!-- grey-section cursor play: a hairline + plus tracking the mouse
+       (replaces the ring there), and the fixed 001/ABOUT label -->
+  <div class="s3line" id="s3Line" aria-hidden="true"><span class="s3line__plus" id="s3Plus"></span></div>
+  <div class="s3label" id="s3Label" aria-hidden="true">
+    <span class="s3label__num">001/</span>
+    <span class="s3label__word">About</span>
+  </div>
 
   <script src="js/main.js"></script>
 </body>

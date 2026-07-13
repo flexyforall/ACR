@@ -544,10 +544,24 @@
   // cursor field for the floating cards: normalized −1…1 from screen
   // center, eased so the drift trails a little behind the pointer
   let s3MxT = 0, s3MyT = 0, s3Mx = 0, s3My = 0;
+  // raw pointer position for the section's line-and-plus cursor play
+  let s3PxT = 0, s3PyT = 0, s3MouseSeen = false;
   window.addEventListener('mousemove', e => {
     s3MxT = (e.clientX / window.innerWidth) * 2 - 1;
     s3MyT = (e.clientY / window.innerHeight) * 2 - 1;
+    s3PxT = e.clientX;
+    s3PyT = e.clientY;
+    s3MouseSeen = true;
   }, { passive: true });
+
+  // line-and-plus cursor (grey section): a full-width hairline tracks
+  // the mouse's Y with a plus marker at its X; whenever it crosses one
+  // of the reading text's lines, that line plays the orange sweep
+  const s3LineEl = document.getElementById('s3Line');
+  const s3PlusEl = document.getElementById('s3Plus');
+  const s3LabelEl = document.getElementById('s3Label');
+  let s3LineX = 0, s3LineY = 0, s3LineInit = false;
+  let s3RowUnder = -1;
 
   // (x, y) card anchors on the 4939-tall canvas — Getty-style: the
   // imagery rings the centered text from the side corridors, alternating
@@ -711,99 +725,34 @@
       s3Words.forEach((w, i) => w.classList.toggle('lit', i < lit));
       s3LitCount = lit;
     }
-  }
 
-  // ------------------------------------------------------------------
-  // SECTION 4 (201:1647): three points on a warm blurred backdrop.
-  // Reaching the section drops the hairline in from above and blurs the
-  // copy in; each point's card floats up from under the screen and
-  // flies away upward when the scroll moves to the next point.
-  // ------------------------------------------------------------------
-  const s4 = document.getElementById('s4');
-  const s4Bg = document.getElementById('s4Bg');
-  const s4Num = document.getElementById('s4Num');
-  const s4Word = document.getElementById('s4Word');
-  const s4PointsBox = document.getElementById('s4Points');
-  let s4Step = -1;   // -1 = not entered yet
-  let s4In = false;
-
-  const S4_POINTS = [
-    {
-      num: '001', word: 'about',
-      lines: ['Standalone', 'class a', 'firerated'],
-      para: 'Protection where it matters most. Noncombustible and engineered to slow, resist, and even stop flames when every second counts. Because peace of mind should come standard.',
-    },
-    {
-      num: '002', word: 'texture',
-      lines: ['The look of', 'natural', 'cedar'],
-      para: 'The warm, hand-split character of natural cedar shakes, engineered to keep its depth and dimension for decades without fading, curling or rot.',
-    },
-    {
-      num: '003', word: 'promise',
-      lines: ['A lifetime', 'of peace', 'of mind'],
-      para: 'Backed by one of the strongest warranties in the industry, because choosing a roof should be a decision you only make once.',
-    },
-  ];
-
-  if (s4) {
-    // the backdrop reuses the film's night frame under a heavy blur —
-    // same navy-to-warm palette as the design's blurred photo
-    s4Bg.src = FRAME_PATH(0);
-    S4_POINTS.forEach((p, i) => {
-      const pt = document.createElement('div');
-      pt.className = 's4point';
-      const title = document.createElement('h3');
-      title.className = 's4point__title';
-      p.lines.forEach(l => {
-        const sp = document.createElement('span');
-        sp.textContent = l;
-        title.appendChild(sp);
-      });
-      const para = document.createElement('p');
-      para.className = 's4point__para';
-      para.textContent = p.para;
-      pt.appendChild(title);
-      pt.appendChild(para);
-      s4PointsBox.appendChild(pt);
-      p.el = pt;
-      // the card lives outside the text group so it can layer over the line
-      const card = document.createElement('div');
-      card.className = 's4__card';
-      const im = document.createElement('img');
-      im.src = S3_IMGS[i % S3_IMGS.length];
-      im.alt = '';
-      im.draggable = false;
-      im.decoding = 'async';
-      if (im.decode) im.decode().catch(() => {});
-      card.appendChild(im);
-      s4PointsBox.parentElement.appendChild(card);
-      p.card = card;
-    });
-  }
-
-  function applyS4() {
-    if (!s4) return;
-    const vh = window.innerHeight;
-    const top = s4.offsetTop;
-    // entrance: once the section fills a third of the screen the line
-    // drops in and the first point rises
-    const entered = window.scrollY > top - vh * 0.65;
-    if (entered !== s4In) {
-      s4In = entered;
-      s4.classList.toggle('in', entered);
-    }
-    const p = (window.scrollY - top) / (s4.offsetHeight - vh);
-    const step = !entered ? -1 : p < 0.34 ? 0 : p < 0.67 ? 1 : 2;
-    if (step === s4Step) return;
-    s4Step = step;
-    S4_POINTS.forEach((pt, i) => {
-      pt.el.classList.toggle('on', i === step);
-      pt.card.classList.toggle('in', i === step);
-      pt.card.classList.toggle('gone', step >= 0 && i < step);
-    });
-    if (step >= 0) {
-      s4Num.textContent = `${S4_POINTS[step].num}/`;
-      s4Word.textContent = S4_POINTS[step].word;
+    // ---- line-and-plus cursor play + fixed label, only while the
+    // section is on screen (the curtain fully lifted) ----
+    const inZone = x >= vh - 60;
+    if (s3LabelEl) s3LabelEl.classList.toggle('on', inZone);
+    const lineOn = inZone && s3MouseSeen;
+    if (s3LineEl) {
+      s3LineEl.classList.toggle('on', lineOn);
+      if (curEl) curEl.classList.toggle('off', lineOn); // ring steps aside
+      if (lineOn) {
+        if (!s3LineInit) { s3LineInit = true; s3LineX = s3PxT; s3LineY = s3PyT; }
+        s3LineX += (s3PxT - s3LineX) * 0.14;
+        s3LineY += (s3PyT - s3LineY) * 0.14;
+        s3LineEl.style.transform = `translateY(${s3LineY.toFixed(1)}px)`;
+        s3PlusEl.style.left = `${s3LineX.toFixed(1)}px`;
+        // the line striking a text row sends the orange wave through it
+        let row = -1;
+        for (let i = 0; i < s3Lines.length; i++) {
+          const r = s3Lines[i][0].getBoundingClientRect();
+          if (s3LineY >= r.top && s3LineY <= r.bottom) { row = i; break; }
+        }
+        if (row !== s3RowUnder) {
+          s3RowUnder = row;
+          if (row >= 0) gwaveEls(s3Lines[row], 0, 45);
+        }
+      } else {
+        s3RowUnder = -1;
+      }
     }
   }
 
@@ -1044,12 +993,11 @@
     vlineEls[1].style.setProperty('--vx', vxR.toFixed(2));
     crossEls.forEach((el, i) => el.style.setProperty('--cx', (i % 2 === 0 ? vxL : vxR).toFixed(2)));
 
-    // the header inverts only while the light grey section is under it —
-    // the dark hero, film and points sections show its true colors
+    // the header inverts only once the white section slides under it —
+    // the dark hero and film sections show it in its true colors
     if (navEl && s3) {
-      const past = s4 ? window.scrollY >= s4.offsetTop - 90 * u() : false;
       navEl.classList.toggle('nav--blend',
-        window.scrollY >= s3.offsetTop + window.innerHeight - 110 * u() && !past);
+        window.scrollY >= s3.offsetTop + window.innerHeight - 110 * u());
     }
 
     // section 3 runs on its own smoothed progress; the card field's
@@ -1061,7 +1009,6 @@
       s3My += (s3MyT - s3My) * 0.055;
     }
     if (body.dataset.state !== 'loading') applyS3(s3Smooth);
-    if (body.dataset.state !== 'loading') applyS4();
 
     // frame target: the film plays at rest; scrolling triggers a fast
     // rewind to frame 1, after which the scroll scrub takes over
@@ -1124,11 +1071,18 @@
     document.addEventListener('mouseenter', () => { if (curOn) curEl.classList.add('on'); });
   }
 
+  let curScale = 1;
+
   function drawCursor() {
     if (!curOn || !curEl) return;
-    curX += (curTX - curX) * 0.22;
-    curY += (curTY - curY) * 0.22;
-    curEl.style.transform = `translate(${curX.toFixed(2)}px, ${curY.toFixed(2)}px)`;
+    const gapX = curTX - curX, gapY = curTY - curY;
+    curX += gapX * 0.22;
+    curY += gapY * 0.22;
+    // the ring swells a little with the pointer's speed and eases back
+    // to its resting size once the mouse stops
+    const sp = Math.min(1, Math.hypot(gapX, gapY) / 130);
+    curScale += ((1 + sp * 0.5) - curScale) * 0.12;
+    curEl.style.transform = `translate(${curX.toFixed(2)}px, ${curY.toFixed(2)}px) scale(${curScale.toFixed(3)})`;
   }
 
   // ------------------------------------------------------------------
