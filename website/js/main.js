@@ -1030,16 +1030,29 @@
   }
 
   let curScale = 1;
+  let curHover = 0, curHoverT = 0;
+
+  // the ring grows over anything readable or clickable
+  const CUR_HOVER_SEL = 'a, button, p, h1, h2, h3, .slogan, .explore, .film-labels, .s3__read, .benefits-head';
+  if (curEl && !reducedMotion) {
+    window.addEventListener('mouseover', e => {
+      curHoverT = e.target.closest && e.target.closest(CUR_HOVER_SEL) ? 1 : 0;
+    }, { passive: true });
+    window.addEventListener('mouseout', e => {
+      if (!e.relatedTarget || !e.relatedTarget.closest(CUR_HOVER_SEL)) curHoverT = 0;
+    }, { passive: true });
+  }
 
   function drawCursor() {
     if (!curOn || !curEl) return;
     const gapX = curTX - curX, gapY = curTY - curY;
     curX += gapX * 0.22;
     curY += gapY * 0.22;
-    // the ring swells a little with the pointer's speed and eases back
-    // to its resting size once the mouse stops
+    // the ring swells with the pointer's speed (easing back at rest)
+    // and grows while hovering text or buttons
     const sp = Math.min(1, Math.hypot(gapX, gapY) / 110);
-    curScale += ((1 + sp * 1.5) - curScale) * 0.14;
+    curHover += (curHoverT - curHover) * 0.12;
+    curScale += ((1 + sp * 1.5) * (1 + curHover * 0.9) - curScale) * 0.14;
     curEl.style.transform = `translate(${curX.toFixed(2)}px, ${curY.toFixed(2)}px) scale(${curScale.toFixed(3)})`;
   }
 

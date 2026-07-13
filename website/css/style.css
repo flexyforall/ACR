@@ -68,10 +68,9 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* the root canvas is the section-3 grey, so any overscroll rubber-band
-   past the end shows that colour instead of a black container. The hero
-   and film get their black from .stage and .loader, not the page bg. */
-html { background: #d3cdc7; }
+/* the page closes on black: the tail block after the grey section marks
+   its end, and the overscroll canvas matches it */
+html { background: #000; }
 html, body { width: 100%; }
 html, body { overscroll-behavior-y: none; }
 
@@ -211,6 +210,15 @@ body[data-state="done-loading"] .loader { display: none; }
 }
 .tl__inner.lit { color: var(--white); }
 .tl__inner.lit .tl__dot { opacity: 1; transform: scale(1); }
+/* the phrase spins over itself (rolls through the clip) as it lights */
+.tl__txt { display: inline-block; }
+.tl__inner.lit .tl__txt { animation: tlspin 0.6s cubic-bezier(0.65, 0, 0.35, 1); }
+@keyframes tlspin {
+  0% { transform: translateY(0); }
+  49.9% { transform: translateY(-112%); }
+  50.1% { transform: translateY(112%); }
+  100% { transform: translateY(0); }
+}
 .loader[data-in] .tl__inner { transform: translateY(0); }
 .loader[data-in] .tl--left .tl__inner { transition-delay: 0.05s, 0s; }
 .loader[data-in] .tl--center .tl__inner { transition-delay: 0.2s, 0s; }
@@ -918,8 +926,14 @@ body[data-revealed] .nav { opacity: 1; }
   will-change: transform;
   transition: opacity 0.35s ease;
 }
-.cursor.on { opacity: 1; }
+.cursor.on { opacity: 0.2; }
 html.has-cursor,
 html.has-cursor * { cursor: none !important; }
 
 
+
+/* black tail after the grey section — a visible end to the page */
+.tail {
+  height: 45vh;
+  background: #000;
+}
