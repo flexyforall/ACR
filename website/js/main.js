@@ -76,7 +76,6 @@
   const navEl = document.getElementById('nav');
   const loaderBand = document.getElementById('loaderBand');
   const stage = document.getElementById('stage');
-  const stagePin = document.querySelector('.stage__pin');
   const hero2 = document.getElementById('hero2');
   const cta = document.getElementById('cta');
   const benefitsHead = document.getElementById('benefitsHead');
@@ -686,21 +685,6 @@
     const rv = vh > 0 ? clamp01(x / vh) : 1;
     s3CardsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
     s3GhostsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
-
-    // the film screen leaves like the loader panel: its leading edge
-    // bows downward mid-flight (an arc clipped into the pin's bottom,
-    // centre trailing, sides leading) and flattens as it settles —
-    // scroll-driven, so scrubbing back replays it in reverse
-    if (stagePin) {
-      if (rv > 0.001 && rv < 0.999) {
-        const D = 0.2 * vh * Math.sin(Math.PI * rv);
-        const w = window.innerWidth;
-        stagePin.style.clipPath =
-          `path('M0 0 H${w} V${(vh - D).toFixed(1)} Q${w / 2} ${(vh + D).toFixed(1)} 0 ${(vh - D).toFixed(1)} Z')`;
-      } else if (stagePin.style.clipPath) {
-        stagePin.style.clipPath = '';
-      }
-    }
 
     // entrance: text + cards arrive out of a blur as the film lifts
     const bl = 16 * (1 - smooth01(clamp01((rv - 0.15) / 0.75)));
