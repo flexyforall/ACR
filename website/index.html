@@ -131,12 +131,29 @@
        revealing a white canvas — the 56px text is pinned mid-screen and
        reads itself in while photo cards scroll past in two columns ======================= -->
   <section class="s3" id="s3">
-    <!-- everything lives inside the sticky pin so it's positioned to the
-         viewport (one composed screen), not the scroll length -->
+    <!-- faint placeholder imagery drifting behind the pinned text -->
+    <div class="s3__ghosts" id="s3Ghosts" aria-hidden="true"></div>
     <div class="s3__pin">
-      <div class="s3__ghosts" id="s3Ghosts" aria-hidden="true"></div>
       <p class="s3__read" id="s3Read">Whether you&rsquo;re designing, building, or protecting a home for generations, CEDUR delivers beauty and performance you can trust.</p>
-      <div class="s3__cards" id="s3Cards"></div>
+    </div>
+    <div class="s3__cards" id="s3Cards"></div>
+  </section>
+
+  <!-- ======================= SECTION 4 (201:1647): points on a blurred
+       backdrop — the background swaps to a warm dark blur, a hairline
+       drops in from above, copy arrives out of a blur, and the point
+       cards float up from the bottom, each flying away as the next
+       one rises beneath it ======================= -->
+  <section class="s4" id="s4">
+    <div class="s4__pin">
+      <img class="s4__bg" id="s4Bg" alt="" draggable="false" aria-hidden="true" />
+      <div class="s4__tint" aria-hidden="true"></div>
+      <span class="s4__line" aria-hidden="true"></span>
+      <div class="s4__label">
+        <span class="s4__num" id="s4Num">001/</span>
+        <span class="s4__word" id="s4Word">about</span>
+      </div>
+      <div class="s4__points" id="s4Points"></div>
     </div>
   </section>
 
@@ -160,8 +177,7 @@
     </div>
   </header>
 
-  <!-- elastic blob cursor (unseen.co-style): a dot that stretches along
-       its direction of travel by speed and relaxes back to a circle -->
+  <!-- ring cursor: a stroke-only circle trailing the pointer -->
   <div class="cursor" id="cursor" aria-hidden="true"></div>
 
   <script src="js/main.js"></script>

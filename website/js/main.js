@@ -549,25 +549,35 @@
     s3MyT = (e.clientY / window.innerHeight) * 2 - 1;
   }, { passive: true });
 
-  // the section is a single viewport-tall screen: the imagery frames the
-  // centered text within one board (1440 wide), reveals as the curtain
-  // lifts, and floats after the cursor. (x, y) are board coords from the
-  // viewport's top-left; s = size, d = cursor-parallax depth, delay =
-  // reveal stagger.
+  // (x, y) card anchors on the 4939-tall canvas — Getty-style: the
+  // imagery rings the centered text from the side corridors, alternating
+  // and varying in size (s), never parking on top of the copy
+  // (d is the cursor-parallax depth: bigger = drifts/tilts more)
   const S3_CARDS = [
-    { x: 20,   y: 360, s: 1.0,  d: 1.1,  delay: 0.0 },
-    { x: 1168, y: 340, s: 0.9,  d: 1.0,  delay: 0.08 },
-    { x: 40,   y: 60,  s: 0.72, d: 0.85, delay: 0.14 },
-    { x: 1150, y: 40,  s: 0.68, d: 0.8,  delay: 0.18 },
-    { x: 150,  y: 640, s: 0.66, d: 0.9,  delay: 0.22 },
-    { x: 1060, y: 660, s: 0.74, d: 0.95, delay: 0.12 },
+    { x: 60, y: -10, s: 1.0, d: 1.0 },
+    { x: 1128, y: 330, s: 0.78, d: 0.85 },
+    { x: 205, y: 760, s: 0.6, d: 0.95 },
+    { x: 1055, y: 1010, s: 1.05, d: 1.15 },
+    { x: 45, y: 1360, s: 0.85, d: 0.8 },
+    { x: 1185, y: 1725, s: 0.6, d: 1.0 },
+    { x: 140, y: 2085, s: 1.0, d: 1.1 },
+    { x: 1090, y: 2405, s: 0.75, d: 0.9 },
+    { x: 60, y: 2770, s: 0.65, d: 1.0 },
+    { x: 1145, y: 3055, s: 0.95, d: 1.05 },
+    { x: 230, y: 3420, s: 0.8, d: 0.9 },
+    { x: 1080, y: 3700, s: 0.7, d: 1.0 },
   ];
-  // small faint pieces closer to the middle, behind the text
+  // small faint pieces that slip closer to the middle and drift past
+  // behind the text (o = opacity)
   const S3_GHOSTS = [
-    { x: 430, y: 90,  s: 0.4,  o: 0.4,  d: 0.5,  delay: 0.1 },
-    { x: 905, y: 130, s: 0.36, o: 0.34, d: 0.45, delay: 0.16 },
-    { x: 470, y: 600, s: 0.42, o: 0.4,  d: 0.5,  delay: 0.2 },
-    { x: 880, y: 585, s: 0.38, o: 0.34, d: 0.44, delay: 0.24 },
+    { x: 420, y: 620, s: 0.4, o: 0.4, d: 0.5 },
+    { x: 950, y: 880, s: 0.34, o: 0.34, d: 0.45 },
+    { x: 385, y: 1560, s: 0.45, o: 0.4, d: 0.5 },
+    { x: 985, y: 1905, s: 0.38, o: 0.34, d: 0.42 },
+    { x: 430, y: 2300, s: 0.42, o: 0.38, d: 0.48 },
+    { x: 940, y: 2645, s: 0.36, o: 0.32, d: 0.4 },
+    { x: 400, y: 3005, s: 0.44, o: 0.38, d: 0.5 },
+    { x: 975, y: 3350, s: 0.38, o: 0.34, d: 0.44 },
   ];
   const S3_IMGS = ['assets/card1.jpg', 'assets/card2.jpg', 'assets/card3.jpg'];
   const s3GhostsBox = document.getElementById('s3Ghosts');
@@ -614,47 +624,75 @@
     });
   }
 
-  function applyS3() {
+  function applyS3(q) {
     if (!s3) return;
     const vh = window.innerHeight;
-    const px = u();
 
-    // one viewport-tall section: everything is driven by the curtain
-    // reveal progress rv (0→1 over the scroll window [s3top, s3top+vh]).
-    // The content is a fixed composed screen — nothing flows past on
-    // scroll; the cards, text and reading all arrive as the film lifts.
+    // the curtain reveal is the scroll window [s3top, s3top + vh]: the
+    // stage screen (stacked above) slides up while s3's own pin holds.
+    // Counter the document scroll exactly (raw scrollY, no smoothing)
+    // so nothing inside moves until the film screen is fully gone; then,
+    // instead of snapping to full scroll speed, the cards accelerate
+    // from rest over the next half viewport (no velocity jump).
     const sTop = s3.offsetTop;
-    const rv = vh > 0 ? clamp01((window.scrollY - sTop) / vh) : 1;
-    s3CardsBox.style.transform = 'none';
-    s3GhostsBox.style.transform = 'none';
+    const x = window.scrollY - sTop;
+    const easeD = vh * 0.4;
+    let reveal;
+    if (x <= 0) reveal = 0;
+    else if (x <= vh) reveal = x;                       // frozen under the curtain
+    else if (x <= vh + easeD) {
+      const e = x - vh;
+      reveal = vh + e - (e * e) / (2 * easeD);          // velocity ramps 0 → 1
+    } else reveal = vh + easeD / 2;                     // riding the scroll
+    const rv = vh > 0 ? clamp01(x / vh) : 1;
+    s3CardsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
+    s3GhostsBox.style.transform = `translateY(${reveal.toFixed(1)}px)`;
 
-    // entrance: text + imagery arrive out of a blur as the film lifts
-    const bl = 16 * (1 - smooth01(clamp01((rv - 0.1) / 0.8)));
-    const blCss = bl > 0.15 ? `blur(${(bl * px).toFixed(1)}px)` : '';
+    // entrance: text + cards arrive out of a blur as the film lifts
+    const bl = 16 * (1 - smooth01(clamp01((rv - 0.15) / 0.75)));
+    const blCss = bl > 0.15 ? `blur(${(bl * u()).toFixed(1)}px)` : '';
     s3Read.style.filter = blCss;
     s3CardsBox.style.filter = blCss;
     s3GhostsBox.style.filter = blCss;
 
-    // the whole field floats/tilts after the cursor by depth; each card
-    // wipes in bottom-up (staggered by delay) with its photo settling
-    // from a slight zoom
-    const float = (d, sc) =>
-      `translate3d(${(s3Mx * 30 * px * d).toFixed(1)}px, ${(s3My * 22 * px * d).toFixed(1)}px, 0) ` +
-      `perspective(900px) rotateX(${(-s3My * 2.2 * d).toFixed(2)}deg) rotateY(${(s3Mx * 3 * d).toFixed(2)}deg) ` +
+    // cards grow as they come into view (centerY is their true viewport
+    // position — constant during the reveal, so the scale holds too),
+    // the whole field floats/tilts after the cursor by depth, and each
+    // card unveils bottom-up with its photo settling from a slight zoom
+    const px = u();
+    const float = (d, sc, dx) =>
+      `translate3d(${(s3Mx * 34 * px * d + dx).toFixed(1)}px, ${(s3My * 26 * px * d).toFixed(1)}px, 0) ` +
+      `perspective(900px) rotateX(${(-s3My * 2.4 * d).toFixed(2)}deg) rotateY(${(s3Mx * 3.2 * d).toFixed(2)}deg) ` +
       `scale(${sc.toFixed(3)})`;
+    const unveil = (c, topY) => {
+      const r = smooth01(clamp01((vh * 1.05 - topY) / (vh * 0.35)));
+      c.el.style.clipPath = r < 0.995 ? `inset(${((1 - r) * 100).toFixed(2)}% 0 0 0)` : '';
+      c.im.style.transform = r < 0.995 ? `scale(${(1.3 - 0.3 * r).toFixed(3)})` : '';
+    };
     const place = (c, grow) => {
-      const t = smooth01(clamp01((rv - (c.delay || 0)) / 0.5));
-      c.el.style.transform = float(c.d, c.s * (grow + (1 - grow) * t));
-      c.el.style.clipPath = t < 0.995 ? `inset(${((1 - t) * 100).toFixed(1)}% 0 0 0)` : '';
-      c.im.style.transform = t < 0.995 ? `scale(${(1.3 - 0.3 * t).toFixed(3)})` : '';
+      const cY = sTop + (c.y + 122.5) * px + reveal - window.scrollY; // rendered center
+      const rh = 122.5 * c.s * px;                                    // rendered half height
+      const tIn = clamp01((vh * 1.15 - cY) / (vh * 0.85));
+      // bend around the pinned text: full dodge for as long as the card
+      // overlaps the text band, easing back to the lane beyond it
+      const bandTop = vh / 2 - 220 * px;
+      const bandBot = vh / 2 + 220 * px;
+      const gap = Math.max(0, Math.max(bandTop - (cY + rh), (cY - rh) - bandBot));
+      const bell = smooth01(clamp01(1 - gap / (vh * 0.22)));
+      const dx = c.dodge * c.dir * bell * px;
+      c.el.style.transform = float(c.d, c.s * (grow + (1 - grow) * Math.min(1, tIn)), dx);
+      unveil(c, cY - rh);
     };
     S3_CARDS.forEach(c => place(c, 0.72));
     S3_GHOSTS.forEach(c => place(c, 0.85));
 
-    // reading: words light left→right as the curtain lifts, each line
-    // shimmering orange as the reading reaches it
-    if (rv <= 0.02) s3FiredLine = -1; // replay on re-entry
-    const lit = Math.round(range(rv, 0.2, 0.95) * s3Words.length);
+    // reading effect: starts only once the film screen is fully gone
+    // (q past the reveal window), words lighting from 20% black to
+    // black as you scroll
+    const total = s3.offsetHeight - vh;
+    const revealFrac = total > 0 ? Math.min(0.9, vh / total) : 0.2;
+    const qq = range(q, revealFrac, 1);
+    const lit = Math.round(range(qq, 0.02, 0.94) * s3Words.length);
     if (lit !== s3LitCount) {
       // as reading reaches a new line, the whole line shimmers orange
       // left→right (a horizontal sweep) rather than a per-word cascade
@@ -667,9 +705,105 @@
             gwaveEls(s3Lines[ln], 0, 45); // left→right across the line
           }
         }
+      } else if (lit <= 0) {
+        s3FiredLine = -1; // allow the sweep to replay on re-entry
       }
       s3Words.forEach((w, i) => w.classList.toggle('lit', i < lit));
       s3LitCount = lit;
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // SECTION 4 (201:1647): three points on a warm blurred backdrop.
+  // Reaching the section drops the hairline in from above and blurs the
+  // copy in; each point's card floats up from under the screen and
+  // flies away upward when the scroll moves to the next point.
+  // ------------------------------------------------------------------
+  const s4 = document.getElementById('s4');
+  const s4Bg = document.getElementById('s4Bg');
+  const s4Num = document.getElementById('s4Num');
+  const s4Word = document.getElementById('s4Word');
+  const s4PointsBox = document.getElementById('s4Points');
+  let s4Step = -1;   // -1 = not entered yet
+  let s4In = false;
+
+  const S4_POINTS = [
+    {
+      num: '001', word: 'about',
+      lines: ['Standalone', 'class a', 'firerated'],
+      para: 'Protection where it matters most. Noncombustible and engineered to slow, resist, and even stop flames when every second counts. Because peace of mind should come standard.',
+    },
+    {
+      num: '002', word: 'texture',
+      lines: ['The look of', 'natural', 'cedar'],
+      para: 'The warm, hand-split character of natural cedar shakes, engineered to keep its depth and dimension for decades without fading, curling or rot.',
+    },
+    {
+      num: '003', word: 'promise',
+      lines: ['A lifetime', 'of peace', 'of mind'],
+      para: 'Backed by one of the strongest warranties in the industry, because choosing a roof should be a decision you only make once.',
+    },
+  ];
+
+  if (s4) {
+    // the backdrop reuses the film's night frame under a heavy blur —
+    // same navy-to-warm palette as the design's blurred photo
+    s4Bg.src = FRAME_PATH(0);
+    S4_POINTS.forEach((p, i) => {
+      const pt = document.createElement('div');
+      pt.className = 's4point';
+      const title = document.createElement('h3');
+      title.className = 's4point__title';
+      p.lines.forEach(l => {
+        const sp = document.createElement('span');
+        sp.textContent = l;
+        title.appendChild(sp);
+      });
+      const para = document.createElement('p');
+      para.className = 's4point__para';
+      para.textContent = p.para;
+      pt.appendChild(title);
+      pt.appendChild(para);
+      s4PointsBox.appendChild(pt);
+      p.el = pt;
+      // the card lives outside the text group so it can layer over the line
+      const card = document.createElement('div');
+      card.className = 's4__card';
+      const im = document.createElement('img');
+      im.src = S3_IMGS[i % S3_IMGS.length];
+      im.alt = '';
+      im.draggable = false;
+      im.decoding = 'async';
+      if (im.decode) im.decode().catch(() => {});
+      card.appendChild(im);
+      s4PointsBox.parentElement.appendChild(card);
+      p.card = card;
+    });
+  }
+
+  function applyS4() {
+    if (!s4) return;
+    const vh = window.innerHeight;
+    const top = s4.offsetTop;
+    // entrance: once the section fills a third of the screen the line
+    // drops in and the first point rises
+    const entered = window.scrollY > top - vh * 0.65;
+    if (entered !== s4In) {
+      s4In = entered;
+      s4.classList.toggle('in', entered);
+    }
+    const p = (window.scrollY - top) / (s4.offsetHeight - vh);
+    const step = !entered ? -1 : p < 0.34 ? 0 : p < 0.67 ? 1 : 2;
+    if (step === s4Step) return;
+    s4Step = step;
+    S4_POINTS.forEach((pt, i) => {
+      pt.el.classList.toggle('on', i === step);
+      pt.card.classList.toggle('in', i === step);
+      pt.card.classList.toggle('gone', step >= 0 && i < step);
+    });
+    if (step >= 0) {
+      s4Num.textContent = `${S4_POINTS[step].num}/`;
+      s4Word.textContent = S4_POINTS[step].word;
     }
   }
 
@@ -910,11 +1044,12 @@
     vlineEls[1].style.setProperty('--vx', vxR.toFixed(2));
     crossEls.forEach((el, i) => el.style.setProperty('--cx', (i % 2 === 0 ? vxL : vxR).toFixed(2)));
 
-    // the header inverts only once the white section slides under it —
-    // the dark hero and film sections show it in its true colors
+    // the header inverts only while the light grey section is under it —
+    // the dark hero, film and points sections show its true colors
     if (navEl && s3) {
+      const past = s4 ? window.scrollY >= s4.offsetTop - 90 * u() : false;
       navEl.classList.toggle('nav--blend',
-        window.scrollY >= s3.offsetTop + window.innerHeight - 110 * u());
+        window.scrollY >= s3.offsetTop + window.innerHeight - 110 * u() && !past);
     }
 
     // section 3 runs on its own smoothed progress; the card field's
@@ -926,6 +1061,7 @@
       s3My += (s3MyT - s3My) * 0.055;
     }
     if (body.dataset.state !== 'loading') applyS3(s3Smooth);
+    if (body.dataset.state !== 'loading') applyS4();
 
     // frame target: the film plays at rest; scrolling triggers a fast
     // rewind to frame 1, after which the scroll scrub takes over
