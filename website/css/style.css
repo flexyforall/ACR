@@ -246,7 +246,10 @@ body[data-state="done-loading"] .loader { display: none; }
 /* ============================================================
    PINNED STAGE
    ============================================================ */
-.stage { height: 600vh; position: relative; z-index: 2; background: #000; }
+/* no own background: the film canvas covers the pin, and the body is
+   already black — this way the grey section shows through the curved
+   clip during the reveal instead of a black backdrop */
+.stage { height: 600vh; position: relative; z-index: 2; }
 .stage__pin {
   position: sticky;
   top: 0;
