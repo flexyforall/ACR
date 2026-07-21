@@ -1,0 +1,539 @@
+/* ------------------------------------------------------------------
+   Wedge landing — Figma "Wedge Internal / transition" section
+   Fonts are placeholders for now:
+     --font-display  →  swap for "Mozilla Headline"
+     --font-text     →  swap for "Mozilla Text"
+     --font-body     →  swap for "Inter"
+------------------------------------------------------------------- */
+
+:root {
+  --font-display: "Helvetica Neue", "Segoe UI", Arial, sans-serif; /* TODO: Mozilla Headline */
+  --font-text: Georgia, "Times New Roman", serif;                  /* TODO: Mozilla Text */
+  --font-body: system-ui, "Segoe UI", Arial, sans-serif;           /* TODO: Inter */
+
+  --ink: #1b1b21;
+  --blue: #2f6de0;
+  --blue-deep: #1c5bd8;
+  --blue-bright: #2b84f8;
+  --frame-radius: 12px;
+  --frame-gap: 24px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: #fff;
+  overflow-x: hidden;
+}
+
+/* ---------- rounded inset frame shared by hero + transition ---------- */
+
+.frame {
+  position: absolute;
+  inset: var(--frame-gap);
+  border-radius: var(--frame-radius);
+  overflow: hidden;
+}
+
+/* =====================  Menu  ===================== */
+
+.menu {
+  position: fixed;
+  top: calc(var(--frame-gap) + 20px);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.menu__logo { display: grid; place-items: center; }
+
+.menu__links { display: flex; }
+
+.menu__links a {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  color: var(--ink);
+  opacity: 0.6;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.menu__links a:hover { opacity: 1; }
+
+.menu__cta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid rgba(27, 27, 33, 0.1);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  color: var(--ink);
+  text-decoration: none;
+  transition: box-shadow 0.2s;
+}
+.menu__cta:hover { box-shadow: 0 2px 10px rgba(27, 27, 33, 0.12); }
+
+/* =====================  Screen 1 · Hero  ===================== */
+
+.hero { position: relative; height: 100vh; }
+
+.frame--hero { background: #bed1f7; }
+
+.hero__bg { position: absolute; inset: 0; }
+
+.hero__bg::before {
+  /* top light + left column washes from the Figma gradients */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, #dee6ff 24.5%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(90deg, #d1dbf9 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(200deg, rgba(215, 234, 255, 0.9), rgba(190, 209, 247, 0.6));
+}
+
+.hero__tiles {
+  /* placeholder for the tiled-glass video backdrop */
+  position: absolute;
+  inset: -20% -10%;
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.35) 0 2px, transparent 2px 120px),
+    repeating-linear-gradient(25deg, rgba(255, 255, 255, 0.3) 0 2px, transparent 2px 120px);
+  transform: perspective(900px) rotateX(28deg) scale(1.15);
+  transform-origin: 50% 100%;
+  opacity: 0.55;
+  mask-image: radial-gradient(120% 90% at 70% 55%, #000 40%, transparent 78%);
+  -webkit-mask-image: radial-gradient(120% 90% at 70% 55%, #000 40%, transparent 78%);
+}
+
+.hero__cube {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  translate: 0 -52%;
+  filter: drop-shadow(0 40px 60px rgba(31, 95, 216, 0.35));
+  animation: cube-float 7s ease-in-out infinite;
+}
+
+@keyframes cube-float {
+  0%, 100% { translate: 0 -52%; }
+  50% { translate: 0 -56%; }
+}
+
+.hero__content {
+  position: absolute;
+  left: 60px;
+  top: 50%;
+  translate: 0 -50%;
+  width: min(800px, 70%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.hero__backed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.yc { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+
+.yc__badge {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  background: #101014;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(40px, 4.45vw, 64px);
+  line-height: 1.09;
+  letter-spacing: -0.02em;
+}
+
+.hero__sub {
+  font-size: 20px;
+  line-height: 1.8;
+  color: rgba(27, 27, 33, 0.6);
+  margin-top: -24px;
+}
+
+.hero__cta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px;
+  border-radius: 6px;
+  border: 1px solid #fff;
+  background: rgba(27, 27, 33, 0.06);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.25s, box-shadow 0.25s;
+}
+
+.hero__cta::after {
+  /* soft top glow sweep (Ellipse 2 in Figma) */
+  content: "";
+  position: absolute;
+  left: 15%;
+  top: -170%;
+  width: 150%;
+  height: 200%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.9), transparent);
+  opacity: 0.5;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.hero__cta:hover { background: rgba(255, 255, 255, 0.5); box-shadow: 0 0 18px rgba(255, 255, 255, 0.7); }
+.hero__cta:hover::after { opacity: 1; }
+
+/* =====================  Screen 2 · Transition  ===================== */
+
+.transition { position: relative; height: 480vh; }
+
+.transition__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.frame--blue { background: #aecbf5; }
+
+/* blurred blue blob backdrop */
+.blobs { position: absolute; inset: 0; filter: blur(60px); }
+
+.blob { position: absolute; border-radius: 50%; }
+
+.blob--a {
+  width: 55vw; height: 50vh;
+  right: -12%; top: 6%;
+  background: radial-gradient(closest-side, #2b84f8 0%, rgba(43, 132, 248, 0) 72%);
+}
+
+.blob--b {
+  width: 60vw; height: 60vh;
+  left: -15%; bottom: -18%;
+  background: radial-gradient(closest-side, #6ea8ff 0%, rgba(110, 168, 255, 0) 70%);
+}
+
+.blob--c {
+  width: 45vw; height: 45vh;
+  left: 22%; top: -14%;
+  background: radial-gradient(closest-side, #dbe9ff 0%, rgba(219, 233, 255, 0) 70%);
+}
+
+/* Phase A — reading headline */
+.reading {
+  position: absolute;
+  left: 50%;
+  top: 41%;
+  translate: -50% -50%;
+  width: 90%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(32px, 3.35vw, 48px);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.reading .w {
+  display: inline-block;
+  opacity: 0.25; /* driven per-word by main.js */
+  will-change: opacity;
+}
+
+/* Phase C — greeting + input */
+.chat {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  translate: -50% 0;
+  width: min(629px, 88%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  opacity: 0; /* driven by main.js */
+  pointer-events: none;
+}
+
+.chat__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(34px, 3.35vw, 48px);
+  line-height: 1.33;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: #fff;
+}
+
+.chat__hey { color: rgba(255, 255, 255, 0.6); }
+
+/* glass input (shared) */
+.ask {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 12px 12px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.28));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 0 40px rgba(255, 255, 255, 0.2),
+    0 1px 4px rgba(0, 0, 0, 0.1),
+    0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.ask::before {
+  /* bottom glow (Ellipse 8803) */
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -230%;
+  width: 60%;
+  height: 400%;
+  translate: -50% 0;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.85), transparent);
+  pointer-events: none;
+}
+
+.ask__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+.ask__input::placeholder { color: rgba(255, 255, 255, 0.8); }
+
+.ask__send {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: #151b2f;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s;
+}
+.ask__send:hover { background: #23304f; }
+.ask__send:active { transform: scale(0.92); }
+
+/* swap voice-bars icon for arrow once there's text */
+.ask__icon--arrow { display: none; }
+.ask.has-text .ask__icon--bars { display: none; }
+.ask.has-text .ask__icon--arrow { display: block; }
+
+/* ---------- the sphere ---------- */
+
+.sphere {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--sphere-size, 720px);
+  height: var(--sphere-size, 720px);
+  translate: -50% -50%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.sphere__glow {
+  position: absolute;
+  inset: -28%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(43, 132, 248, 0.55), rgba(43, 132, 248, 0) 70%);
+}
+
+.sphere__ball {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, #ffffff 0%, #dcedff 14%, #8fbdfc 42%, #2b84f8 68%, #1c5bd8 88%, #1547ad 100%);
+  box-shadow:
+    inset 0 -0.055em 0.33em rgba(43, 132, 248, 0.9),
+    inset 0 0.1em 0.1em rgba(255, 255, 255, 0.25),
+    0 0.05em 0.22em rgba(70, 88, 102, 0.4);
+  font-size: var(--sphere-size, 720px); /* em-based inset shadows scale with size */
+  overflow: hidden;
+}
+
+.sphere__swirl {
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.55) 55deg,
+    transparent 130deg,
+    rgba(191, 238, 247, 0.5) 200deg,
+    transparent 290deg,
+    rgba(255, 255, 255, 0.35) 330deg,
+    transparent 360deg
+  );
+  filter: blur(14px);
+  mix-blend-mode: screen;
+  animation: swirl 14s linear infinite;
+}
+
+.sphere__cyan {
+  position: absolute;
+  left: 8%;
+  bottom: -4%;
+  width: 85%;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(191, 238, 247, 0.85), transparent 75%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+}
+
+@keyframes swirl {
+  to { rotate: 360deg; }
+}
+
+/* =====================  Screen 3 · About  ===================== */
+
+.about {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 140px 10px 160px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.about__q {
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  color: #000;
+}
+
+.about__body {
+  max-width: 900px;
+  text-align: center;
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: clamp(22px, 2.25vw, 32px);
+  line-height: 1.5;
+  letter-spacing: -0.04em;
+}
+
+.about__body em {
+  font-style: normal;
+  color: var(--blue);
+}
+
+.about__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.chip { display: inline-flex; align-items: center; gap: 12px; }
+
+.chip__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: rgba(47, 109, 224, 0.11);
+}
+
+/* light variant of the input for the white section */
+.ask--light {
+  width: min(629px, 88%);
+  border-color: rgba(27, 27, 33, 0.1);
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.ask--light::before { display: none; }
+
+.ask--light .ask__input { color: var(--ink); }
+.ask--light .ask__input::placeholder { color: rgba(27, 27, 33, 0.45); }
+
+.sphere--mini {
+  --sphere-size: 56px;
+  left: 50%;
+  top: auto;
+  bottom: -14px;
+  translate: -50% 0;
+}
+
+/* =====================  Responsive  ===================== */
+
+@media (max-width: 900px) {
+  .menu__links { display: none; }
+  .hero__content { left: 32px; }
+  .hero__cube { right: -18%; opacity: 0.7; }
+  .reading { white-space: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sphere__swirl, .hero__cube { animation: none; }
+  html { scroll-behavior: auto; }
+}

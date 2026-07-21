@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedge — The Operating System for Healthcare AI Agents</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Floating glass menu (persists across all screens) -->
+  <nav class="menu" aria-label="Main">
+    <span class="menu__logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="32" height="32">
+        <rect width="32" height="32" rx="7" fill="#101014"/>
+        <path d="M16 7.5 24.5 16 16 24.5 7.5 16Z M16 12.2 19.8 16 16 19.8 12.2 16Z"
+              fill="#fff" fill-rule="evenodd"/>
+      </svg>
+    </span>
+    <div class="menu__links">
+      <a href="#transition">Our process</a>
+      <a href="#about">FAQ</a>
+    </div>
+    <a class="menu__cta" href="#about">
+      Book a Demo
+      <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+        <path d="M2 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="#1b1b21" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </nav>
+
+  <main>
+
+    <!-- ============ Screen 1 · Hero ============ -->
+    <section class="hero">
+      <div class="frame frame--hero">
+        <div class="hero__bg" aria-hidden="true">
+          <div class="hero__tiles"></div>
+          <div class="hero__cube">
+            <svg viewBox="0 0 520 520" width="520" height="520">
+              <defs>
+                <linearGradient id="cubeTop" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#5b95ef"/>
+                  <stop offset=".55" stop-color="#2f6de0"/>
+                  <stop offset="1" stop-color="#1e56c6"/>
+                </linearGradient>
+                <linearGradient id="cubeBase" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#dceafe" stop-opacity=".95"/>
+                  <stop offset="1" stop-color="#9fc2f5" stop-opacity=".55"/>
+                </linearGradient>
+              </defs>
+              <!-- glass base slab -->
+              <g transform="translate(260 330) scale(1 .52) rotate(45)">
+                <rect x="-150" y="-150" width="300" height="300" rx="44" fill="url(#cubeBase)"/>
+              </g>
+              <!-- main cube: rounded diamond with punched-out center -->
+              <g transform="translate(260 235) scale(1 .82)">
+                <g transform="rotate(45)">
+                  <path d="M-150-150h300v300h-300z M-64-64h128v128h-128z"
+                        transform="translate(-150 -150) translate(150 150)"
+                        fill="url(#cubeTop)" fill-rule="evenodd"
+                        stroke="#bcd6ff" stroke-width="3" stroke-opacity=".5"
+                        stroke-linejoin="round"/>
+                </g>
+              </g>
+              <!-- side extrusion hint -->
+              <g transform="translate(260 262) scale(1 .82)" opacity=".85">
+                <g transform="rotate(45)">
+                  <rect x="-150" y="-150" width="300" height="300" rx="40" fill="#1c50b8" opacity=".35"/>
+                </g>
+              </g>
+              <ellipse cx="260" cy="430" rx="190" ry="34" fill="#1e56c6" opacity=".18"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="hero__content">
+          <p class="hero__backed">
+            Backed by
+            <span class="yc" aria-label="Y Combinator">
+              <span class="yc__badge">Y</span> Combinator
+            </span>
+          </p>
+          <h1 class="hero__title">The Operating System<br/>for Healthcare AI Agents</h1>
+          <p class="hero__sub">Automating the entire back office for large health systems.</p>
+          <button class="hero__cta" id="startJourney" type="button">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="none" stroke="#1b1b21" stroke-width="1.6"/>
+              <circle cx="12" cy="12" r="4.5" fill="none" stroke="#1b1b21" stroke-width="1.6" opacity=".55"/>
+              <circle cx="12" cy="12" r="1.6" fill="#1b1b21"/>
+            </svg>
+            Start the Journey
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Screen 2 · Pinned scroll transition ============ -->
+    <section class="transition" id="transition">
+      <div class="transition__sticky">
+        <div class="frame frame--blue">
+          <div class="blobs" aria-hidden="true">
+            <span class="blob blob--a"></span>
+            <span class="blob blob--b"></span>
+            <span class="blob blob--c"></span>
+          </div>
+
+          <!-- Phase A — reading headline -->
+          <h2 class="reading" id="readingLine">Talk to Wedge AI to learn more</h2>
+
+          <!-- Phase C — greeting + input -->
+          <div class="chat" id="chat">
+            <h2 class="chat__title">
+              <span class="chat__hey">Hey, I’m Wedge!</span><br/>
+              Ask anything about me
+            </h2>
+            <form class="ask" id="askForm">
+              <input class="ask__input" id="askInput" type="text"
+                     placeholder="Ask Wedge anything..." autocomplete="off" />
+              <button class="ask__send" id="askSend" type="submit" aria-label="Send">
+                <!-- idle: voice bars · with text: arrow -->
+                <svg class="ask__icon ask__icon--bars" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                  <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+                    <path d="M4 10v4"/><path d="M8 7v10"/><path d="M12 4v16"/><path d="M16 7v10"/><path d="M20 10v4"/>
+                  </g>
+                </svg>
+                <svg class="ask__icon ask__icon--arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                  <path d="M4 12h16M13 5l7 7-7 7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <!-- The sphere (scales down + circles into place on scroll) -->
+          <div class="sphere" id="sphere" aria-hidden="true">
+            <div class="sphere__glow"></div>
+            <div class="sphere__ball">
+              <span class="sphere__swirl"></span>
+              <span class="sphere__cyan"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Screen 3 · Answer section ============ -->
+    <section class="about" id="about">
+      <p class="about__q" id="aboutQuestion">What is wedge?</p>
+      <div class="about__body">
+        <p>
+          Wedge creates tailored <em>AI solutions<br/>for healthcare</em> organizations.
+          We take care of
+        </p>
+        <p class="about__chips">
+          <span class="chip">
+            <span class="chip__icon">
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <path d="M8.5 8 4.5 12l4 4M15.5 8l4 4-4 4M13 5.5l-2 13" fill="none" stroke="#2f6de0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            development,
+          </span>
+          <span class="chip">
+            <span class="chip__icon">
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <path d="M12 3v10M8 9.5l4 4 4-4" fill="none" stroke="#2f6de0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 16v2.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V16" fill="none" stroke="#2f6de0" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            integration,
+          </span>
+          and
+          <span class="chip">
+            <span class="chip__icon">
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <circle cx="12" cy="12" r="3.2" fill="none" stroke="#2f6de0" stroke-width="2"/>
+                <path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1" stroke="#2f6de0" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            maintenance
+          </span>
+        </p>
+        <p>making it easy to work with us.</p>
+      </div>
+
+      <!-- follow-up input + resting sphere, as in the last frame -->
+      <form class="ask ask--light" id="askFormLight">
+        <input class="ask__input" type="text" placeholder="Ask Wedge anything..." autocomplete="off" />
+        <button class="ask__send" type="submit" aria-label="Send">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+              <path d="M4 10v4"/><path d="M8 7v10"/><path d="M12 4v16"/><path d="M16 7v10"/><path d="M20 10v4"/>
+            </g>
+          </svg>
+        </button>
+      </form>
+      <div class="sphere sphere--mini" aria-hidden="true">
+        <div class="sphere__glow"></div>
+        <div class="sphere__ball">
+          <span class="sphere__swirl"></span>
+          <span class="sphere__cyan"></span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
