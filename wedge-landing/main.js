@@ -54,6 +54,59 @@ async function intro() {
 }
 intro();
 
+/* ---------------- cipher scramble on button hover ----------------
+ * On hover/focus the label dissolves into random glyphs and locks back in
+ * character by character, left to right — like a cipher being decoded.
+ */
+
+const SCRAMBLE_CHARS = '!<>-_\\/[]{}=+*^?#$%&@01';
+
+document.querySelectorAll('[data-scramble]').forEach((el) => {
+  const finalText = el.textContent;
+  const trigger = el.closest('button, a') || el;
+  let running = false;
+
+  function start() {
+    if (running || reduceMotion) return;
+    running = true;
+
+    const D = 550; // total decode time, ms
+    const len = finalText.length;
+    // each character locks at its own moment, sweeping left → right
+    const locks = [...finalText].map((ch, i) =>
+      ch === ' ' ? 0 : (i / len) * D * 0.75 + Math.random() * D * 0.25);
+
+    // freeze the label's width so the button doesn't breathe while scrambling
+    if (el.tagName === 'SPAN' || el.tagName === 'A') {
+      el.style.minWidth = el.offsetWidth + 'px';
+      el.style.display = 'inline-block';
+    }
+
+    const t0 = performance.now();
+    (function frame(now) {
+      const t = (now || performance.now()) - t0;
+      let out = '';
+      for (let i = 0; i < len; i++) {
+        const ch = finalText[i];
+        out += (ch === ' ' || t >= locks[i])
+          ? ch
+          : SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+      }
+      el.textContent = out;
+      if (t < D) {
+        requestAnimationFrame(frame);
+      } else {
+        el.textContent = finalText;
+        el.style.minWidth = '';
+        running = false;
+      }
+    })();
+  }
+
+  trigger.addEventListener('mouseenter', start);
+  trigger.addEventListener('focusin', start);
+});
+
 /* ---------------- ambient loop → explore → fly-in → governance ----------------
  *
  * The video is one 10s take: [0 … 6.0s] is an ambient orbit that ends back on
