@@ -6,10 +6,39 @@
      --font-body     →  swap for "Inter"
 ------------------------------------------------------------------- */
 
+/* Real typefaces — these activate as soon as the files exist in assets/fonts/.
+   Each src lists a few likely filenames; the browser skips missing ones. */
+@font-face {
+  font-family: "Mozilla Headline";
+  src: url("assets/fonts/MozillaHeadline-Medium.woff2") format("woff2"),
+       url("assets/fonts/MozillaHeadline-Medium.ttf") format("truetype"),
+       url("assets/fonts/MozillaHeadline-VariableFont_wdth,wght.ttf") format("truetype");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mozilla Text";
+  src: url("assets/fonts/MozillaText-Medium.woff2") format("woff2"),
+       url("assets/fonts/MozillaText-Medium.ttf") format("truetype"),
+       url("assets/fonts/MozillaText-VariableFont_wght.ttf") format("truetype");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/Inter-Regular.woff2") format("woff2"),
+       url("assets/fonts/Inter-Regular.ttf") format("truetype"),
+       url("assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
-  --font-display: "Helvetica Neue", "Segoe UI", Arial, sans-serif; /* TODO: Mozilla Headline */
-  --font-text: Georgia, "Times New Roman", serif;                  /* TODO: Mozilla Text */
-  --font-body: system-ui, "Segoe UI", Arial, sans-serif;           /* TODO: Inter */
+  --font-display: "Mozilla Headline", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  --font-text: "Mozilla Text", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, "Segoe UI", Arial, sans-serif;
 
   --ink: #1b1b21;
   --blue: #2f6de0;
@@ -43,7 +72,7 @@ body {
 
 .menu {
   position: fixed;
-  top: calc(var(--frame-gap) + 20px);
+  top: 16px;
   left: 50%;
   translate: -50% 0;
   z-index: 50;
@@ -91,57 +120,42 @@ body {
 }
 .menu__cta:hover { box-shadow: 0 2px 10px rgba(27, 27, 33, 0.12); }
 
-/* =====================  Screen 1 · Hero  ===================== */
+/* =====================  Screen 1 · Hero ("AI Agent Option")  ===================== */
 
-.hero { position: relative; height: 100vh; }
+.hero {
+  position: relative;
+  height: 100vh;
+  background:
+    /* fallback backdrop until assets/hero.mp4 (static frame) is uploaded */
+    radial-gradient(120% 80% at 78% 70%, rgba(255, 255, 255, 0.55), transparent 60%),
+    linear-gradient(200deg, #e6edf4 0%, #d8e2ec 45%, #c6d5e4 100%);
+  overflow: hidden;
+}
 
-.frame--hero { background: #bed1f7; }
+.hero__media { position: absolute; inset: 0; }
 
-.hero__bg { position: absolute; inset: 0; }
-
-.hero__bg::before {
-  /* top light + left column washes from the Figma gradients */
-  content: "";
+.hero__media video {
+  /* static frame only — no autoplay/controls; the backdrop animation is planned separately */
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, #dee6ff 24.5%, rgba(255, 255, 255, 0) 60%),
-    linear-gradient(90deg, #d1dbf9 0%, rgba(255, 255, 255, 0) 55%),
-    linear-gradient(200deg, rgba(215, 234, 255, 0.9), rgba(190, 209, 247, 0.6));
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
 }
 
-.hero__tiles {
-  /* placeholder for the tiled-glass video backdrop */
+.hero__hue {
+  /* blue hue wash over the render, as in Figma (mix-blend-hue #2088ff) */
   position: absolute;
-  inset: -20% -10%;
-  background:
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.35) 0 2px, transparent 2px 120px),
-    repeating-linear-gradient(25deg, rgba(255, 255, 255, 0.3) 0 2px, transparent 2px 120px);
-  transform: perspective(900px) rotateX(28deg) scale(1.15);
-  transform-origin: 50% 100%;
-  opacity: 0.55;
-  mask-image: radial-gradient(120% 90% at 70% 55%, #000 40%, transparent 78%);
-  -webkit-mask-image: radial-gradient(120% 90% at 70% 55%, #000 40%, transparent 78%);
-}
-
-.hero__cube {
-  position: absolute;
-  right: 6%;
-  top: 50%;
-  translate: 0 -52%;
-  filter: drop-shadow(0 40px 60px rgba(31, 95, 216, 0.35));
-  animation: cube-float 7s ease-in-out infinite;
-}
-
-@keyframes cube-float {
-  0%, 100% { translate: 0 -52%; }
-  50% { translate: 0 -56%; }
+  inset: 0;
+  background: #2088ff;
+  mix-blend-mode: hue;
 }
 
 .hero__content {
   position: absolute;
   left: 60px;
-  top: 50%;
+  top: calc(50% - 72px);
   translate: 0 -50%;
   width: min(800px, 70%);
   display: flex;
@@ -529,11 +543,10 @@ body {
 @media (max-width: 900px) {
   .menu__links { display: none; }
   .hero__content { left: 32px; }
-  .hero__cube { right: -18%; opacity: 0.7; }
   .reading { white-space: normal; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sphere__swirl, .hero__cube { animation: none; }
+  .sphere__swirl { animation: none; }
   html { scroll-behavior: auto; }
 }

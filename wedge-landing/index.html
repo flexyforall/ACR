@@ -31,50 +31,18 @@
 
   <main>
 
-    <!-- ============ Screen 1 · Hero ============ -->
+    <!-- ============ Screen 1 · Hero (Figma "AI Agent Option") ============ -->
     <section class="hero">
-      <div class="frame frame--hero">
-        <div class="hero__bg" aria-hidden="true">
-          <div class="hero__tiles"></div>
-          <div class="hero__cube">
-            <svg viewBox="0 0 520 520" width="520" height="520">
-              <defs>
-                <linearGradient id="cubeTop" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#5b95ef"/>
-                  <stop offset=".55" stop-color="#2f6de0"/>
-                  <stop offset="1" stop-color="#1e56c6"/>
-                </linearGradient>
-                <linearGradient id="cubeBase" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#dceafe" stop-opacity=".95"/>
-                  <stop offset="1" stop-color="#9fc2f5" stop-opacity=".55"/>
-                </linearGradient>
-              </defs>
-              <!-- glass base slab -->
-              <g transform="translate(260 330) scale(1 .52) rotate(45)">
-                <rect x="-150" y="-150" width="300" height="300" rx="44" fill="url(#cubeBase)"/>
-              </g>
-              <!-- main cube: rounded diamond with punched-out center -->
-              <g transform="translate(260 235) scale(1 .82)">
-                <g transform="rotate(45)">
-                  <path d="M-150-150h300v300h-300z M-64-64h128v128h-128z"
-                        transform="translate(-150 -150) translate(150 150)"
-                        fill="url(#cubeTop)" fill-rule="evenodd"
-                        stroke="#bcd6ff" stroke-width="3" stroke-opacity=".5"
-                        stroke-linejoin="round"/>
-                </g>
-              </g>
-              <!-- side extrusion hint -->
-              <g transform="translate(260 262) scale(1 .82)" opacity=".85">
-                <g transform="rotate(45)">
-                  <rect x="-150" y="-150" width="300" height="300" rx="40" fill="#1c50b8" opacity=".35"/>
-                </g>
-              </g>
-              <ellipse cx="260" cy="430" rx="190" ry="34" fill="#1e56c6" opacity=".18"/>
-            </svg>
-          </div>
-        </div>
+      <div class="hero__media" aria-hidden="true">
+        <!-- Static frame only — playback intentionally disabled (an animation
+             for this backdrop is planned separately). The gradient backdrop
+             below shows until assets/hero.mp4 / hero-poster.jpg exist. -->
+        <video src="assets/hero.mp4" poster="assets/hero-poster.jpg"
+               muted playsinline preload="metadata" tabindex="-1"></video>
+        <div class="hero__hue"></div>
+      </div>
 
-        <div class="hero__content">
+      <div class="hero__content">
           <p class="hero__backed">
             Backed by
             <span class="yc" aria-label="Y Combinator">
@@ -82,16 +50,15 @@
             </span>
           </p>
           <h1 class="hero__title">The Operating System<br/>for Healthcare AI Agents</h1>
-          <p class="hero__sub">Automating the entire back office for large health systems.</p>
+          <p class="hero__sub">Automating the entire back office for large health systems</p>
           <button class="hero__cta" id="startJourney" type="button">
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
               <circle cx="12" cy="12" r="9" fill="none" stroke="#1b1b21" stroke-width="1.6"/>
               <circle cx="12" cy="12" r="4.5" fill="none" stroke="#1b1b21" stroke-width="1.6" opacity=".55"/>
               <circle cx="12" cy="12" r="1.6" fill="#1b1b21"/>
             </svg>
-            Start the Journey
+            Explore Agents
           </button>
-        </div>
       </div>
     </section>
 
