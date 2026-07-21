@@ -54,7 +54,16 @@ async function intro() {
 }
 intro();
 
-/* ---------------- explore → fly-in → governance ---------------- */
+/* ---------------- ambient loop → explore → fly-in → governance ----------------
+ *
+ * The video is one 10s take: [0 … 6.0s] is an ambient orbit that ends back on
+ * frame 0 (measured: the 6.0s frame matches frame 0), and [6.0s … end] is the
+ * fly-in towards the person. While idle we loop the first segment; pressing
+ * Explore Agents jumps to 6.0s and rides the fly-in to the end.
+ */
+
+const INTRO_END = 6.0;
+let flying = false;
 
 function reveal() {
   video.pause();                 // hold the last (person) frame
@@ -62,22 +71,36 @@ function reveal() {
   stage.classList.add('is-revealed');
 }
 
+/* ambient segment loop (rAF for a tight wrap — timeupdate is too coarse) */
+function watchAmbient() {
+  if (flying) return;
+  if (video.currentTime >= INTRO_END - 0.06) video.currentTime = 0;
+  requestAnimationFrame(watchAmbient);
+}
+
+if (!reduceMotion) {
+  const p = video.play(); // muted + playsinline → allowed to autoplay
+  if (p && p.catch) p.catch(() => {}); // blocked → static poster is fine
+  requestAnimationFrame(watchAmbient);
+}
+
 exploreBtn.addEventListener('click', () => {
   if (stage.classList.contains('is-playing') || stage.classList.contains('is-revealed')) return;
 
+  flying = true;
   stage.classList.remove('is-intro');
   stage.classList.add('is-playing');
 
   if (reduceMotion) {
     // honour reduced motion: skip the fly-in, jump straight to the last frame
-    try { video.currentTime = video.duration || 4; } catch (e) {}
+    try { video.currentTime = video.duration || 10; } catch (e) {}
     reveal();
     return;
   }
 
-  video.currentTime = 0;
+  video.currentTime = INTRO_END; // ambient ends on ~frame 0, so the cut is soft
   const p = video.play();
-  if (p && p.catch) p.catch(() => reveal()); // autoplay blocked → just reveal
+  if (p && p.catch) p.catch(() => reveal()); // playback blocked → just reveal
 });
 
 // When the fly-in finishes, reveal the governance content.
