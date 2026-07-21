@@ -25,15 +25,13 @@ npx serve .        # or: python3 -m http.server
 - **Layout** (paddings, sizes, colours, letter-spacing) is matched 1:1 to the
   Figma node values.
 
-## Icon / logo assets — replace with your Figma exports
+## Icon / logo assets — exported from Figma
 
-Figma's asset domain is blocked from the build environment, so these four are
-faithful **stand-ins**. Upload your exact Figma exports over the same filenames
-and they swap in with no code change:
+These are the real @3x exports from the Figma file:
 
 | file | Figma node | what it is |
 |------|-----------|------------|
-| `assets/logo.svg` | `143:205` | Wedge menu logo |
-| `assets/ycombinator.svg` | `138:2170` | "Y Combinator" backer logo |
-| `assets/icon-story.svg` | `138:2177` | button icon ("Explore Agents") |
-| `assets/icon-arrow-right.svg` | `143:218` | "Book a Demo" arrow |
+| `assets/logo.png` | `143:205` | Wedge menu logo (3D faceted mark) |
+| `assets/ycombinator.png` | `138:2170` | "Y Combinator" backer logo |
+| `assets/icon.png` | `138:2177` | button icon — blue orbit sphere ("Explore Agents") |
+| `assets/icon2.png` | `143:218` | "Book a Demo" chevron |

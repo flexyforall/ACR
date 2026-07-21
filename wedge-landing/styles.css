@@ -66,11 +66,24 @@ body {
   height: 100vh;
   min-height: 720px;
   overflow: hidden;
-  background: var(--frame-bg);
+  /* pale sky that matches the render, so the feathered backdrop edge is seamless */
+  background:
+    radial-gradient(120% 120% at 100% 100%, #cdd9e6 0%, rgba(205, 217, 230, 0) 55%),
+    linear-gradient(160deg, #dbe4ee 0%, #d3deea 55%, #c9d6e4 100%);
 }
 
-/* --- static backdrop --- */
-.hero__media { position: absolute; inset: 0; }
+/* --- static backdrop: a right/bottom-anchored render that clears the copy,
+       shown near its native size (no upscaling) and feathered into the sky --- */
+.hero__media {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: min(76%, 1120px);
+  height: min(88%, 720px);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(112deg, rgba(0,0,0,0) 6%, #000 40%);
+  mask-image: linear-gradient(112deg, rgba(0,0,0,0) 6%, #000 40%);
+}
 
 .hero__video {
   position: absolute;
@@ -78,12 +91,11 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 60% 78%; /* keep the building right-of-centre, sky over the copy */
-  pointer-events: none;
+  object-position: 46% 34%; /* frame the building, keep the ground low */
 }
 
 .hero__hue {
-  /* Figma: #2088ff on mix-blend-hue over the render */
+  /* Figma: #2088ff on mix-blend-hue over the render only */
   position: absolute;
   inset: 0;
   background: #2088ff;
@@ -232,29 +244,21 @@ body {
   padding: 20px 24px 20px 20px;
   border-radius: 6px;
   border: 1px solid #fff;
-  background: rgba(27, 27, 33, 0.06);
+  /* Ellipse 2 sheen baked into the fill: a soft top-edge highlight, no hard edges */
+  background:
+    radial-gradient(140% 120% at 50% -20%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 62%),
+    rgba(27, 27, 33, 0.06);
   box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
-  overflow: clip;
   cursor: pointer;
-  transition: background 0.25s, box-shadow 0.25s;
+  transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 
-/* Ellipse 2 — soft white glow above the button (138:2179) */
-.hero__cta::before {
-  content: "";
-  position: absolute;
-  left: 47px;
-  top: -64px;
-  width: 325px;
-  height: 72px;
-  background: radial-gradient(50% 100% at 50% 100%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
-  opacity: 0.55;
-  pointer-events: none;
-  transition: opacity 0.25s;
+.hero__cta:hover {
+  background:
+    radial-gradient(140% 120% at 50% -20%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 64%),
+    rgba(255, 255, 255, 0.42);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.6);
 }
-
-.hero__cta:hover { background: rgba(255, 255, 255, 0.5); box-shadow: 0 0 18px rgba(255, 255, 255, 0.6); }
-.hero__cta:hover::before { opacity: 1; }
 
 .hero__cta-icon { display: block; width: 24px; height: 24px; position: relative; z-index: 1; }
 
