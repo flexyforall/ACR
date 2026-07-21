@@ -54,6 +54,26 @@ async function intro() {
 }
 intro();
 
+/* ---------------- bottom-right Lottie on the governance screen ---------------- */
+
+const lottieBox = document.getElementById('govLottie');
+if (lottieBox && window.lottie) {
+  (window.__LOTTIE_DATA__
+    ? Promise.resolve(window.__LOTTIE_DATA__) // inlined build (preview bundle)
+    : fetch('assets/lottie.json').then((r) => (r.ok ? r.json() : Promise.reject()))
+  )
+    .then((data) => {
+      window.lottie.loadAnimation({
+        container: lottieBox,
+        renderer: 'svg',
+        loop: true,
+        autoplay: !reduceMotion,
+        animationData: data,
+      });
+    })
+    .catch(() => {}); // no assets/lottie.json yet → the box stays hidden
+}
+
 /* ---------------- cipher scramble on button hover ----------------
  * On hover/focus the label dissolves into random glyphs and locks back in
  * character by character, left to right — like a cipher being decoded.

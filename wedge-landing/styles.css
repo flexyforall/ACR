@@ -563,6 +563,21 @@ body {
 }
 .gov-card__try:hover { filter: brightness(1.06); }
 
+/* bottom-right Lottie — mirrors the left panel: 60px off the right edge,
+   bottom-aligned with the card's bottom (60px) */
+.gov__lottie {
+  position: absolute;
+  right: 60px;
+  bottom: 60px;
+  width: 240px;
+  height: 240px;
+  pointer-events: none;
+  transform: translateY(16px);
+  transition: transform 0.7s ease 0.12s;
+}
+.stage.is-revealed .gov__lottie { transform: translateY(0); }
+.gov__lottie:empty { display: none; } /* stays hidden until the animation loads */
+
 /* bottom-right: // ASK WEDGE AI + sphere (143:288) */
 .gov__ask {
   position: absolute;
