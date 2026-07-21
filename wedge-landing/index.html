@@ -8,31 +8,33 @@
 </head>
 <body>
 
-  <section class="hero" data-node-id="138:2009">
-    <!-- Static hero backdrop. The <video> is intentionally NOT played — a
-         separate backdrop animation is planned. The poster (frame 0) already
-         shows the building, so the section never renders blank. -->
-    <div class="hero__media" aria-hidden="true">
-      <video class="hero__video" src="assets/dodd.mp4" poster="assets/hero-poster.jpg"
+  <!-- One fixed stage; nothing scrolls. Clicking "Explore Agents" plays the
+       fly-in video, and only when it lands on the person (last frame) does the
+       governance content reveal. -->
+  <section class="stage is-intro" id="stage" data-node-id="138:2009">
+
+    <!-- Shared backdrop: building (poster/frame 0) → fly-in → person (last frame) -->
+    <div class="stage__media" aria-hidden="true">
+      <video class="stage__video" id="heroVideo" src="assets/dodd.mp4" poster="assets/hero-poster.jpg"
              muted playsinline preload="auto" tabindex="-1"></video>
-      <div class="hero__hue"></div>
+      <div class="stage__hue"></div>
     </div>
 
-    <!-- Menu (Figma 143:204) -->
-    <nav class="menu" aria-label="Main" data-node-id="143:204">
-      <img class="menu__logo" src="assets/logo.png" width="32" height="32" alt="Wedge" data-node-id="143:205" />
-      <div class="menu__links" data-node-id="143:211">
+    <!-- Menu (Figma 143:224) — persistent across both states -->
+    <nav class="menu" aria-label="Main" data-node-id="143:224">
+      <img class="menu__logo" src="assets/logo.png" width="32" height="32" alt="Wedge" data-node-id="143:225" />
+      <div class="menu__links" data-node-id="143:231">
         <a class="menu__link" href="#">Our process</a>
         <a class="menu__link" href="#">FAQ</a>
       </div>
-      <a class="menu__demo" href="#" data-node-id="143:216">
+      <a class="menu__demo" href="#" data-node-id="143:236">
         Book a Demo
         <img class="menu__demo-arrow" src="assets/icon2.png" width="12" height="12" alt="" />
       </a>
     </nav>
 
-    <!-- title, label (Figma 138:2165) -->
-    <div class="hero__content" data-node-id="138:2165">
+    <!-- ===== Intro state (Figma 138:2165) ===== -->
+    <div class="hero__content" id="heroContent" data-node-id="138:2165">
       <div class="hero__text" data-node-id="138:2166">
         <p class="hero__backed" data-node-id="138:2167">
           Backed by
@@ -44,12 +46,71 @@
         </div>
       </div>
 
-      <button class="hero__cta" type="button" data-node-id="138:2176">
+      <button class="hero__cta" type="button" id="exploreBtn" data-node-id="138:2176">
         <img class="hero__cta-icon" src="assets/icon.png" width="24" height="24" alt="" data-node-id="138:2177" />
         <span class="hero__cta-text" data-node-id="138:2178">Explore Agents</span>
       </button>
     </div>
+
+    <!-- ===== Revealed state (Figma 138:307 · "AI Agent — Governance") ===== -->
+    <div class="gov" id="gov" aria-hidden="true">
+
+      <!-- left: label + card (Figma 138:1867) -->
+      <div class="gov__panel" data-node-id="138:1867">
+        <p class="gov__eyebrow" data-node-id="138:1639">// WEDGE AI AGENTS</p>
+
+        <div class="gov-card" data-node-id="138:1315">
+          <div class="gov-card__body" data-node-id="138:1467">
+
+            <div class="gov-card__head" data-node-id="138:1468">
+              <button class="gov-card__nav gov-card__nav--prev" type="button" aria-label="Previous">
+                <img src="assets/arrow-right.svg" width="16" height="16" alt="" />
+              </button>
+
+              <div class="gov-card__title-wrap" data-node-id="138:1902">
+                <span class="gov-card__icon" data-node-id="138:1917">
+                  <img src="assets/code.svg" width="24" height="24" alt="" />
+                </span>
+                <h2 class="gov-card__title" data-node-id="138:1469">AI Governance</h2>
+                <p class="gov-card__desc" data-node-id="138:1470">Ensures that every AI tool operates correctly, safely, and in compliance with established policies</p>
+              </div>
+
+              <button class="gov-card__nav" type="button" aria-label="Next">
+                <img src="assets/arrow-right.svg" width="16" height="16" alt="" />
+              </button>
+            </div>
+
+            <hr class="gov-card__divider" data-node-id="138:1577" />
+
+            <ul class="gov-card__points" data-node-id="138:1472">
+              <li class="gov-card__point">
+                <img class="gov-card__tick" src="assets/tick-circle.svg" width="20" height="20" alt="" />
+                <span>Monitors every AI agent in real time</span>
+              </li>
+              <li class="gov-card__point">
+                <img class="gov-card__tick" src="assets/tick-circle.svg" width="20" height="20" alt="" />
+                <span>Ensures compliance with clinical and security policies</span>
+              </li>
+              <li class="gov-card__point">
+                <img class="gov-card__tick" src="assets/tick-circle.svg" width="20" height="20" alt="" />
+                <span>Maintains a complete audit trail for every AI decision</span>
+              </li>
+            </ul>
+          </div>
+
+          <button class="gov-card__try" type="button" data-node-id="138:1505">Try now</button>
+        </div>
+      </div>
+
+      <!-- bottom-right: label + AI sphere (Figma 143:288 / 138:1924) -->
+      <div class="gov__ask" data-node-id="143:288">
+        <p class="gov__ask-label" data-node-id="138:1924">// ASK WEDGE AI</p>
+        <img class="gov__sphere" src="assets/AI Sphere.png" alt="Ask Wedge AI" />
+      </div>
+    </div>
+
   </section>
 
+  <script src="main.js"></script>
 </body>
 </html>

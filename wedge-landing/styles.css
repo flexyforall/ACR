@@ -56,46 +56,46 @@ body {
   color: var(--ink);
   background: var(--frame-bg);
   -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* the stage never scrolls */
 }
 
-/* =====================  Hero  ===================== */
+/* =====================  Stage (hero → governance)  ===================== */
 
-.hero {
+.stage {
   position: relative;
   width: 100%;
   height: 100vh;
   min-height: 720px;
   overflow: hidden;
-  /* pale sky that matches the render, so the feathered backdrop edge is seamless */
   background:
     radial-gradient(120% 120% at 100% 100%, #cdd9e6 0%, rgba(205, 217, 230, 0) 55%),
     linear-gradient(160deg, #dbe4ee 0%, #d3deea 55%, #c9d6e4 100%);
 }
 
-/* --- static backdrop: a right/bottom-anchored render that clears the copy,
-       shown near its native size (no upscaling) and feathered into the sky --- */
-.hero__media {
+.stage__media {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.hero__video {
+.stage__video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 50%; /* full-screen backdrop */
+  object-position: 50% 50%;
 }
 
-.hero__hue {
-  /* Figma: #2088ff on mix-blend-hue over the render only */
+.stage__hue {
+  /* #2088ff hue wash over the building; eased off once we're inside */
   position: absolute;
   inset: 0;
   background: #2088ff;
   mix-blend-mode: hue;
+  transition: opacity 0.6s ease;
 }
+.stage.is-revealed .stage__hue { opacity: 0; }
 
 /* =====================  Menu (143:204)  ===================== */
 
@@ -173,6 +173,15 @@ body {
   flex-direction: column;
   align-items: flex-start;
   gap: 40px;
+  transition: opacity 0.5s ease, transform 0.6s ease;
+}
+
+/* hero copy fades out (and eases back a touch) once the fly-in starts */
+.stage.is-playing .hero__content,
+.stage.is-revealed .hero__content {
+  opacity: 0;
+  transform: translateY(-50%) scale(1.04);
+  pointer-events: none;
 }
 
 .hero__text {
@@ -240,7 +249,7 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 20px 24px 20px 20px;
-  border-radius: 16px;
+  border-radius: 6px; /* match the top menu plate */
   border: 1px solid rgba(255, 255, 255, 0.55);
   background: linear-gradient(135deg,
     rgba(255, 255, 255, 0.30) 0%,
@@ -324,6 +333,204 @@ body {
   white-space: nowrap;
 }
 
+/* =====================  Governance (138:307)  ===================== */
+
+.gov {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+}
+.stage.is-revealed .gov {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* left panel: eyebrow + card (138:1867) */
+.gov__panel {
+  position: absolute;
+  left: 40px;
+  top: 350px;
+  width: 432px;
+  max-width: calc(100% - 80px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: translateY(16px);
+  transition: transform 0.7s ease;
+}
+.stage.is-revealed .gov__panel { transform: translateY(0); }
+
+.gov__eyebrow {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* card (138:1315) */
+.gov-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.gov-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 12px 12px 16px;
+}
+
+/* title row with the two carousel arrows (138:1468) */
+.gov-card__head {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.gov-card__nav {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.gov-card__nav:hover { background: rgba(0, 0, 0, 0.04); }
+.gov-card__nav--prev img { transform: rotate(180deg); }
+
+.gov-card__title-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.gov-card__icon {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  background: rgba(47, 109, 224, 0.11);
+}
+
+.gov-card__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.96px;
+  color: var(--ink);
+  text-align: center;
+  font-variation-settings: "wdth" 100;
+}
+
+.gov-card__desc {
+  width: 256px;
+  max-width: 100%;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink);
+  opacity: 0.6;
+}
+
+.gov-card__divider {
+  border: 0;
+  height: 1px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.gov-card__points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gov-card__point {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.gov-card__tick { flex: 0 0 auto; display: block; width: 20px; height: 20px; }
+.gov-card__point span {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+/* "Try now" (138:1505) — blue with a cyan glow sweep */
+.gov-card__try {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 40px;
+  border: 0;
+  border-radius: 4px;
+  background:
+    radial-gradient(120% 220% at 50% 135%, #5fe3ff 0%, rgba(95, 227, 255, 0) 55%),
+    #2f6de0;
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: -0.28px;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.gov-card__try:hover { filter: brightness(1.06); }
+
+/* bottom-right: // ASK WEDGE AI + sphere (143:288) */
+.gov__ask {
+  position: absolute;
+  right: 48px;
+  bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gov__ask-label {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.gov__sphere {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 18px rgba(43, 132, 248, 0.4));
+}
+
 /* =====================  Responsive  ===================== */
 
 @media (max-width: 900px) {
@@ -335,7 +542,9 @@ body {
     width: auto;
   }
   .hero__title { font-size: clamp(38px, 8vw, 64px); }
-  .hero__video { object-position: 62% 78%; }
+  .stage__video { object-position: 58% 50%; }
+  .gov__panel { left: 20px; top: auto; bottom: 120px; }
+  .gov__ask { right: 20px; bottom: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
