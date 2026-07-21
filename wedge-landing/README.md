@@ -1,44 +1,39 @@
-# Wedge AI — Landing prototype
+# Wedge AI — Hero
 
-Screens coded from the Figma selection **Wedge Internal → "transition" section**
-(hero → "Talk to Wedge AI" scroll transition → answer section).
+Hero section coded from Figma **Wedge Internal → "AI Agent Option"** (node `138:2009`).
 
-## Run it
+## Run
 
-No build step — it's a static site:
+Static site, no build step:
 
 ```bash
 cd wedge-landing
 npx serve .        # or: python3 -m http.server
 ```
 
-…or just open `index.html` in a browser.
+…or open `index.html` directly.
 
-## What's implemented
+## Notes
 
-1. **Hero** — "The Operating System for Healthcare AI Agents", Backed by YC row,
-   Start the Journey button (scrolls into the transition), floating glass menu.
-2. **Scroll transition** (pinned section, scrubbed by scroll):
-   - *Reading effect*: "Talk to Wedge AI to learn more" lights up word by word.
-   - The sphere starts huge at the bottom edge, then **scales down while
-     circling** (one elliptical loop) until it settles into place under the input.
-   - "Hey, I'm Wedge! Ask anything about me" + glass input field fade in.
-   - The send icon swaps from voice-bars to an arrow once you type
-     (as in the Figma frames), and **pressing send scrolls to the next section**,
-     carrying your question into its heading.
-3. **Answer section** — "What is wedge?" copy with the development / integration /
-   maintenance icon chips, follow-up input, and the resting mini sphere.
+- **Backdrop**: `assets/hero.mp4` is shown as a *static* frame (no autoplay, no
+  controls) — a separate backdrop animation is planned. `assets/hero-poster.jpg`
+  is frame 0 (building already visible) so the section never renders blank.
+- **Type**: the title uses the uploaded **Mozilla Headline** TTFs
+  (`assets/MozillaHeadline-*.ttf`). UI/body text uses **Inter** — drop
+  `assets/Inter-Regular.ttf` and `assets/Inter-Medium.ttf` in to activate it
+  (system fallback until then).
+- **Layout** (paddings, sizes, colours, letter-spacing) is matched 1:1 to the
+  Figma node values.
 
-## Placeholders
+## Icon / logo assets — replace with your Figma exports
 
-- **Fonts** are placeholder stacks, defined once in `styles.css`:
-  `--font-display` → Mozilla Headline, `--font-text` → Mozilla Text,
-  `--font-body` → Inter. Swap them there when the real fonts are added.
-- The hero's tiled-glass video backdrop, the 3D cube, and the sphere are
-  CSS/SVG recreations (no binary assets), so everything is self-contained.
+Figma's asset domain is blocked from the build environment, so these four are
+faithful **stand-ins**. Upload your exact Figma exports over the same filenames
+and they swap in with no code change:
 
-## Files
-
-- `index.html` — markup for all three screens
-- `styles.css` — design tokens + styling (frame, menu, sphere, glass input…)
-- `main.js` — scroll choreography (word reveal, sphere orbit, phase fades)
+| file | Figma node | what it is |
+|------|-----------|------------|
+| `assets/logo.svg` | `143:205` | Wedge menu logo |
+| `assets/ycombinator.svg` | `138:2170` | "Y Combinator" backer logo |
+| `assets/icon-story.svg` | `138:2177` | button icon ("Explore Agents") |
+| `assets/icon-arrow-right.svg` | `143:218` | "Book a Demo" arrow |
