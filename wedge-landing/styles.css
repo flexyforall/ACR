@@ -99,6 +99,7 @@ body {
 
 /* =====================  Menu (143:204)  ===================== */
 
+/* liquid-glass plate: refractive blur + gradient fill + specular rim */
 .menu {
   position: absolute;
   top: 16px;
@@ -110,11 +111,35 @@ body {
   gap: 16px;
   padding: 8px 8px 8px 12px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(115deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.26) 100%);
+  backdrop-filter: blur(22px) saturate(190%) brightness(1.04);
+  -webkit-backdrop-filter: blur(22px) saturate(190%) brightness(1.04);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.1),
+    0 4px 20px rgba(0, 0, 0, 0.06),
+    0 14px 34px rgba(23, 43, 77, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -8px 20px rgba(255, 255, 255, 0.12);
+  overflow: hidden;
 }
+
+/* sheen across the top-left of the plate */
+.menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(60% 130% at 18% 0%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 45%);
+}
+
+.menu > * { position: relative; z-index: 1; }
 
 .menu__logo { display: block; width: 32px; height: 32px; }
 
@@ -192,7 +217,7 @@ body {
   width: 100%;
 }
 
-/* Backed by [YC] */
+/* Backed by [YC] — hidden until the intro timeline starts (stage.t1) */
 .hero__backed {
   display: flex;
   align-items: center;
@@ -203,6 +228,16 @@ body {
   line-height: 1.2;
   letter-spacing: -0.32px;
   color: var(--ink);
+  opacity: 0;
+  transform: translateY(10px);
+  filter: blur(4px);
+  transition: opacity 0.6s ease, transform 0.6s ease, filter 0.6s ease;
+}
+
+.stage.t1 .hero__backed {
+  opacity: 1;
+  transform: none;
+  filter: none;
 }
 
 .hero__yc { display: block; height: 28px; width: auto; }
@@ -219,6 +254,7 @@ body {
 
 .hero__title {
   width: 100%;
+  min-height: 2.18em; /* reserve both lines while the text types itself */
   font-family: var(--font-display);
   font-weight: 500;
   font-size: 64px;
@@ -230,12 +266,36 @@ body {
 
 .hero__sub {
   width: 100%;
+  min-height: 36px; /* reserved line while typing */
   font-family: var(--font-body);
   font-weight: 400;
   font-size: 20px;
   line-height: 36px;
   letter-spacing: -0.4px;
   color: rgba(27, 27, 33, 0.6);
+}
+
+/* terminal caret that follows the self-typing text (main.js) */
+.type-caret {
+  display: inline-block;
+  width: 0.09em;
+  height: 0.88em;
+  margin-left: 0.08em;
+  border-radius: 1px;
+  vertical-align: -0.06em;
+  background: currentColor;
+  animation: caret-blink 0.9s linear infinite;
+}
+
+.type-caret--done {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
 /* CTA button (138:2176) */
@@ -250,33 +310,58 @@ body {
   gap: 10px;
   padding: 20px 24px 20px 20px;
   border-radius: 6px; /* match the top menu plate */
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.30) 0%,
-    rgba(255, 255, 255, 0.10) 52%,
-    rgba(255, 255, 255, 0.18) 100%);
-  -webkit-backdrop-filter: blur(14px) saturate(185%) brightness(1.06);
-  backdrop-filter: blur(14px) saturate(185%) brightness(1.06);
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.22) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(200%) brightness(1.07);
+  backdrop-filter: blur(18px) saturate(200%) brightness(1.07);
   box-shadow:
-    0 8px 30px rgba(23, 43, 77, 0.18),          /* soft cast shadow */
-    inset 0 1px 1px rgba(255, 255, 255, 0.9),   /* bright top edge */
-    inset 0 -10px 24px rgba(255, 255, 255, 0.12), /* inner floor glow */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12);  /* faint inner rim */
+    0 8px 30px rgba(23, 43, 77, 0.18),            /* soft cast shadow */
+    0 1px 2px rgba(23, 43, 77, 0.1),              /* contact shadow */
+    inset 0 1px 1px rgba(255, 255, 255, 0.95),    /* bright top edge */
+    inset 0 -1px 1px rgba(255, 255, 255, 0.35),   /* bottom lip catch-light */
+    inset 0 -10px 24px rgba(255, 255, 255, 0.14), /* inner floor glow */
+    inset 2px 0 6px rgba(255, 255, 255, 0.18),    /* left rim refraction */
+    inset -2px 0 6px rgba(190, 214, 255, 0.18);   /* right rim, cool cast */
   cursor: pointer;
-  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+  /* hidden until the hero finishes typing (main.js adds .t2 to the stage) */
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition:
+    opacity 0.5s ease,
+    box-shadow 0.3s ease,
+    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.3s ease;
 }
 
-/* fixed specular highlight — the glassy sheen across the top-left */
+.stage.t2 .hero__cta {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.stage.t2 .hero__cta:hover { transform: translateY(-1px); }
+.stage.t2 .hero__cta:active { transform: translateY(0); }
+
+/* specular highlight — a glassy sheen that drifts slowly, like settling liquid */
 .hero__cta::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -12% -8%;
   z-index: 0;
   pointer-events: none;
   mix-blend-mode: screen;
   background:
     radial-gradient(80% 55% at 22% 0%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 60%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 46%);
+  animation: cta-liquid 7s ease-in-out infinite alternate;
+}
+
+@keyframes cta-liquid {
+  from { transform: translateX(-3.5%); }
+  to   { transform: translateX(3.5%); }
 }
 
 /* travelling glare that sweeps across on hover */
@@ -348,11 +433,12 @@ body {
   pointer-events: auto;
 }
 
-/* left panel: eyebrow + card (138:1867) */
+/* left panel: eyebrow + card (138:1867) — anchored to the bottom edge so it
+   keeps a clean margin at any viewport height */
 .gov__panel {
   position: absolute;
   left: 40px;
-  top: 350px;
+  bottom: 72px;
   width: 432px;
   max-width: calc(100% - 80px);
   display: flex;
@@ -506,12 +592,15 @@ body {
 /* bottom-right: // ASK WEDGE AI + sphere (143:288) */
 .gov__ask {
   position: absolute;
-  right: 48px;
-  bottom: 40px;
+  right: 40px;
+  bottom: 28px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 16px;
+  transform: translateY(16px);
+  transition: transform 0.7s ease 0.12s;
 }
+.stage.is-revealed .gov__ask { transform: translateY(0); }
 
 .gov__ask-label {
   font-family: var(--font-body);
@@ -521,14 +610,76 @@ body {
   letter-spacing: -0.24px;
   color: #fff;
   white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(23, 43, 77, 0.3);
 }
 
-.gov__sphere {
-  display: block;
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 18px rgba(43, 132, 248, 0.4));
+/* The AI sphere. The PNG has large transparent margins, so the wrapper is the
+   true hit-area and the image is oversized + offset to centre the ball itself. */
+.sphere {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sphere__img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 290px;
+  max-width: none;
+  transform: translate(-55.7%, -56.5%); /* ball centre within the PNG canvas */
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.sphere:hover .sphere__img,
+.sphere:focus-visible .sphere__img {
+  transform: translate(-55.7%, -56.5%) scale(1.08);
+}
+
+.sphere:focus-visible { outline: none; }
+
+/* live glow behind the ball — two drifting light blobs */
+.sphere__glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(18px);
+  will-change: transform;
+}
+
+.sphere__glow--a {
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(closest-side, rgba(43, 132, 248, 0.55), rgba(43, 132, 248, 0) 70%);
+  animation: sphere-glow-a 5.5s ease-in-out infinite alternate;
+}
+
+.sphere__glow--b {
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(closest-side, rgba(95, 227, 255, 0.5), rgba(95, 227, 255, 0) 70%);
+  animation: sphere-glow-b 4s ease-in-out infinite alternate;
+}
+
+.sphere:hover .sphere__glow,
+.sphere:focus-visible .sphere__glow { filter: blur(16px) brightness(1.15); }
+
+@keyframes sphere-glow-a {
+  from { transform: translate(-62%, -46%) scale(1); }
+  to   { transform: translate(-38%, -56%) scale(1.18); }
+}
+
+@keyframes sphere-glow-b {
+  from { transform: translate(-40%, -60%) scale(1.08); opacity: 0.85; }
+  to   { transform: translate(-60%, -42%) scale(0.9);  opacity: 1; }
 }
 
 /* =====================  Responsive  ===================== */
@@ -543,12 +694,17 @@ body {
   }
   .hero__title { font-size: clamp(38px, 8vw, 64px); }
   .stage__video { object-position: 58% 50%; }
-  .gov__panel { left: 20px; top: auto; bottom: 120px; }
-  .gov__ask { right: 20px; bottom: 20px; }
+  .gov__panel { left: 20px; bottom: 116px; }
+  .gov__ask { right: 20px; bottom: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__cta, .menu__link, .menu__demo { transition: none; }
+  .hero__cta, .menu__link, .menu__demo, .hero__backed { transition: none; }
   .hero__cta:hover { transform: none; }
   .hero__cta:hover::after { animation: none; }
+  .hero__cta::before,
+  .sphere__glow--a,
+  .sphere__glow--b,
+  .type-caret { animation: none; }
+  .sphere__img { transition: none; }
 }

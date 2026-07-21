@@ -41,8 +41,14 @@
           <img class="hero__yc" src="assets/ycombinator.png" width="119" height="28" alt="Y Combinator" data-node-id="138:2170" />
         </p>
         <div class="hero__headings" data-node-id="138:2173">
-          <h1 class="hero__title" data-node-id="138:2174">The Operating System<br />for Healthcare AI Agents</h1>
-          <p class="hero__sub" data-node-id="138:2175">Automating the entire back office for large health systems</p>
+          <!-- text types itself on load (main.js); data-text holds the final copy -->
+          <h1 class="hero__title" data-node-id="138:2174" aria-label="The Operating System for Healthcare AI Agents">
+            <span class="type-line" data-text="The Operating System" aria-hidden="true">The Operating System</span><br />
+            <span class="type-line" data-text="for Healthcare AI Agents" aria-hidden="true">for Healthcare AI Agents</span>
+          </h1>
+          <p class="hero__sub" data-node-id="138:2175" aria-label="Automating the entire back office for large health systems">
+            <span class="type-line" data-text="Automating the entire back office for large health systems" aria-hidden="true">Automating the entire back office for large health systems</span>
+          </p>
         </div>
       </div>
 
@@ -105,7 +111,11 @@
       <!-- bottom-right: label + AI sphere (Figma 143:288 / 138:1924) -->
       <div class="gov__ask" data-node-id="143:288">
         <p class="gov__ask-label" data-node-id="138:1924">// ASK WEDGE AI</p>
-        <img class="gov__sphere" src="assets/AI Sphere.png" alt="Ask Wedge AI" />
+        <button class="sphere" type="button" aria-label="Ask Wedge AI">
+          <span class="sphere__glow sphere__glow--a" aria-hidden="true"></span>
+          <span class="sphere__glow sphere__glow--b" aria-hidden="true"></span>
+          <img class="sphere__img" src="assets/AI Sphere.png" alt="" />
+        </button>
       </div>
     </div>
 
