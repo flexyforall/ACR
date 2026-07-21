@@ -27,8 +27,8 @@
         <a class="menu__link" href="#">Our process</a>
         <a class="menu__link" href="#">FAQ</a>
       </div>
-      <a class="menu__demo" href="#" data-node-id="143:236">
-        Book a Demo
+      <a class="menu__demo" href="#" data-node-id="164:292">
+        <span class="menu__demo-text">Book a Demo</span>
         <img class="menu__demo-arrow" src="assets/icon2.png" width="12" height="12" alt="" />
       </a>
     </nav>
@@ -42,19 +42,30 @@
         </p>
         <div class="hero__headings" data-node-id="138:2173">
           <!-- text types itself on load (main.js); data-text holds the final copy -->
-          <h1 class="hero__title" data-node-id="138:2174" aria-label="The Operating System for Healthcare AI Agents">
-            <span class="type-line" data-text="The Operating System" aria-hidden="true">The Operating System</span><br />
+          <h1 class="hero__title" data-node-id="164:273" aria-label="Wedge is the Operating System for Healthcare AI Agents">
+            <span class="type-line" data-text="Wedge is the Operating System" aria-hidden="true">Wedge is the Operating System</span><br />
             <span class="type-line" data-text="for Healthcare AI Agents" aria-hidden="true">for Healthcare AI Agents</span>
           </h1>
-          <p class="hero__sub" data-node-id="138:2175" aria-label="Automating the entire back office for large health systems">
+          <p class="hero__sub" data-node-id="164:274" aria-label="Automating the entire back office for large health systems">
             <span class="type-line" data-text="Automating the entire back office for large health systems" aria-hidden="true">Automating the entire back office for large health systems</span>
           </p>
         </div>
       </div>
+    </div>
 
-      <button class="hero__cta" type="button" id="exploreBtn" data-node-id="138:2176">
-        <img class="hero__cta-icon" src="assets/icon.png" width="24" height="24" alt="" data-node-id="138:2177" />
-        <span class="hero__cta-text" data-node-id="138:2178">Explore Agents</span>
+    <!-- actions row, bottom-left (Figma 164:334) -->
+    <div class="hero__actions" data-node-id="164:334">
+      <button class="hero__book" type="button" data-node-id="164:326">
+        <!-- vuesax/bold/flash — inline until flash.svg is uploaded -->
+        <svg class="hero__book-icon" viewBox="0 0 16 17" aria-hidden="true">
+          <path d="M10.32 1.14 3.44 8.6c-.4.44-.1 1.15.5 1.15h3.18l-1.02 5.5c-.11.6.64.96 1.03.5l6.88-7.47c.4-.44.1-1.15-.5-1.15h-3.18l1.02-5.5c.11-.6-.64-.96-1.03-.49Z" fill="#fff"/>
+        </svg>
+        <span class="hero__book-text">Book a Demo</span>
+      </button>
+
+      <button class="hero__cta" type="button" id="exploreBtn" data-node-id="164:275">
+        <img class="hero__cta-icon" src="assets/icon.png" width="24" height="24" alt="" data-node-id="164:276" />
+        <span class="hero__cta-text" data-node-id="164:278">Explore Agents</span>
       </button>
     </div>
 
@@ -108,7 +119,8 @@
         </div>
       </div>
 
-      <!-- bottom-right: label + AI sphere (Figma 143:288 / 138:1924) -->
+      <!-- bottom-right: label + AI sphere (Figma 143:288 / 138:1924).
+           Temporarily disabled per design review — restore by uncommenting.
       <div class="gov__ask" data-node-id="143:288">
         <p class="gov__ask-label" data-node-id="138:1924">// ASK WEDGE AI</p>
         <button class="sphere" type="button" aria-label="Ask Wedge AI">
@@ -117,6 +129,8 @@
           <img class="sphere__img" src="assets/AI Sphere.png" alt="" />
         </button>
       </div>
+      -->
+
     </div>
 
   </section>

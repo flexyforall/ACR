@@ -26,22 +26,17 @@
 
 /* ---- Inter: activates if assets/Inter-Regular.ttf / -Medium.ttf are added;
         falls back to a near-metrics-compatible system stack until then. ---- */
+/* Rinter — the body/UI face the Figma frames actually reference */
 @font-face {
-  font-family: "Inter";
-  src: url("assets/Inter-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Inter";
-  src: url("assets/Inter-Medium.ttf") format("truetype");
-  font-weight: 500;
+  font-family: "Rinter";
+  src: url("assets/Rinter.ttf") format("truetype");
+  font-weight: 400 500;
   font-display: swap;
 }
 
 :root {
   --font-display: "Mozilla Headline", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Inter", system-ui, "Segoe UI", Arial, sans-serif;
+  --font-body: "Rinter", system-ui, "Segoe UI", Arial, sans-serif;
 
   --ink: #1b1b21;
   --frame-bg: #d8e2ec;
@@ -99,7 +94,7 @@ body {
 
 /* =====================  Menu (143:204)  ===================== */
 
-/* liquid-glass plate: refractive blur + gradient fill + specular rim */
+/* glass plate — exact Figma spec (164:280) */
 .menu {
   position: absolute;
   top: 16px;
@@ -111,42 +106,18 @@ body {
   gap: 16px;
   padding: 8px 8px 8px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: linear-gradient(115deg,
-    rgba(255, 255, 255, 0.42) 0%,
-    rgba(255, 255, 255, 0.12) 45%,
-    rgba(255, 255, 255, 0.26) 100%);
-  backdrop-filter: blur(22px) saturate(190%) brightness(1.04);
-  -webkit-backdrop-filter: blur(22px) saturate(190%) brightness(1.04);
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.1),
-    0 4px 20px rgba(0, 0, 0, 0.06),
-    0 14px 34px rgba(23, 43, 77, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9),
-    inset 0 -8px 20px rgba(255, 255, 255, 0.12);
-  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
 }
-
-/* sheen across the top-left of the plate */
-.menu::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  background:
-    radial-gradient(60% 130% at 18% 0%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 45%);
-}
-
-.menu > * { position: relative; z-index: 1; }
 
 .menu__logo { display: block; width: 32px; height: 32px; }
 
 .menu__links { display: flex; align-items: center; }
 
 .menu__link {
-  padding: 12px;
+  padding: 16px 12px 12px; /* Figma 164:288 — Rinter baseline sits high */
   border-radius: 100px;
   font-family: var(--font-body);
   font-size: 16px;
@@ -182,6 +153,8 @@ body {
 }
 .menu__demo:hover { box-shadow: 0 2px 10px rgba(27, 27, 33, 0.12); }
 
+.menu__demo-text { padding-top: 4px; } /* Figma 164:337 — Rinter baseline */
+
 .menu__demo-arrow { display: block; width: 12px; height: 12px; }
 
 /* =====================  title, label (138:2165)  ===================== */
@@ -189,7 +162,7 @@ body {
 .hero__content {
   position: absolute;
   left: 60px;
-  top: calc(50% - 72px);
+  top: calc(50% - 156.5px); /* Figma 164:264 — text block sits higher now */
   transform: translateY(-50%);
   z-index: 5;
   width: 800px;
@@ -197,7 +170,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 40px;
   transition: opacity 0.5s ease, transform 0.6s ease;
 }
 
@@ -248,18 +220,18 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 24px; /* Figma 164:272 */
   width: 100%;
 }
 
 .hero__title {
   width: 100%;
-  min-height: 2.18em; /* reserve both lines while the text types itself */
+  min-height: 2.4em; /* reserve both lines while the text types itself */
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 64px;
-  line-height: 1.09;
-  letter-spacing: -1.28px;
+  font-size: 56px;          /* Figma 164:273 */
+  line-height: 1.2;
+  letter-spacing: -1.12px;
   color: var(--ink);
   font-variation-settings: "wdth" 100;
 }
@@ -298,109 +270,111 @@ body {
   50%, 100% { opacity: 0; }
 }
 
-/* CTA button (138:2176) */
-/* Apple "liquid glass" — refracts the backdrop through a blurred, specular pane */
+/* =====================  Actions row (164:334)  ===================== */
+/* Two buttons pinned bottom-left, 60px off both edges. Hidden until the
+   intro finishes typing (main.js adds .t2 to the stage). */
+.hero__actions {
+  position: absolute;
+  left: 60px;
+  bottom: 60px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.stage.t2 .hero__actions {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* once the fly-in starts, the actions leave together with the copy */
+.stage.is-playing .hero__actions,
+.stage.is-revealed .hero__actions {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+/* primary "Book a Demo" (164:326) — solid dark */
+.hero__book {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 66px;
+  padding: 20px 24px;
+  border: 0;
+  border-radius: 6px;
+  background: #1b1b21;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.hero__book:hover { background: #2b2b33; transform: translateY(-1px); }
+.hero__book:active { transform: translateY(0); }
+
+.hero__book-icon { display: block; width: 16px; height: 17px; }
+
+.hero__book-text {
+  padding-top: 6px;              /* Rinter baseline compensation, as in Figma */
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.09;
+  letter-spacing: -0.36px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* secondary "Explore Agents" (164:275) — exact Figma glass:
+   translucent ink fill, white hairline, soft white halo, Ellipse-2 glow */
 .hero__cta {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
+  overflow: clip;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 20px 24px 20px 20px;
-  border-radius: 6px; /* match the top menu plate */
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.34) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.22) 100%);
-  -webkit-backdrop-filter: blur(18px) saturate(200%) brightness(1.07);
-  backdrop-filter: blur(18px) saturate(200%) brightness(1.07);
-  box-shadow:
-    0 8px 30px rgba(23, 43, 77, 0.18),            /* soft cast shadow */
-    0 1px 2px rgba(23, 43, 77, 0.1),              /* contact shadow */
-    inset 0 1px 1px rgba(255, 255, 255, 0.95),    /* bright top edge */
-    inset 0 -1px 1px rgba(255, 255, 255, 0.35),   /* bottom lip catch-light */
-    inset 0 -10px 24px rgba(255, 255, 255, 0.14), /* inner floor glow */
-    inset 2px 0 6px rgba(255, 255, 255, 0.18),    /* left rim refraction */
-    inset -2px 0 6px rgba(190, 214, 255, 0.18);   /* right rim, cool cast */
+  border-radius: 6px;
+  border: 1px solid #fff;
+  background: rgba(27, 27, 33, 0.06);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+  -webkit-backdrop-filter: blur(4px); /* Figma Glass effect, radius 4 */
+  backdrop-filter: blur(4px);
   cursor: pointer;
-  /* hidden until the hero finishes typing (main.js adds .t2 to the stage) */
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-  transition:
-    opacity 0.5s ease,
-    box-shadow 0.3s ease,
-    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
-    border-color 0.3s ease;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
-.stage.t2 .hero__cta {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-.stage.t2 .hero__cta:hover { transform: translateY(-1px); }
-.stage.t2 .hero__cta:active { transform: translateY(0); }
-
-/* specular highlight — a glassy sheen that drifts slowly, like settling liquid */
+/* Ellipse 2 (164:279): a blurred white ellipse hovering above the top edge —
+   clipped by the button, it reads as a soft light pooling along the top */
 .hero__cta::before {
   content: "";
   position: absolute;
-  inset: -12% -8%;
-  z-index: 0;
+  left: 47px;
+  top: -64px;
+  width: 325px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  filter: blur(18px);
   pointer-events: none;
-  mix-blend-mode: screen;
-  background:
-    radial-gradient(80% 55% at 22% 0%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 46%);
-  animation: cta-liquid 7s ease-in-out infinite alternate;
-}
-
-@keyframes cta-liquid {
-  from { transform: translateX(-3.5%); }
-  to   { transform: translateX(3.5%); }
-}
-
-/* travelling glare that sweeps across on hover */
-.hero__cta::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -60%;
-  width: 45%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  transform: skewX(-18deg);
-  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-  opacity: 0;
 }
 
 .hero__cta:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.85);
-  box-shadow:
-    0 14px 38px rgba(23, 43, 77, 0.24),
-    inset 0 1px 1px rgba(255, 255, 255, 1),
-    inset 0 -12px 26px rgba(255, 255, 255, 0.18),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
 }
 
-.hero__cta:hover::after { animation: cta-glare 0.9s ease; }
-.hero__cta:active { transform: translateY(0); }
-
-.hero__cta:focus-visible {
+.hero__cta:focus-visible,
+.hero__book:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.9);
   outline-offset: 2px;
-}
-
-@keyframes cta-glare {
-  0%   { left: -60%; opacity: 0; }
-  18%  { opacity: 1; }
-  100% { left: 130%; opacity: 0; }
 }
 
 .hero__cta-icon { display: block; width: 24px; height: 24px; position: relative; z-index: 1; }
@@ -437,8 +411,8 @@ body {
    keeps a clean margin at any viewport height */
 .gov__panel {
   position: absolute;
-  left: 40px;
-  bottom: 72px;
+  left: 60px;
+  bottom: 60px; /* equal 60px margins from the left and bottom edges */
   width: 432px;
   max-width: calc(100% - 80px);
   display: flex;
@@ -699,10 +673,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__cta, .menu__link, .menu__demo, .hero__backed { transition: none; }
-  .hero__cta:hover { transform: none; }
-  .hero__cta:hover::after { animation: none; }
-  .hero__cta::before,
+  .hero__cta, .hero__book, .hero__actions, .menu__link, .menu__demo, .hero__backed { transition: none; }
+  .hero__book:hover { transform: none; }
   .sphere__glow--a,
   .sphere__glow--b,
   .type-caret { animation: none; }
