@@ -138,38 +138,51 @@ document.querySelectorAll('[data-scramble]').forEach((el) => {
 const INTRO_END = 6.0;
 let flying = false;
 
-/* "// ASK WEDGE AI" types itself once the governance screen appears */
-function typeAskLabel() {
-  const el = document.getElementById('askLabel');
-  if (!el || el.dataset.typed) return;
-  el.dataset.typed = '1';
-  if (reduceMotion) return;
+/* the "// …" labels type themselves on repeat: type → hold → clear → retype */
+function startTypeLoop(el, startDelay) {
+  if (!el || el.dataset.looping) return;
+  el.dataset.looping = '1';
   const text = el.textContent;
-  el.textContent = '';
+  el.style.minWidth = el.offsetWidth + 'px'; // keep the row from shifting
+  if (reduceMotion) return;
   el.classList.add('is-typing');
   let i = 0;
-  (function step() {
+  function step() {
     i++;
     el.textContent = text.slice(0, i);
     if (i < text.length) {
-      setTimeout(step, 45 + Math.random() * 45);
+      setTimeout(step, 45 + Math.random() * 45);   // typing
     } else {
-      setTimeout(() => el.classList.remove('is-typing'), 1200);
+      setTimeout(() => {                            // hold the full text…
+        i = 0;
+        el.textContent = '';
+        setTimeout(step, 600);                      // …clear, brief pause, retype
+      }, 2600);
     }
-  })();
+  }
+  el.textContent = '';
+  setTimeout(step, startDelay);
 }
 
 function reveal() {
   video.pause();                 // hold the last (person) frame
   stage.classList.remove('is-playing');
   stage.classList.add('is-revealed');
-  setTimeout(typeAskLabel, 350); // start typing as the content fades in
+  setTimeout(() => {
+    startTypeLoop(document.getElementById('eyebrowLabel'), 300);
+    startTypeLoop(document.getElementById('askLabel'), 600);
+  }, 350);
 }
 
-/* ambient segment loop (rAF for a tight wrap — timeupdate is too coarse) */
+/* ambient segment plays ONCE: when the camera returns to the first frame
+   (~6.0s) the video freezes there until Explore Agents is pressed */
 function watchAmbient() {
   if (flying) return;
-  if (video.currentTime >= INTRO_END - 0.06) video.currentTime = 0;
+  if (video.currentTime >= INTRO_END - 0.06) {
+    video.pause();
+    video.currentTime = INTRO_END; // hold exactly on the return frame
+    return;
+  }
   requestAnimationFrame(watchAmbient);
 }
 
