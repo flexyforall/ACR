@@ -121,27 +121,22 @@
         </div>
       </div>
 
-      <!-- bottom-right: Lottie animation, mirroring the left panel's 60px
-           margins and sharing its bottom edge. Loads assets/lottie.json. -->
-      <div class="gov__lottie" id="govLottie" aria-hidden="true"></div>
-
-      <!-- bottom-right: label + AI sphere (Figma 143:288 / 138:1924).
-           Temporarily disabled per design review — restore by uncommenting.
-      <div class="gov__ask" data-node-id="143:288">
-        <p class="gov__ask-label" data-node-id="138:1924">// ASK WEDGE AI</p>
-        <button class="sphere" type="button" aria-label="Ask Wedge AI">
-          <span class="sphere__glow sphere__glow--a" aria-hidden="true"></span>
-          <span class="sphere__glow sphere__glow--b" aria-hidden="true"></span>
-          <img class="sphere__img" src="assets/AI Sphere.png" alt="" />
+      <!-- bottom-right: // ASK WEDGE AI + glass tile with the agent orb
+           (Figma 173:696) — bottom-aligned with the card, mirrored 60px margins -->
+      <div class="gov__ask" data-node-id="173:696">
+        <p class="gov__ask-label" id="askLabel" data-node-id="173:529">// ASK WEDGE AI</p>
+        <button class="ask-tile" type="button" aria-label="Ask Wedge AI" data-node-id="173:600">
+          <span class="orb" aria-hidden="true" data-node-id="173:651">
+            <span class="orb__swirl"></span>
+            <span class="orb__streak"></span>
+          </span>
         </button>
       </div>
-      -->
 
     </div>
 
   </section>
 
-  <script src="assets/lottie.min.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

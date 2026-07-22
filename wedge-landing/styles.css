@@ -563,29 +563,15 @@ body {
 }
 .gov-card__try:hover { filter: brightness(1.06); }
 
-/* bottom-right Lottie — mirrors the left panel: 60px off the right edge,
-   bottom-aligned with the card's bottom (60px) */
-.gov__lottie {
+/* bottom-right: // ASK WEDGE AI + glass tile with the agent orb (173:696).
+   Mirrors the left card: 60px off the right edge, bottom edges aligned. */
+.gov__ask {
   position: absolute;
   right: 60px;
   bottom: 60px;
-  width: 240px;
-  height: 240px;
-  pointer-events: none;
-  transform: translateY(16px);
-  transition: transform 0.7s ease 0.12s;
-}
-.stage.is-revealed .gov__lottie { transform: translateY(0); }
-.gov__lottie:empty { display: none; } /* stays hidden until the animation loads */
-
-/* bottom-right: // ASK WEDGE AI + sphere (143:288) */
-.gov__ask {
-  position: absolute;
-  right: 40px;
-  bottom: 28px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 19px; /* Figma 173:696 */
   transform: translateY(16px);
   transition: transform 0.7s ease 0.12s;
 }
@@ -602,73 +588,89 @@ body {
   text-shadow: 0 1px 6px rgba(23, 43, 77, 0.3);
 }
 
-/* The AI sphere. The PNG has large transparent margins, so the wrapper is the
-   true hit-area and the image is oversized + offset to centre the ball itself. */
-.sphere {
+/* blinking terminal underscore while the label types itself */
+.gov__ask-label.is-typing::after {
+  content: "_";
+  animation: caret-blink 0.9s linear infinite;
+}
+
+/* glass tile (173:600) */
+.ask-tile {
   position: relative;
-  width: 112px;
-  height: 112px;
+  width: 60px;
+  height: 60px;
   padding: 0;
   border: 0;
-  background: transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px); /* Figma Glass effect, radius 4 */
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
   cursor: pointer;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
+.ask-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 8px 28px rgba(0, 0, 0, 0.1);
+}
+.ask-tile:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; }
 
-.sphere__img {
+/* the agent orb (173:651) — layered gradients; the highlights slowly revolve
+   so the light travels inside the ball and gives it depth */
+.orb {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 290px;
-  max-width: none;
-  transform: translate(-55.7%, -56.5%); /* ball centre within the PNG canvas */
-  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
-  pointer-events: none;
-  will-change: transform;
+  width: 29px;
+  height: 29px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 32% 28%, #bfeef7 0%, #63b0f6 18%, #2b84f8 38%, #123a8c 64%, #0a1e4d 90%);
+  box-shadow:
+    inset 0 -1.6px 9.7px #2b84f8,
+    inset 0 2.9px 2.9px rgba(255, 255, 255, 0.25),
+    0 1.5px 6px rgba(70, 88, 102, 0.35);
 }
 
-.sphere:hover .sphere__img,
-.sphere:focus-visible .sphere__img {
-  transform: translate(-55.7%, -56.5%) scale(1.08);
-}
-
-.sphere:focus-visible { outline: none; }
-
-/* live glow behind the ball — two drifting light blobs */
-.sphere__glow {
+.orb__swirl,
+.orb__streak {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  inset: -18%;
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(18px);
-  will-change: transform;
+  mix-blend-mode: screen;
 }
 
-.sphere__glow--a {
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(closest-side, rgba(43, 132, 248, 0.55), rgba(43, 132, 248, 0) 70%);
-  animation: sphere-glow-a 5.5s ease-in-out infinite alternate;
+.orb__swirl {
+  background: conic-gradient(
+    from 200deg,
+    transparent 0deg,
+    rgba(191, 238, 247, 0.9) 50deg,
+    transparent 120deg,
+    rgba(255, 255, 255, 0.55) 190deg,
+    transparent 260deg,
+    rgba(95, 227, 255, 0.6) 315deg,
+    transparent 360deg
+  );
+  filter: blur(2.5px);
+  animation: orb-spin 9s linear infinite;
 }
 
-.sphere__glow--b {
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(closest-side, rgba(95, 227, 255, 0.5), rgba(95, 227, 255, 0) 70%);
-  animation: sphere-glow-b 4s ease-in-out infinite alternate;
+.orb__streak {
+  background:
+    radial-gradient(40% 22% at 30% 26%, rgba(255, 255, 255, 0.95), transparent 75%),
+    radial-gradient(50% 26% at 68% 74%, rgba(95, 227, 255, 0.55), transparent 75%);
+  filter: blur(1.2px);
+  animation: orb-spin 14s linear infinite reverse; /* counter-rotation = parallax depth */
 }
 
-.sphere:hover .sphere__glow,
-.sphere:focus-visible .sphere__glow { filter: blur(16px) brightness(1.15); }
+.ask-tile:hover .orb__swirl { animation-duration: 4.5s; } /* light speeds up on hover */
 
-@keyframes sphere-glow-a {
-  from { transform: translate(-62%, -46%) scale(1); }
-  to   { transform: translate(-38%, -56%) scale(1.18); }
-}
-
-@keyframes sphere-glow-b {
-  from { transform: translate(-40%, -60%) scale(1.08); opacity: 0.85; }
-  to   { transform: translate(-60%, -42%) scale(0.9);  opacity: 1; }
+@keyframes orb-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* =====================  Responsive  ===================== */
@@ -690,8 +692,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hero__cta, .hero__book, .hero__actions, .menu__link, .menu__demo, .hero__backed { transition: none; }
   .hero__book:hover { transform: none; }
-  .sphere__glow--a,
-  .sphere__glow--b,
+  .orb__swirl,
+  .orb__streak,
+  .gov__ask-label.is-typing::after,
   .type-caret { animation: none; }
-  .sphere__img { transition: none; }
+  .ask-tile:hover { transform: none; }
 }

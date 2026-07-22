@@ -138,10 +138,32 @@ document.querySelectorAll('[data-scramble]').forEach((el) => {
 const INTRO_END = 6.0;
 let flying = false;
 
+/* "// ASK WEDGE AI" types itself once the governance screen appears */
+function typeAskLabel() {
+  const el = document.getElementById('askLabel');
+  if (!el || el.dataset.typed) return;
+  el.dataset.typed = '1';
+  if (reduceMotion) return;
+  const text = el.textContent;
+  el.textContent = '';
+  el.classList.add('is-typing');
+  let i = 0;
+  (function step() {
+    i++;
+    el.textContent = text.slice(0, i);
+    if (i < text.length) {
+      setTimeout(step, 45 + Math.random() * 45);
+    } else {
+      setTimeout(() => el.classList.remove('is-typing'), 1200);
+    }
+  })();
+}
+
 function reveal() {
   video.pause();                 // hold the last (person) frame
   stage.classList.remove('is-playing');
   stage.classList.add('is-revealed');
+  setTimeout(typeAskLabel, 350); // start typing as the content fades in
 }
 
 /* ambient segment loop (rAF for a tight wrap — timeupdate is too coarse) */
