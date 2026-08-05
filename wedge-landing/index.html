@@ -8,25 +8,21 @@
 </head>
 <body>
 
-  <!-- Loader: plays once, full-bleed and un-overlaid. Its last frame hands off
-       to the hero, which then runs its own intro. -->
-  <div class="loader" id="loader">
-    <video class="loader__video" id="loaderVideo" src="assets/loader.mp4"
-           poster="assets/loader-poster.jpg" muted playsinline autoplay
-           preload="auto" tabindex="-1"></video>
-  </div>
-
-  <!-- One fixed stage; nothing scrolls. Clicking "Explore Agents" plays the
-       fly-in video, and only when it lands on the person (last frame) does the
-       governance content reveal. -->
+  <!-- One fixed stage; nothing scrolls. The intro clip plays un-overlaid, then
+       freezes on its last frame and stays as the hero backdrop — there is no
+       second clip behind the hero, so nothing can visibly switch. Pressing
+       Explore Agents cross-fades into the fly-in, which lands on the person and
+       reveals the governance content. -->
   <section class="stage is-intro" id="stage" data-node-id="138:2009">
 
-    <!-- Hero backdrop video (4K, 10s): the first ~6s are an ambient orbit that
-         returns to frame 0 — they loop on the hero. The 6s→end fly-in plays
-         after Explore Agents is pressed. -->
     <div class="stage__media" aria-hidden="true">
-      <video class="stage__video" id="heroVideo" src="assets/hero.mp4" poster="assets/hero-poster.jpg"
-             muted playsinline preload="auto" tabindex="-1"></video>
+      <!-- plays once on load, then holds its final frame for the whole hero -->
+      <video class="stage__video" id="introVideo" src="assets/loader.mp4"
+             poster="assets/loader-poster.jpg" muted playsinline autoplay
+             preload="auto" tabindex="-1"></video>
+      <!-- starts on the same shot the intro ends on; fades in only on click -->
+      <video class="stage__video stage__video--flyin" id="flyinVideo"
+             src="assets/hero-flyin.mp4" muted playsinline preload="auto" tabindex="-1"></video>
       <div class="stage__hue"></div>
     </div>
 

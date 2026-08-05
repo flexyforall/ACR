@@ -1,6 +1,7 @@
-/* Wedge loader → hero → governance flow.
+/* Wedge intro → hero → governance flow.
  *
- * Loader: a full-bleed clip plays once; its last frame hands off to the hero.
+ * Intro clip: plays once un-overlaid, then freezes and stays as the hero's
+ * backdrop — no second clip swaps in behind the hero, so there is no seam.
  * Intro: the hero text types itself (terminal caret), then the CTA appears.
  * Stage states, driven only by the button and the video:
  *   is-intro    → building backdrop (poster), hero copy + "Explore Agents"
@@ -10,7 +11,8 @@
  */
 
 const stage = document.getElementById('stage');
-const video = document.getElementById('heroVideo');
+const introVideo = document.getElementById('introVideo');
+const flyinVideo = document.getElementById('flyinVideo');
 const exploreBtn = document.getElementById('exploreBtn');
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -54,41 +56,42 @@ async function intro() {
   setTimeout(() => caret.remove(), 900);
 }
 
-/* ---------------- loader → hero handoff ---------------- */
+/* ---------------- intro clip → hero ----------------
+ * The intro plays un-overlaid, then simply stops. Its last frame stays on
+ * screen as the hero backdrop — nothing swaps, so there is no seam to see.
+ */
 
-const loader = document.getElementById('loader');
-const loaderVideo = document.getElementById('loaderVideo');
 let heroStarted = false;
+
+function freezeIntro() {
+  introVideo.pause();
+  // park on the very last frame so the still is exactly where the motion ended
+  if (introVideo.duration) {
+    try { introVideo.currentTime = Math.max(0, introVideo.duration - 0.04); } catch (e) {}
+  }
+}
 
 function startHero() {
   if (heroStarted) return;
   heroStarted = true;
-
-  loader.classList.add('is-done');
-  stage.classList.add('is-live');
-  setTimeout(() => loader.remove(), 700); // after the cross-fade
-
-  if (!reduceMotion) {
-    const p = video.play(); // muted + playsinline → allowed to autoplay
-    if (p && p.catch) p.catch(() => {});
-    requestAnimationFrame(watchAmbient);
-  }
+  freezeIntro();
+  stage.classList.add('is-live'); // menu + hero copy appear over the frozen frame
   intro();
 }
 
-if (loader && loaderVideo && !reduceMotion) {
-  loaderVideo.addEventListener('ended', startHero);
+if (!reduceMotion) {
+  introVideo.addEventListener('ended', startHero);
 
   // safety nets: some codecs never fire 'ended', and autoplay can be blocked
-  loaderVideo.addEventListener('timeupdate', () => {
-    if (loaderVideo.duration && loaderVideo.currentTime >= loaderVideo.duration - 0.05) startHero();
+  introVideo.addEventListener('timeupdate', () => {
+    if (introVideo.duration && introVideo.currentTime >= introVideo.duration - 0.05) startHero();
   });
-  loaderVideo.addEventListener('error', startHero);
-  const p = loaderVideo.play();
-  if (p && p.catch) p.catch(startHero); // playback refused → go straight to the hero
+  introVideo.addEventListener('error', startHero);
+  const p = introVideo.play();
+  if (p && p.catch) p.catch(startHero); // playback refused → straight to the hero
   setTimeout(startHero, 15000);         // hard cap, whatever happens
 } else {
-  startHero(); // reduced motion: no loader clip
+  startHero(); // reduced motion: hold the poster, no clip
 }
 
 /* ---------------- bottom-right Lottie on the governance screen ---------------- */
@@ -164,16 +167,12 @@ document.querySelectorAll('[data-scramble]').forEach((el) => {
   trigger.addEventListener('focusin', start);
 });
 
-/* ---------------- ambient loop → explore → fly-in → governance ----------------
+/* ---------------- explore → fly-in → governance ----------------
  *
- * The video is one 10s take: [0 … 6.0s] is an ambient orbit that ends back on
- * frame 0 (measured: the 6.0s frame matches frame 0), and [6.0s … end] is the
- * fly-in towards the person. While idle we loop the first segment; pressing
- * Explore Agents jumps to 6.0s and rides the fly-in to the end.
+ * hero-flyin.mp4 is cut to open on the exact shot the intro clip freezes on
+ * (matched by frame comparison, same 3840x2140 square-pixel geometry), so the
+ * cross-fade on click continues the camera instead of cutting to a new one.
  */
-
-const INTRO_END = 6.0;
-let flying = false;
 
 /* the "// …" labels type themselves on repeat: type → hold → clear → retype */
 function startTypeLoop(el, startDelay) {
@@ -202,7 +201,7 @@ function startTypeLoop(el, startDelay) {
 }
 
 function reveal() {
-  video.pause();                 // hold the last (person) frame
+  flyinVideo.pause();            // hold the last (person) frame
   stage.classList.remove('is-playing');
   stage.classList.add('is-revealed');
   setTimeout(() => {
@@ -211,45 +210,34 @@ function reveal() {
   }, 350);
 }
 
-/* ambient segment plays ONCE: when the camera returns to the first frame
-   (~6.0s) the video freezes there until Explore Agents is pressed */
-function watchAmbient() {
-  if (flying) return;
-  if (video.currentTime >= INTRO_END - 0.06) {
-    video.pause();
-    video.currentTime = INTRO_END; // hold exactly on the return frame
-    return;
-  }
-  requestAnimationFrame(watchAmbient);
-}
-
-/* the ambient pass is kicked off by startHero(), once the loader hands over */
-
 exploreBtn.addEventListener('click', () => {
   if (stage.classList.contains('is-playing') || stage.classList.contains('is-revealed')) return;
 
-  flying = true;
   stage.classList.remove('is-intro');
   stage.classList.add('is-playing');
 
   if (reduceMotion) {
     // honour reduced motion: skip the fly-in, jump straight to the last frame
-    try { video.currentTime = video.duration || 10; } catch (e) {}
+    stage.classList.add('is-flying');
+    try { flyinVideo.currentTime = flyinVideo.duration || 4; } catch (e) {}
     reveal();
     return;
   }
 
-  video.currentTime = INTRO_END; // ambient ends on ~frame 0, so the cut is soft
-  const p = video.play();
+  // the fly-in opens on the shot the intro froze on, so fading it in while it
+  // starts moving reads as the same camera continuing, not a cut
+  flyinVideo.currentTime = 0;
+  stage.classList.add('is-flying');
+  const p = flyinVideo.play();
   if (p && p.catch) p.catch(() => reveal()); // playback blocked → just reveal
 });
 
 // When the fly-in finishes, reveal the governance content.
-video.addEventListener('ended', reveal);
+flyinVideo.addEventListener('ended', reveal);
 
 // Safety net: if 'ended' doesn't fire (some codecs), reveal near the end.
-video.addEventListener('timeupdate', () => {
-  if (video.duration && video.currentTime >= video.duration - 0.05 &&
+flyinVideo.addEventListener('timeupdate', () => {
+  if (flyinVideo.duration && flyinVideo.currentTime >= flyinVideo.duration - 0.05 &&
       stage.classList.contains('is-playing')) {
     reveal();
   }
