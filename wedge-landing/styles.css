@@ -100,24 +100,23 @@ body {
   object-position: 50% 50%;
 }
 
-/* the fly-in sits on top, matched frame-for-frame to where the intro stops,
-   and cross-fades in as it starts moving so the cut can't be read */
-.stage__video--flyin {
+/* the later clips stack on top and cross-fade in while already in motion, so
+   the hand-off reads as the same camera rather than a cut */
+.stage__video--layer {
   opacity: 0;
-  transition: opacity 0.28s ease;
-}
-.stage.is-flying .stage__video--flyin,
-.stage.is-revealed .stage__video--flyin { opacity: 1; }
-
-.stage__hue {
-  /* #2088ff hue wash over the building; eased off once we're inside */
-  position: absolute;
-  inset: 0;
-  background: #2088ff;
-  mix-blend-mode: hue;
   transition: opacity 0.6s ease;
 }
-.stage.is-revealed .stage__hue { opacity: 0; }
+
+.stage.is-ambient #ambientVideo,
+.stage.is-flying #ambientVideo,
+.stage.is-revealed #ambientVideo { opacity: 1; }
+
+/* the fly-in is cut from the same source at the ambient's last frame, so it
+   only needs a short fade to cover encoder differences */
+#flyinVideo { transition: opacity 0.18s ease; }
+.stage.is-flying #flyinVideo,
+.stage.is-revealed #flyinVideo { opacity: 1; }
+
 
 /* =====================  Menu (143:204)  ===================== */
 

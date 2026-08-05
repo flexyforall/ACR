@@ -12,6 +12,7 @@
 
 const stage = document.getElementById('stage');
 const introVideo = document.getElementById('introVideo');
+const ambientVideo = document.getElementById('ambientVideo');
 const flyinVideo = document.getElementById('flyinVideo');
 const exploreBtn = document.getElementById('exploreBtn');
 
@@ -43,17 +44,17 @@ async function intro() {
     return;
   }
   typeLines.forEach((s) => (s.textContent = '')); // clear the no-JS fallback copy
-  await wait(250);
+  await wait(80);
   stage.classList.add('t1');       // "Backed by YC" fades in
-  await wait(350);
-  await typeSpan(typeLines[0], 34); // title line 1
-  await typeSpan(typeLines[1], 34); // title line 2
-  await wait(140);
-  await typeSpan(typeLines[2], 85); // subtitle, quicker
-  await wait(350);
+  await wait(120);
+  await typeSpan(typeLines[0], 62); // title line 1
+  await typeSpan(typeLines[1], 62); // title line 2
+  await wait(60);
+  await typeSpan(typeLines[2], 140); // subtitle, quicker
+  await wait(120);
   caret.classList.add('type-caret--done');
   stage.classList.add('t2');       // CTA appears
-  setTimeout(() => caret.remove(), 900);
+  setTimeout(() => caret.remove(), 700);
 }
 
 /* ---------------- intro clip → hero ----------------
@@ -77,7 +78,25 @@ function startHero() {
   freezeIntro();
   stage.classList.add('is-live'); // menu + hero copy appear over the frozen frame
   intro();
+  startAmbient();
 }
+
+/* the camera pulls back and returns, then holds — cross-faded in over the
+   frozen intro frame while it is already moving, so the join isn't readable */
+function startAmbient() {
+  if (reduceMotion) return;
+  stage.classList.add('is-ambient');
+  const p = ambientVideo.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
+function freezeAmbient() {
+  ambientVideo.pause();
+  if (ambientVideo.duration) {
+    try { ambientVideo.currentTime = Math.max(0, ambientVideo.duration - 0.04); } catch (e) {}
+  }
+}
+ambientVideo.addEventListener('ended', freezeAmbient);
 
 if (!reduceMotion) {
   introVideo.addEventListener('ended', startHero);
@@ -224,8 +243,9 @@ exploreBtn.addEventListener('click', () => {
     return;
   }
 
-  // the fly-in opens on the shot the intro froze on, so fading it in while it
-  // starts moving reads as the same camera continuing, not a cut
+  // the fly-in is cut from the same source exactly where the ambient stops, so
+  // it opens on the frame already on screen and the camera simply keeps going
+  freezeAmbient();
   flyinVideo.currentTime = 0;
   stage.classList.add('is-flying');
   const p = flyinVideo.play();
