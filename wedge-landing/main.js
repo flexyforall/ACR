@@ -1,5 +1,6 @@
-/* Wedge hero → governance flow.
+/* Wedge loader → hero → governance flow.
  *
+ * Loader: a full-bleed clip plays once; its last frame hands off to the hero.
  * Intro: the hero text types itself (terminal caret), then the CTA appears.
  * Stage states, driven only by the button and the video:
  *   is-intro    → building backdrop (poster), hero copy + "Explore Agents"
@@ -52,7 +53,43 @@ async function intro() {
   stage.classList.add('t2');       // CTA appears
   setTimeout(() => caret.remove(), 900);
 }
-intro();
+
+/* ---------------- loader → hero handoff ---------------- */
+
+const loader = document.getElementById('loader');
+const loaderVideo = document.getElementById('loaderVideo');
+let heroStarted = false;
+
+function startHero() {
+  if (heroStarted) return;
+  heroStarted = true;
+
+  loader.classList.add('is-done');
+  stage.classList.add('is-live');
+  setTimeout(() => loader.remove(), 700); // after the cross-fade
+
+  if (!reduceMotion) {
+    const p = video.play(); // muted + playsinline → allowed to autoplay
+    if (p && p.catch) p.catch(() => {});
+    requestAnimationFrame(watchAmbient);
+  }
+  intro();
+}
+
+if (loader && loaderVideo && !reduceMotion) {
+  loaderVideo.addEventListener('ended', startHero);
+
+  // safety nets: some codecs never fire 'ended', and autoplay can be blocked
+  loaderVideo.addEventListener('timeupdate', () => {
+    if (loaderVideo.duration && loaderVideo.currentTime >= loaderVideo.duration - 0.05) startHero();
+  });
+  loaderVideo.addEventListener('error', startHero);
+  const p = loaderVideo.play();
+  if (p && p.catch) p.catch(startHero); // playback refused → go straight to the hero
+  setTimeout(startHero, 15000);         // hard cap, whatever happens
+} else {
+  startHero(); // reduced motion: no loader clip
+}
 
 /* ---------------- bottom-right Lottie on the governance screen ---------------- */
 
@@ -186,11 +223,7 @@ function watchAmbient() {
   requestAnimationFrame(watchAmbient);
 }
 
-if (!reduceMotion) {
-  const p = video.play(); // muted + playsinline → allowed to autoplay
-  if (p && p.catch) p.catch(() => {}); // blocked → static poster is fine
-  requestAnimationFrame(watchAmbient);
-}
+/* the ambient pass is kicked off by startHero(), once the loader hands over */
 
 exploreBtn.addEventListener('click', () => {
   if (stage.classList.contains('is-playing') || stage.classList.contains('is-revealed')) return;

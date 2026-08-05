@@ -8,6 +8,14 @@
 </head>
 <body>
 
+  <!-- Loader: plays once, full-bleed and un-overlaid. Its last frame hands off
+       to the hero, which then runs its own intro. -->
+  <div class="loader" id="loader">
+    <video class="loader__video" id="loaderVideo" src="assets/loader.mp4"
+           poster="assets/loader-poster.jpg" muted playsinline autoplay
+           preload="auto" tabindex="-1"></video>
+  </div>
+
   <!-- One fixed stage; nothing scrolls. Clicking "Explore Agents" plays the
        fly-in video, and only when it lands on the person (last frame) does the
        governance content reveal. -->
