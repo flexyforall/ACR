@@ -15,22 +15,15 @@
        reveals the governance content. -->
   <section class="stage is-intro" id="stage" data-node-id="138:2009">
 
+    <!-- One continuous take, so there is no clip to switch and nothing to see:
+         0–5.0s  the desk, dissolving into the model
+         5.0–9.6s the camera pulls back and returns  ← hero copy appears here
+         9.6s     holds, waiting for Explore Agents
+         9.6–end  flies inside, landing on the person -->
     <div class="stage__media" aria-hidden="true">
-      <!-- 1 · opening shot: the desk, pushing into the model on screen -->
-      <video class="stage__video" id="introVideo1" src="assets/intro-1.mp4"
-             poster="assets/intro-1-poster.jpg" muted playsinline autoplay
+      <video class="stage__video" id="heroVideo" src="assets/hero.mp4"
+             poster="assets/hero-poster.jpg" muted playsinline autoplay
              preload="auto" tabindex="-1"></video>
-      <!-- 2 · dissolves in on the scene change, then holds its final frame -->
-      <video class="stage__video stage__video--layer" id="introVideo" src="assets/loader.mp4"
-             muted playsinline preload="auto" tabindex="-1"></video>
-      <!-- 3 · the camera pulls back and returns; fades in over the frozen frame
-              while it is already moving, then holds its own last frame -->
-      <video class="stage__video stage__video--layer" id="ambientVideo"
-             src="assets/hero-ambient.mp4" muted playsinline preload="auto" tabindex="-1"></video>
-      <!-- 4 · fly-in; cut from the same source right where the ambient ends, so
-              the boundary frame is the same one -->
-      <video class="stage__video stage__video--layer" id="flyinVideo"
-             src="assets/hero-flyin.mp4" muted playsinline preload="auto" tabindex="-1"></video>
     </div>
 
     <!-- Menu (Figma 143:224) — persistent across both states -->
