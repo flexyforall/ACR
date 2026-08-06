@@ -11,6 +11,7 @@
  */
 
 const stage = document.getElementById('stage');
+const introVideo1 = document.getElementById('introVideo1');
 const introVideo = document.getElementById('introVideo');
 const ambientVideo = document.getElementById('ambientVideo');
 const flyinVideo = document.getElementById('flyinVideo');
@@ -65,6 +66,7 @@ async function intro() {
 let heroStarted = false;
 
 function freezeIntro() {
+  introVideo1.pause();
   introVideo.pause();
   // park on the very last frame so the still is exactly where the motion ended
   if (introVideo.duration) {
@@ -98,19 +100,35 @@ function freezeAmbient() {
 }
 ambientVideo.addEventListener('ended', freezeAmbient);
 
-if (!reduceMotion) {
-  introVideo.addEventListener('ended', startHero);
+/* clip 1 → clip 2: a different scene, so this one dissolves */
+let secondStarted = false;
 
-  // safety nets: some codecs never fire 'ended', and autoplay can be blocked
-  introVideo.addEventListener('timeupdate', () => {
-    if (introVideo.duration && introVideo.currentTime >= introVideo.duration - 0.05) startHero();
-  });
-  introVideo.addEventListener('error', startHero);
+function startSecondIntro() {
+  if (secondStarted || heroStarted) return;
+  secondStarted = true;
+  stage.classList.add('is-intro-2');
   const p = introVideo.play();
-  if (p && p.catch) p.catch(startHero); // playback refused → straight to the hero
-  setTimeout(startHero, 15000);         // hard cap, whatever happens
+  if (p && p.catch) p.catch(startHero); // can't play the second clip → hero now
+}
+
+function watchToEnd(el, done) {
+  el.addEventListener('ended', done);
+  // safety nets: some codecs never fire 'ended', and autoplay can be blocked
+  el.addEventListener('timeupdate', () => {
+    if (el.duration && el.currentTime >= el.duration - 0.05) done();
+  });
+  el.addEventListener('error', done);
+}
+
+if (!reduceMotion) {
+  watchToEnd(introVideo1, startSecondIntro);
+  watchToEnd(introVideo, startHero);
+
+  const p = introVideo1.play();
+  if (p && p.catch) p.catch(startSecondIntro); // first clip refused → move on
+  setTimeout(startHero, 22000);                // hard cap, whatever happens
 } else {
-  startHero(); // reduced motion: hold the poster, no clip
+  startHero(); // reduced motion: hold the poster, no clips
 }
 
 /* ---------------- bottom-right Lottie on the governance screen ---------------- */

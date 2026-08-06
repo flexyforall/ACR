@@ -107,6 +107,14 @@ body {
   transition: opacity 0.6s ease;
 }
 
+/* the opening shot and the next clip are different scenes, so this one is a
+   deliberate dissolve rather than an invisible join */
+#introVideo { transition: opacity 0.55s ease; }
+.stage.is-intro-2 #introVideo,
+.stage.is-ambient #introVideo,
+.stage.is-flying #introVideo,
+.stage.is-revealed #introVideo { opacity: 1; }
+
 .stage.is-ambient #ambientVideo,
 .stage.is-flying #ambientVideo,
 .stage.is-revealed #ambientVideo { opacity: 1; }
