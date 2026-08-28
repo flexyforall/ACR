@@ -23,10 +23,10 @@
 
     <!-- nav (425:1069) -->
     <nav class="nav" aria-label="Main" data-node-id="425:1069">
-      <a class="nav__link" href="#" data-node-id="425:1071">Our process</a>
-      <a class="nav__link" href="#" data-node-id="425:1074">FAQ</a>
+      <a class="nav__link" href="#" data-node-id="425:1071"><span data-scramble>Our process</span></a>
+      <a class="nav__link" href="#" data-node-id="425:1074"><span data-scramble>FAQ</span></a>
       <a class="nav__cta" href="#" data-node-id="425:1077">
-        <span class="nav__cta-text">Book a Demo</span>
+        <span class="nav__cta-text" data-scramble>Book a Demo</span>
         <img class="nav__cta-arrow" src="assets/arrow-right.svg" width="12" height="12" alt="" />
       </a>
     </nav>
@@ -37,16 +37,35 @@
       <div class="hero__head" data-node-id="425:1055">
         <img class="hero__backed" src="assets/ycombinator.svg" width="218" height="28"
              alt="Backed by Y Combinator" data-node-id="425:1056" />
-        <h1 class="hero__title" data-node-id="425:1062">The Operating System<br />for Healthcare AI Agents</h1>
+
+        <!-- each line types itself (main.js). The ghost copy reserves the final
+             width so the centred block never shifts while the text grows. -->
+        <h1 class="hero__title" data-node-id="425:1062"
+            aria-label="The Operating System for Healthcare AI Agents">
+          <span class="type" aria-hidden="true">
+            <span class="type__ghost">The Operating System</span>
+            <span class="type__out" data-text="The Operating System"></span>
+          </span><br />
+          <span class="type" aria-hidden="true">
+            <span class="type__ghost">for Healthcare AI Agents</span>
+            <span class="type__out" data-text="for Healthcare AI Agents"></span>
+          </span>
+        </h1>
       </div>
 
       <div class="hero__pitch" data-node-id="425:1045">
-        <p class="hero__sub" data-node-id="425:1046">Wedge creates secure, custom AI agents and applications that integrate with your existing systems</p>
+        <p class="hero__sub" data-node-id="425:1046"
+           aria-label="Wedge creates secure, custom AI agents and applications that integrate with your existing systems">
+          <span class="type type--block" aria-hidden="true">
+            <span class="type__ghost">Wedge creates secure, custom AI agents and applications that integrate with your existing systems</span>
+            <span class="type__out" data-text="Wedge creates secure, custom AI agents and applications that integrate with your existing systems"></span>
+          </span>
+        </p>
         <button class="cta" type="button" data-node-id="425:1047">
           <span class="cta__icon" data-node-id="425:1048">
             <img src="assets/launchicon.svg" width="20" height="20" alt="" />
           </span>
-          <span class="cta__text" data-node-id="425:1052">Explore Agents</span>
+          <span class="cta__text" data-node-id="425:1052" data-scramble>Explore Agents</span>
         </button>
       </div>
 
@@ -54,5 +73,6 @@
 
   </section>
 
+  <script src="main.js"></script>
 </body>
 </html>

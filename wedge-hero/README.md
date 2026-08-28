@@ -36,7 +36,15 @@ button. Logo top-left, nav top-right, both 50px off the edge at y=34.
 - **Type**: Mozilla Headline Medium for the title, Inter Display
   (Regular + Medium) for everything else. Only the weights actually used are
   kept in `assets/`.
-- **Icons**: `launchicon.svg` in the CTA's green tile, `arrow-right.svg` in
+- **Reveal**: on load the YC line fades up out of a blur, the title types
+  itself line by line behind a blinking caret, the copy follows, then the CTA
+  rises in. Each typed line sits over a hidden ghost copy of its final text, so
+  the centred column keeps its exact size and nothing reflows. Button labels
+  decode out of random glyphs on hover. All of it is skipped under
+  `prefers-reduced-motion`.
+- **Icons**: `iconborder.png` is the CTA tile (it carries its own rounding and
+  green-to-light falloff, so no fill or highlight is added in CSS),
+  `launchicon.svg` sits on top of it, `arrow-right.svg` in
   Book a Demo, and `ycombinator.svg` — which is the whole "Backed by
   Y Combinator" lockup as one 218x28 asset, so that row is a single image
   rather than text plus a logo.

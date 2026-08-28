@@ -217,6 +217,8 @@ body {
   pointer-events: none;
 }
 
+/* the tile is the supplied shape, which carries its own rounding and the
+   green-to-light falloff, so no fill or inset highlight is added here */
 .cta__icon {
   position: relative;
   z-index: 1;
@@ -225,9 +227,7 @@ body {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 4px;
-  background: var(--green);
-  box-shadow: inset 0 4px 4px rgba(255, 255, 255, 0.25);
+  background: url("assets/iconborder.png") center / 100% 100% no-repeat;
 }
 .cta__icon img { display: block; width: 20px; height: 20px; }
 
@@ -240,6 +240,76 @@ body {
   letter-spacing: -0.16px;
   color: #fff;
   white-space: nowrap;
+}
+
+/* =====================  Reveal  =====================
+   Ported from the earlier builds: the YC line fades up out of a blur, the
+   title and copy type themselves, then the CTA rises in. */
+
+.hero__backed,
+.cta {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+              filter 0.6s ease, background 0.25s ease;
+}
+
+.hero__backed { filter: blur(5px); }
+
+.is-t1 .hero__backed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.cta { pointer-events: none; }
+
+.is-t2 .cta {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.is-t2 .cta:hover { transform: translateY(-1px); }
+.is-t2 .cta:active { transform: translateY(0); }
+
+/* a ghost copy holds the final size so the centred block never reflows while
+   the visible text grows over it */
+.type {
+  position: relative;
+  display: inline-block;
+}
+.type--block { display: block; }
+
+.type__ghost { visibility: hidden; }
+
+.type__out {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  text-align: left;
+}
+
+/* terminal caret that follows the text */
+.type-caret {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.86em;
+  margin-left: 0.06em;
+  border-radius: 1px;
+  vertical-align: -0.06em;
+  background: currentColor;
+  animation: caret-blink 0.9s steps(1) infinite;
+}
+.type-caret--done {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
 /* =====================  Responsive  ===================== */
