@@ -66,74 +66,88 @@ reveal();
 
 /* ---------------- Explore Agents → fly inside ----------------
  *
- * hero.mp4 is a boomerang: frames 0-192 run forward, 193-383 are the same
- * frames coming back. transition.mp4 opens on frame 192 — the turnaround —
- * matched by frame comparison, so if we hand off exactly there the camera
- * simply keeps going and there is no cut to see.
+ * dive.mp4 is the hero's camera move with the fly-in welded onto the end of
+ * it, as a single encode. The moment the camera enters the building therefore
+ * lives inside a file — it is a plain frame-to-frame cut that cannot glitch,
+ * stall or flash.
  *
- * Two things make that work from a click at any moment:
- *   · if the loop is on its way back, we jump to the mirrored point in the
- *     forward pass. That frame is the same image, so the seek is invisible.
- *   · playback then speeds up to reach the turnaround in about a second, which
- *     reads as the camera diving in rather than as a wait.
+ * That leaves one swap: from the looping clip to the dive. We control it, so
+ * we make it show the same picture on both sides:
+ *   · hero.mp4 is a boomerang, so if it is on the way back we mirror the time
+ *     to the matching point of the forward pass — the identical frame.
+ *   · dive.mp4 opens with that exact same footage, so seeking it to the same
+ *     time lands on the same frame.
+ *   · we wait for the seek to actually complete, then reveal. The dive layer
+ *     is opaque, so the loop is hidden the instant it appears; nothing can
+ *     show through and there is no undecoded frame to flash black.
+ * Playback then speeds up to reach the fly-in in about a second and drops back
+ * to normal once it is inside.
  */
 
 const heroVideo = document.getElementById('heroVideo');
-const transitionVideo = document.getElementById('transitionVideo');
+const diveVideo = document.getElementById('diveVideo');
 const cta = document.querySelector('.cta');
 
-const TURN = 8.0;        // seconds: frame 192 at 24fps, where the two clips meet
-const DIVE_SECONDS = 1.1; // how long the run-up to the turnaround should take
+const LOOP_TURN = 8.0; // boomerang turnaround
+const DIVE_JOIN = 8.0; // where the fly-in starts inside dive.mp4
+const DIVE_SECONDS = 1.1;
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 let diving = false;
 
-function goInside() {
+/* warm the decoder so the first revealed frame is already painted */
+function prewarm() {
+  diveVideo.removeEventListener('loadeddata', prewarm);
+  const p = diveVideo.play();
+  if (p && p.then) p.then(() => { diveVideo.pause(); diveVideo.currentTime = 0; }).catch(() => {});
+}
+diveVideo.addEventListener('loadeddata', prewarm);
+
+function runDive(from) {
   heroVideo.pause();
-  hero.classList.add('is-transition');
-  transitionVideo.currentTime = 0;
-  const p = transitionVideo.play();
+  hero.classList.add('is-diving');
+
+  diveVideo.playbackRate = clamp((DIVE_JOIN - from) / DIVE_SECONDS, 1, 6);
+  const p = diveVideo.play();
   if (p && p.catch) p.catch(() => {});
-  setTimeout(() => hero.classList.add('is-inside'), 250);
+
+  (function watch() {
+    if (diveVideo.currentTime >= DIVE_JOIN) {
+      diveVideo.playbackRate = 1;      // inside now: back to the intended pace
+      hero.classList.add('is-inside');
+      return;
+    }
+    requestAnimationFrame(watch);
+  })();
 }
 
 cta.addEventListener('click', () => {
   if (diving) return;
   diving = true;
-  hero.classList.add('is-diving');
+  hero.classList.add('is-leaving');
 
   if (reduceMotion) {
-    hero.classList.add('is-transition', 'is-inside');
-    try { transitionVideo.currentTime = transitionVideo.duration || 5; } catch (e) {}
+    try { diveVideo.currentTime = diveVideo.duration || 13; } catch (e) {}
+    hero.classList.add('is-diving', 'is-inside');
     return;
   }
 
   let t = heroVideo.currentTime;
-  if (t > TURN) {
-    // on the way back: the mirrored time shows the identical frame
-    try { heroVideo.currentTime = t = 2 * TURN - t; } catch (e) {}
-  }
+  if (t > LOOP_TURN) t = 2 * LOOP_TURN - t; // mirror: the identical frame
+  t = clamp(t, 0, DIVE_JOIN - 0.05);
 
-  const remaining = Math.max(0, TURN - t);
-  heroVideo.loop = false;
-  heroVideo.playbackRate = clamp(remaining / DIVE_SECONDS, 1, 6);
-  const p = heroVideo.play();
-  if (p && p.catch) p.catch(goInside); // can't play → just show the transition
+  // reveal only once the dive is actually sitting on that frame
+  let started = false;
+  const go = () => { if (!started) { started = true; runDive(t); } };
+  diveVideo.addEventListener('seeked', go, { once: true });
+  setTimeout(go, 400); // seek never reported → go anyway
 
-  (function watch() {
-    if (!hero.classList.contains('is-transition')) {
-      if (heroVideo.currentTime >= TURN - 0.03) return goInside();
-      requestAnimationFrame(watch);
-    }
-  })();
-
-  // safety net: hand off anyway if playback stalls
-  setTimeout(goInside, (remaining / heroVideo.playbackRate) * 1000 + 900);
+  try { diveVideo.currentTime = t; } catch (e) { go(); }
 });
 
 // hold the final frame; this is where the next section will pick up
-transitionVideo.addEventListener('ended', () => {
-  transitionVideo.pause();
+diveVideo.addEventListener('ended', () => {
+  diveVideo.pause();
   hero.classList.add('is-arrived');
 });
 

@@ -11,14 +11,18 @@
   <section class="hero" data-node-id="425:1150">
 
     <!-- backdrop: looping video at 50% over black (425:1151).
-         hero.mp4 is a boomerang; its turnaround frame (8.0s) is the exact shot
-         transition.mp4 opens on, so Explore Agents can hand off without a cut. -->
+         hero.mp4 is a boomerang of the camera move. dive.mp4 is that same move
+         with the fly-in welded onto the end of it, one encode, so the moment
+         the camera enters the building lives inside a file and can't glitch.
+         The only swap is between two clips showing the identical frame. -->
     <div class="hero__bg" aria-hidden="true">
       <video class="hero__video" id="heroVideo" src="assets/hero.mp4"
              poster="assets/hero-poster.jpg" autoplay muted loop playsinline
              preload="auto" tabindex="-1"></video>
-      <video class="hero__video hero__video--transition" id="transitionVideo"
-             src="assets/transition.mp4" muted playsinline preload="auto" tabindex="-1"></video>
+      <div class="hero__dive" id="diveLayer">
+        <video class="hero__video" id="diveVideo" src="assets/dive.mp4"
+               muted playsinline preload="auto" tabindex="-1"></video>
+      </div>
     </div>
 
     <!-- logo (425:1177) -->

@@ -30,22 +30,26 @@ button. Logo top-left, nav top-right, both 50px off the edge at y=34.
 
 ## Explore Agents
 
-Clicking the CTA flies the camera inside, into `assets/transition.mp4`, which
-opens on the very frame the hero loop turns around on (frame 192 / 8.0s —
-found by comparing frames, 39.5 dB against 16-22 dB elsewhere). Handing off
-exactly there means the camera just keeps going, with no cut.
+Clicking the CTA flies the camera inside. The moment it enters the building is
+**not** a handoff between two clips — `assets/dive.mp4` is the hero's camera
+move with the fly-in welded onto the end of it, one encode, so that join is an
+ordinary frame-to-frame cut inside a file and cannot stall, flash or drift.
 
-Two things make that work from a click at any moment:
+That leaves a single swap, from the looping clip to the dive, and it is made to
+show the same picture on both sides:
 
-- If the loop is on its way back, playback jumps to the mirrored point in the
-  forward pass. Because a boomerang holds every frame twice, that seek shows
-  the identical image and is invisible.
-- Playback then speeds up to reach the turnaround in about a second, so the
-  click feels answered — it reads as the camera diving in rather than a wait.
+- `hero.mp4` is a boomerang, so if it is on its way back, the time is mirrored
+  to the matching point of the forward pass — the identical frame.
+- `dive.mp4` opens with that same footage, so seeking it to the same time lands
+  on that same frame.
+- The reveal waits for the seek to actually report complete, and the dive sits
+  in its own opaque layer (black behind, video at the same 50% on top), so the
+  loop is hidden the instant it appears and no undecoded frame can flash black.
+  The decoder is warmed at load so the first revealed frame is already painted.
 
-The transition takes over at the same 50% opacity, so the handoff carries no
-brightness step; it brightens to full only once the copy is gone. Its last
-frame is held, ready for the next section to pick up.
+Playback then speeds up to reach the fly-in in about a second and drops back to
+normal once inside, where the scene brightens to full. The final frame is held,
+ready for the next section.
 
 ## Notes
 
