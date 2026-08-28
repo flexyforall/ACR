@@ -30,7 +30,13 @@ button. Logo top-left, nav top-right, both 50px off the edge at y=34.
 
 ## Notes
 
-- **Background**: `assets/hero.mp4` loops muted at 50% opacity over black.
+- **Background**: `assets/hero.mp4` loops muted at 50% opacity over black. The
+  file is a boomerang — the supplied 8s clip followed by itself reversed — so
+  playback runs forward, then back, and cycles with no cut. Browsers can't play
+  a video backwards (negative `playbackRate` is unsupported), so the reverse is
+  baked into the file and a plain `loop` attribute does the rest. The duplicated
+  frame at each turnaround is dropped, so both seams step by exactly one frame:
+  384 frames, 16s, 24fps.
   This frame carries no gradient scrim — its `overlay` group is empty — so the
   video's own contrast is what darkens the page.
 - **Type**: Mozilla Headline Medium for the title, Inter Display
