@@ -1,6 +1,6 @@
 # Wedge — Hero
 
-Hero section coded from Figma **Wedge Internal → "Hero"** (node `425:1038`).
+Hero section coded from Figma **Wedge Internal → "Hero"** (node `425:1150`).
 
 ## Run
 
@@ -17,14 +17,14 @@ video and the fonts.
 ## Files
 
 - `index.html` — markup, each block tagged with its Figma `data-node-id`
-- `styles.css` — all styling; the frame's own numbers (1440x810 canvas, centred
-  800px column, 50px gutters) are kept as literals so they can be checked
+- `styles.css` — all styling; the frame's own numbers (1440x810 canvas, left-aligned
+  800px column at x=80, 50px gutters) are kept as literals so they can be checked
   against Figma
 - `assets/` — background video + poster, fonts, logo and icons
 
 ## Layout
 
-Everything sits in one centred 800px column: the "Backed by Y Combinator"
+Everything sits in one left-aligned 800px column, 80px off the left edge: the "Backed by Y Combinator"
 lockup, the 72px title, a 582px-wide line of copy and the Explore Agents
 button. Logo top-left, nav top-right, both 50px off the edge at y=34.
 
@@ -39,7 +39,7 @@ button. Logo top-left, nav top-right, both 50px off the edge at y=34.
 - **Reveal**: on load the YC line fades up out of a blur, the title types
   itself line by line behind a blinking caret, the copy follows, then the CTA
   rises in. Each typed line sits over a hidden ghost copy of its final text, so
-  the centred column keeps its exact size and nothing reflows. Button labels
+  nothing reflows while the text grows. Button labels
   decode out of random glyphs on hover. All of it is skipped under
   `prefers-reduced-motion`.
 - **Icons**: `iconborder.png` is the CTA tile (it carries its own rounding and

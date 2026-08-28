@@ -126,27 +126,26 @@ body {
 .nav__cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); }
 .nav__cta-arrow { display: block; width: 12px; height: 12px; }
 
-/* =====================  Centred column (425:1116)  ===================== */
+/* =====================  Copy column (425:1158)  ===================== */
 
 .hero__center {
   position: absolute;
-  left: 50%;
+  left: 80px;
   top: calc(50% + 0.5px);
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   z-index: 2;
   width: 800px;
-  max-width: calc(100% - var(--gutter) * 2);
+  max-width: calc(100% - 80px - var(--gutter));
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 24px;
-  text-align: center;
 }
 
 .hero__head {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   width: 100%;
 }
@@ -168,7 +167,7 @@ body {
 .hero__pitch {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 20px;
 }
 
