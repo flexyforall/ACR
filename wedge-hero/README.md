@@ -61,7 +61,29 @@ sources so nothing is a re-encode of a re-encode. It holds two joins:
 
 Playback speeds up to reach the fly-in in about a second and drops back to
 normal once inside, where the scene brightens to full. The final frame — the
-dashboard — is held, ready for the next section.
+dashboard — is held, and the Agents section fades in over it.
+
+## Agents (node `417:470`)
+
+The second screen is not a new page — it is the dive's held final frame with
+the layout's chrome and copy laid on top. `main.js` adds `is-arrived` in the
+dive's `ended` handler, and that class is the only thing that reveals the
+section, so the text cannot appear before the last frame is on screen. The
+hero's own logo and nav fade out at the same moment; they are white-on-video
+and have no place on the light frame.
+
+**No monitor mockup is drawn.** The design's mockup is the workstation the
+camera lands on, and the video already puts it there: measured on the dive's
+final frame, the monitor's bounding box sits at 0.037 / 0.251 of the frame
+(0.586 wide), against 0.035 / 0.249 (0.560 wide) for the mockup on the design's
+canvas. The gap is under half a percent of the width, so the video stays
+full-bleed and nothing is repositioned or re-scaled to meet it.
+
+What the section adds is the light centred menu (`417:504`), the copy column at
+x=956 — bullet + `01`, `AI Receptionist`, the body paragraph and the
+`Try Agent Now` button — and the carousel controls below it at y=696: prev/next
+and six dots. Frame coordinates are kept as literals, as elsewhere, so they can
+be checked against Figma.
 
 ## Notes
 
