@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedge — The Operating System for Healthcare AI Agents</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <section class="hero" data-node-id="425:1150">
+
+    <!-- backdrop: looping video at 50% over black (425:1151).
+         hero.mp4 is a boomerang of the camera move. dive.mp4 is that same move
+         with the fly-in welded onto the end of it, one encode, so the moment
+         the camera enters the building lives inside a file and can't glitch.
+         The only swap is between two clips showing the identical frame. -->
+    <div class="hero__bg" aria-hidden="true">
+      <video class="hero__video" id="heroVideo" src="assets/hero.mp4"
+             poster="assets/hero-poster.jpg" autoplay muted loop playsinline
+             preload="auto" tabindex="-1"></video>
+      <div class="hero__dive" id="diveLayer">
+        <video class="hero__video" id="diveVideo" src="assets/dive.mp4"
+               muted playsinline preload="auto" tabindex="-1"></video>
+      </div>
+    </div>
+
+    <!-- logo (425:1177) -->
+    <a class="hero__logo" href="#" aria-label="Wedge" data-node-id="425:1177">
+      <img src="assets/logo.png" width="40" height="40" alt="" />
+    </a>
+
+    <!-- nav (425:1183) -->
+    <nav class="nav" aria-label="Main" data-node-id="425:1183">
+      <a class="nav__link" href="#" data-node-id="425:1185"><span data-scramble>Our process</span></a>
+      <a class="nav__link" href="#" data-node-id="425:1188"><span data-scramble>FAQ</span></a>
+      <a class="nav__cta" href="#" data-node-id="425:1191">
+        <span class="nav__cta-text" data-scramble>Book a Demo</span>
+        <img class="nav__cta-arrow" src="assets/arrow-right.svg" width="12" height="12" alt="" />
+      </a>
+    </nav>
+
+    <!-- copy column, left-aligned (425:1158) -->
+    <div class="hero__center" data-node-id="425:1158">
+
+      <div class="hero__head" data-node-id="425:1160">
+        <img class="hero__backed" src="assets/ycombinator.svg" width="218" height="28"
+             alt="Backed by Y Combinator" data-node-id="425:1161" />
+
+        <!-- each line types itself (main.js). The ghost copy reserves the final
+             box so nothing reflows while the text grows. -->
+        <h1 class="hero__title" data-node-id="425:1167"
+            aria-label="The Operating System for Healthcare AI Agents">
+          <span class="type" aria-hidden="true">
+            <span class="type__ghost">The Operating System</span>
+            <span class="type__out" data-text="The Operating System"></span>
+          </span><br />
+          <span class="type" aria-hidden="true">
+            <span class="type__ghost">for Healthcare AI Agents</span>
+            <span class="type__out" data-text="for Healthcare AI Agents"></span>
+          </span>
+        </h1>
+      </div>
+
+      <div class="hero__pitch" data-node-id="425:1168">
+        <p class="hero__sub" data-node-id="425:1169"
+           aria-label="Wedge creates secure, custom AI agents and applications that integrate with your existing systems">
+          <span class="type type--block" aria-hidden="true">
+            <span class="type__ghost">Wedge creates secure, custom AI agents and applications that integrate with your existing systems</span>
+            <span class="type__out" data-text="Wedge creates secure, custom AI agents and applications that integrate with your existing systems"></span>
+          </span>
+        </p>
+        <button class="cta" type="button" data-node-id="425:1170">
+          <span class="cta__icon" data-node-id="425:1171">
+            <img src="assets/launchicon.svg" width="20" height="20" alt="" />
+          </span>
+          <span class="cta__text" data-node-id="425:1175" data-scramble>Explore Agents</span>
+        </button>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===== Agents (417:470) — revealed when the dive lands ===== -->
+  <section class="agents" id="agents" data-node-id="417:470">
+
+    <!-- menu (417:504) -->
+    <nav class="lmenu" aria-label="Main" data-node-id="417:504">
+      <img class="lmenu__logo" src="assets/logo.png" width="32" height="32" alt="Wedge" />
+      <div class="lmenu__links">
+        <a class="lmenu__link" href="#"><span data-scramble>Our process</span></a>
+        <a class="lmenu__link" href="#"><span data-scramble>FAQ</span></a>
+      </div>
+      <a class="lmenu__cta" href="#">
+        <span data-scramble>Book a Demo</span>
+        <img src="assets/arrow-right.svg" width="12" height="12" alt="" />
+      </a>
+    </nav>
+
+    <!-- copy (417:474) -->
+    <div class="agent" data-node-id="417:474">
+      <div class="agent__text" data-node-id="417:475">
+        <div class="agent__head" data-node-id="417:476">
+          <p class="agent__index" data-node-id="417:477">
+            <span class="agent__bullet" aria-hidden="true"></span>01
+          </p>
+          <h2 class="agent__title" data-node-id="417:480">AI Receptionist</h2>
+        </div>
+        <p class="agent__body" data-node-id="417:481">The AI Receptionist manages patient calls, scheduling, and front-desk inquiries. It handles routine communication so staff can focus on higher-value patient interactions.</p>
+      </div>
+
+      <button class="agent__cta" type="button" data-node-id="417:482">
+        <span class="agent__cta-icon" data-node-id="417:483">
+          <img src="assets/launchicon.svg" width="20" height="20" alt="" />
+        </span>
+        <span class="agent__cta-label">
+          <span data-scramble>Try Agent Now</span>
+          <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+            <path d="M4.46 9.96 7.72 6.7c.38-.38.38-1.01 0-1.4L4.46 2.04"
+                  fill="none" stroke="#fff" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- carousel controls (417:492) -->
+    <div class="pager" data-node-id="417:492">
+      <button class="pager__btn pager__btn--prev" type="button" aria-label="Previous agent">
+        <img src="assets/arrow-right.svg" width="20" height="20" alt="" />
+      </button>
+      <div class="pager__dots" data-node-id="417:495">
+        <span class="pager__dot is-on"></span><span class="pager__dot"></span><span class="pager__dot"></span>
+        <span class="pager__dot"></span><span class="pager__dot"></span><span class="pager__dot"></span>
+      </div>
+      <button class="pager__btn" type="button" aria-label="Next agent">
+        <img src="assets/arrow-right.svg" width="20" height="20" alt="" />
+      </button>
+    </div>
+
+  </section>
+
+  <script src="main.js"></script>
+</body>
+</html>

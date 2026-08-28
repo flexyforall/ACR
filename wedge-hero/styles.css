@@ -1,0 +1,607 @@
+/* ------------------------------------------------------------------
+   Wedge — Hero (Figma node 425:1150)
+   Built to the frame's own numbers: 1440x810 canvas, left-aligned 800px column at x=80.
+   Type: Mozilla Headline for the title, Inter Display for everything else.
+------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Mozilla Headline";
+  src: url("assets/MozillaHeadline-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter Display";
+  src: url("assets/InterDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("assets/InterDisplay-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --ink: #1b1b21;
+  --green: #105f40;        /* CTA icon tile */
+  --font-display: "Mozilla Headline", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter Display", system-ui, "Segoe UI", Arial, sans-serif;
+  --gutter: 50px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  background: #000;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =====================  Hero shell  ===================== */
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 700px;
+  overflow: hidden;
+  background: #000;
+}
+
+.hero__bg { position: absolute; inset: 0; }
+
+.hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;            /* Figma: video layer at 50% over black */
+  pointer-events: none;
+}
+
+/* The dive sits in its own opaque layer: black underneath, video at the same
+   50% on top. Revealing it therefore hides the loop completely — no blending,
+   no gap to show through — and since it is seeked to the frame already on
+   screen, switching it on is invisible. */
+.hero__dive {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hero.is-diving .hero__dive {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* the 50% wash only existed to keep the copy legible; with the copy gone the
+   scene comes up to full brightness as we fly in */
+.hero.is-inside .hero__dive .hero__video {
+  opacity: 1;
+  transition: opacity 0.9s ease;
+}
+
+/* hero copy clears out as the dive begins */
+.hero.is-leaving .hero__center {
+  opacity: 0;
+  transform: translateY(-50%) scale(1.04);
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.9s cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+/* =====================  Logo + nav  ===================== */
+
+.hero__logo {
+  position: absolute;
+  left: var(--gutter);
+  top: 34px;
+  z-index: 2;
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+.hero__logo img { display: block; width: 40px; height: 40px; }
+
+.nav {
+  position: absolute;
+  right: var(--gutter);
+  top: 34px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav__link {
+  padding: 15px 12px 12px;   /* Figma: text sits 3px low inside the 12px box */
+  border-radius: 100px;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: -0.16px;
+  color: #fff;
+  opacity: 0.6;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+.nav__link:hover { opacity: 1; }
+
+/* the two links sit flush together, then a 16px gap before the CTA */
+.nav__link + .nav__link { margin-left: -16px; }
+
+.nav__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 4px;
+  background: #fff;
+  color: #1b1b21;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.16px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.nav__cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); }
+.nav__cta-arrow { display: block; width: 12px; height: 12px; }
+
+/* =====================  Copy column (425:1158)  ===================== */
+
+.hero__center {
+  position: absolute;
+  left: 80px;
+  top: calc(50% + 0.5px);
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 800px;
+  max-width: calc(100% - 80px - var(--gutter));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.hero__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+
+.hero__backed { display: block; height: 28px; width: auto; }
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -1.44px;
+  color: #fff;
+  font-variation-settings: "wdth" 100;
+}
+
+/* =====================  Pitch + CTA (425:1168)  ===================== */
+
+.hero__pitch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.hero__sub {
+  width: 582px;
+  max-width: 100%;
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: -0.36px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cta {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 56px;
+  padding: 6px 20px 6px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+.cta:hover { background: rgba(0, 0, 0, 0.38); transform: translateY(-1px); }
+.cta:active { transform: translateY(0); }
+.cta:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; }
+
+/* soft light pooling over the top edge (Ellipse 2); the button clips it, so
+   only a faint band along the top rim shows */
+.cta::before {
+  content: "";
+  position: absolute;
+  left: 48px;
+  top: -63px;
+  width: 325px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+/* the tile is the supplied shape, which carries its own rounding and the
+   green-to-light falloff, so no fill or inset highlight is added here */
+.cta__icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: url("assets/iconborder.png") center / 100% 100% no-repeat;
+}
+.cta__icon img { display: block; width: 20px; height: 20px; }
+
+.cta__text {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.16px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* =====================  Reveal  =====================
+   Ported from the earlier builds: the YC line fades up out of a blur, the
+   title and copy type themselves, then the CTA rises in. */
+
+.hero__backed,
+.cta {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+              filter 0.6s ease, background 0.25s ease;
+}
+
+.hero__backed { filter: blur(5px); }
+
+.is-t1 .hero__backed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.cta { pointer-events: none; }
+
+.is-t2 .cta {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.is-t2 .cta:hover { transform: translateY(-1px); }
+.is-t2 .cta:active { transform: translateY(0); }
+
+/* a ghost copy holds the final size so the centred block never reflows while
+   the visible text grows over it */
+.type {
+  position: relative;
+  display: inline-block;
+}
+.type--block { display: block; }
+
+.type__ghost { visibility: hidden; }
+
+.type__out {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  text-align: left;
+}
+
+/* terminal caret that follows the text */
+.type-caret {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.86em;
+  margin-left: 0.06em;
+  border-radius: 1px;
+  vertical-align: -0.06em;
+  background: currentColor;
+  animation: caret-blink 0.9s steps(1) infinite;
+}
+.type-caret--done {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* =====================  Responsive  ===================== */
+
+@media (max-width: 900px) {
+  :root { --gutter: 24px; }
+  .nav__link { display: none; }
+  .hero__title { font-size: clamp(36px, 7.2vw, 72px); letter-spacing: -0.02em; }
+  .hero__sub { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__link, .nav__cta, .cta { transition: none; }
+  .nav__cta:hover, .cta:hover { transform: none; }
+}
+
+/* =====================  Agents (417:470)  =====================
+   No monitor is drawn here: the dive's final frame already is the mockup, and
+   it already lands where the frame wants it — measured against the design, the
+   monitor sits at 0.037/0.251 of the frame versus 0.035/0.249 of the canvas, so
+   the video simply stays full-bleed and this section only adds the chrome and
+   the copy on top of it. */
+
+.agents {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.hero.is-arrived ~ .agents {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* the hero's own chrome is white-on-video; it has no place on the white frame */
+.hero.is-arrived .hero__logo,
+.hero.is-arrived .nav { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+
+/* ---- menu (417:504) ---- */
+
+.lmenu {
+  position: absolute;
+  left: calc(50% - 23.5px);
+  top: 16px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.lmenu__logo { display: block; width: 32px; height: 32px; }
+.lmenu__links { display: flex; align-items: center; }
+
+.lmenu__link {
+  padding: 12px;
+  border-radius: 100px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.96px;
+  color: var(--ink);
+  opacity: 0.6;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+.lmenu__link:hover { opacity: 1; }
+
+.lmenu__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid rgba(27, 27, 33, 0.1);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.96px;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lmenu__cta img { display: block; }
+
+/* ---- copy (417:474) ---- */
+
+.agent {
+  position: absolute;
+  left: 956px;
+  top: 332px;
+  width: 386px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.agent__text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.agent__head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.agent__index {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 4px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--ink);
+  font-variation-settings: "wdth" 100;
+}
+
+.agent__bullet {
+  width: 9px;
+  height: 9px;
+  border-radius: 1px;
+  background: #222228;
+}
+
+.agent__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.3;
+  letter-spacing: -0.72px;
+  color: var(--ink);
+  font-variation-settings: "wdth" 100;
+}
+
+.agent__body {
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: -0.36px;
+  color: rgba(27, 27, 33, 0.6);
+}
+
+.agent__cta {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+  padding: 6px 20px 6px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: #1b1b21;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.agent__cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(27, 27, 33, 0.28); }
+.agent__cta:active { transform: translateY(0); }
+
+/* Ellipse 2 again: a soft light pooling over the top rim, clipped by the button */
+.agent__cta::before {
+  content: "";
+  position: absolute;
+  left: 48px;
+  top: -63px;
+  width: 325px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.agent__cta-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: var(--green);
+  box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.4);
+}
+.agent__cta-icon img { display: block; }
+
+.agent__cta-label {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.16px;
+  color: #fff;
+  white-space: nowrap;
+}
+.agent__cta-label svg { display: block; margin-top: 2px; }
+
+/* ---- carousel controls (417:492) ---- */
+
+.pager {
+  position: absolute;
+  left: 956px;
+  top: 696px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.pager__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 12px;
+  border: 0;
+  border-radius: 4px;
+  background: #ececec;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.pager__btn:hover { background: #e0e0e0; }
+.pager__btn img { display: block; width: 20px; height: 20px; }
+.pager__btn--prev img { transform: rotate(180deg); }
+
+.pager__dots { display: flex; align-items: center; gap: 8px; }
+
+.pager__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.pager__dot.is-on { background: var(--ink); }
+
+@media (max-width: 1200px) {
+  .agent, .pager { left: auto; right: 40px; width: min(386px, 40vw); }
+}

@@ -1,0 +1,708 @@
+/* ------------------------------------------------------------------
+   Wedge — Hero ("AI Agent Option", Figma node 138:2009)
+   Built to Figma spec: paddings, sizes, colours, tracking all matched.
+   Type: Mozilla Headline (uploaded TTFs) for the title; Inter for UI/body.
+------------------------------------------------------------------- */
+
+/* ---- Mozilla Headline: the weights the hero uses, from the uploaded files ---- */
+@font-face {
+  font-family: "Mozilla Headline";
+  src: url("assets/MozillaHeadline-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mozilla Headline";
+  src: url("assets/MozillaHeadline-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mozilla Headline";
+  src: url("assets/MozillaHeadline-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+
+/* ---- Inter: activates if assets/Inter-Regular.ttf / -Medium.ttf are added;
+        falls back to a near-metrics-compatible system stack until then. ---- */
+/* Rinter — the body/UI face the Figma frames actually reference */
+@font-face {
+  font-family: "Rinter";
+  src: url("assets/Rinter.ttf") format("truetype");
+  font-weight: 400 500;
+  font-display: swap;
+}
+
+:root {
+  --font-display: "Mozilla Headline", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Rinter", system-ui, "Segoe UI", Arial, sans-serif;
+
+  --ink: #1b1b21;
+  --frame-bg: #d8e2ec;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--frame-bg);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* the stage never scrolls */
+}
+
+/* =====================  Stage (intro → hero → governance)  =====================
+   The stage is on screen from the first frame; only its UI waits. While the
+   intro clip plays, the menu and hero copy are hidden, so the clip reads as a
+   clean full-bleed loader with no overlay. */
+
+.stage .menu,
+.stage .hero__content,
+.stage .hero__actions {
+  visibility: hidden;
+}
+
+.stage.is-live .menu,
+.stage.is-live .hero__content,
+.stage.is-live .hero__actions {
+  visibility: visible;
+}
+
+.stage .menu { opacity: 0; transition: opacity 0.6s ease; }
+.stage.is-live .menu { opacity: 1; }
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 720px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 120% at 100% 100%, #cdd9e6 0%, rgba(205, 217, 230, 0) 55%),
+    linear-gradient(160deg, #dbe4ee 0%, #d3deea 55%, #c9d6e4 100%);
+}
+
+.stage__media {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stage__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+
+
+/* =====================  Menu (143:204)  ===================== */
+
+/* glass plate — exact Figma spec (164:280) */
+.menu {
+  position: absolute;
+  top: 16px;
+  left: calc(50% - 23.5px);
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.menu__logo { display: block; width: 32px; height: 32px; }
+
+.menu__links { display: flex; align-items: center; }
+
+.menu__link {
+  padding: 16px 12px 12px; /* Figma 164:288 — Rinter baseline sits high */
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.96px;
+  color: var(--ink);
+  opacity: 0.6;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.menu__link:hover { opacity: 1; }
+
+.menu__demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid rgba(27, 27, 33, 0.1);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.96px;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: box-shadow 0.2s;
+}
+.menu__demo:hover { box-shadow: 0 2px 10px rgba(27, 27, 33, 0.12); }
+
+.menu__demo-text { padding-top: 4px; } /* Figma 164:337 — Rinter baseline */
+
+.menu__demo-arrow { display: block; width: 12px; height: 12px; }
+
+/* =====================  title, label (138:2165)  ===================== */
+
+.hero__content {
+  position: absolute;
+  left: 60px;
+  top: calc(50% - 156.5px); /* Figma 164:264 — text block sits higher now */
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 800px;
+  max-width: calc(100% - 120px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: opacity 0.5s ease, transform 0.6s ease;
+}
+
+/* hero copy fades out (and eases back a touch) once the fly-in starts */
+.stage.is-playing .hero__content,
+.stage.is-revealed .hero__content {
+  opacity: 0;
+  transform: translateY(-50%) scale(1.04);
+  pointer-events: none;
+}
+
+.hero__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+}
+
+/* Backed by [YC] — hidden until the intro timeline starts (stage.t1) */
+.hero__backed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.32px;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(10px);
+  filter: blur(4px);
+  transition: opacity 0.6s ease, transform 0.6s ease, filter 0.6s ease;
+}
+
+.stage.t1 .hero__backed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.hero__yc { display: block; height: 28px; width: auto; }
+
+/* headings block — Figma centres these within the 800px column */
+.hero__headings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px; /* Figma 164:272 */
+  width: 100%;
+}
+
+.hero__title {
+  width: 100%;
+  min-height: 2.4em; /* reserve both lines while the text types itself */
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 56px;          /* Figma 164:273 */
+  line-height: 1.2;
+  letter-spacing: -1.12px;
+  color: var(--ink);
+  font-variation-settings: "wdth" 100;
+}
+
+.hero__sub {
+  width: 100%;
+  min-height: 36px; /* reserved line while typing */
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 36px;
+  letter-spacing: -0.4px;
+  color: rgba(27, 27, 33, 0.6);
+}
+
+/* terminal caret that follows the self-typing text (main.js) */
+.type-caret {
+  display: inline-block;
+  width: 0.09em;
+  height: 0.88em;
+  margin-left: 0.08em;
+  border-radius: 1px;
+  vertical-align: -0.06em;
+  background: currentColor;
+  animation: caret-blink 0.9s linear infinite;
+}
+
+.type-caret--done {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* =====================  Actions row (164:334)  ===================== */
+/* Two buttons pinned bottom-left, 60px off both edges. Hidden until the
+   intro finishes typing (main.js adds .t2 to the stage). */
+.hero__actions {
+  position: absolute;
+  left: 60px;
+  bottom: 60px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.stage.t2 .hero__actions {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* once the fly-in starts, the actions leave together with the copy */
+.stage.is-playing .hero__actions,
+.stage.is-revealed .hero__actions {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+/* primary "Book a Demo" (164:326) — solid dark */
+.hero__book {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 66px;
+  padding: 20px 24px;
+  border: 0;
+  border-radius: 6px;
+  background: #1b1b21;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.hero__book:hover { background: #2b2b33; transform: translateY(-1px); }
+.hero__book:active { transform: translateY(0); }
+
+.hero__book-icon { display: block; width: 16px; height: 17px; }
+
+.hero__book-text {
+  padding-top: 6px;              /* Rinter baseline compensation, as in Figma */
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.09;
+  letter-spacing: -0.36px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* secondary "Explore Agents" (164:275) — exact Figma glass:
+   translucent ink fill, white hairline, soft white halo, Ellipse-2 glow */
+.hero__cta {
+  position: relative;
+  overflow: clip;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 24px 20px 20px;
+  border-radius: 6px;
+  border: 1px solid #fff;
+  background: rgba(27, 27, 33, 0.06);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+  -webkit-backdrop-filter: blur(4px); /* Figma Glass effect, radius 4 */
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Ellipse 2 (164:279): a blurred white ellipse hovering above the top edge —
+   clipped by the button, it reads as a soft light pooling along the top */
+.hero__cta::before {
+  content: "";
+  position: absolute;
+  left: 47px;
+  top: -64px;
+  width: 325px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.hero__cta:hover {
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+}
+
+.hero__cta:focus-visible,
+.hero__book:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 2px;
+}
+
+.hero__cta-icon { display: block; width: 24px; height: 24px; position: relative; z-index: 1; }
+
+.hero__cta-text {
+  position: relative;
+  z-index: 1;
+  padding-top: 6px;              /* Figma: text frame has pt 6 */
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.09;
+  letter-spacing: -0.36px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* =====================  Governance (138:307)  ===================== */
+
+.gov {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+}
+.stage.is-revealed .gov {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* left panel: eyebrow + card (138:1867) — anchored to the bottom edge so it
+   keeps a clean margin at any viewport height */
+.gov__panel {
+  position: absolute;
+  left: 60px;
+  bottom: 60px; /* equal 60px margins from the left and bottom edges */
+  width: 432px;
+  max-width: calc(100% - 80px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: translateY(16px);
+  transition: transform 0.7s ease;
+}
+.stage.is-revealed .gov__panel { transform: translateY(0); }
+
+.gov__eyebrow {
+  min-height: 20px; /* keeps the card from jumping while the label retypes */
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* card (138:1315) */
+.gov-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.gov-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 12px 12px 16px;
+}
+
+/* title row with the two carousel arrows (138:1468) */
+.gov-card__head {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.gov-card__nav {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.gov-card__nav:hover { background: rgba(0, 0, 0, 0.04); }
+.gov-card__nav--prev img { transform: rotate(180deg); }
+
+.gov-card__title-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.gov-card__icon {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  background: rgba(47, 109, 224, 0.11);
+}
+
+.gov-card__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.96px;
+  color: var(--ink);
+  text-align: center;
+  font-variation-settings: "wdth" 100;
+}
+
+.gov-card__desc {
+  width: 256px;
+  max-width: 100%;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink);
+  opacity: 0.6;
+}
+
+.gov-card__divider {
+  border: 0;
+  height: 1px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.gov-card__points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gov-card__point {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.gov-card__tick { flex: 0 0 auto; display: block; width: 20px; height: 20px; }
+.gov-card__point span {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+/* "Try now" (138:1505) — blue with a cyan glow sweep */
+.gov-card__try {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 40px;
+  border: 0;
+  border-radius: 4px;
+  background:
+    radial-gradient(120% 220% at 50% 135%, #5fe3ff 0%, rgba(95, 227, 255, 0) 55%),
+    #2f6de0;
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: -0.28px;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.gov-card__try:hover { filter: brightness(1.06); }
+
+/* bottom-right: // ASK WEDGE AI + glass tile with the agent orb (173:696).
+   Mirrors the left card: 60px off the right edge, bottom edges aligned. */
+.gov__ask {
+  position: absolute;
+  right: 60px;
+  bottom: 60px;
+  display: flex;
+  align-items: center;
+  gap: 19px; /* Figma 173:696 */
+  transform: translateY(16px);
+  transition: transform 0.7s ease 0.12s;
+}
+.stage.is-revealed .gov__ask { transform: translateY(0); }
+
+.gov__ask-label {
+  min-height: 20px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* blinking terminal underscore while the labels type themselves */
+.gov__ask-label.is-typing::after,
+.gov__eyebrow.is-typing::after {
+  content: "_";
+  animation: caret-blink 0.9s linear infinite;
+}
+
+/* glass tile (173:600) */
+.ask-tile {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px); /* Figma Glass effect, radius 4 */
+  -webkit-backdrop-filter: blur(4px);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+.ask-tile:hover { transform: translateY(-1px); }
+.ask-tile:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; }
+
+/* the agent orb (173:651) — layered gradients; the highlights slowly revolve
+   so the light travels inside the ball and gives it depth */
+.orb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 29px;
+  height: 29px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 32% 28%, #bfeef7 0%, #63b0f6 18%, #2b84f8 38%, #123a8c 64%, #0a1e4d 90%);
+  box-shadow:
+    inset 0 -1.6px 9.7px #2b84f8,
+    inset 0 2.9px 2.9px rgba(255, 255, 255, 0.25),
+    0 1.5px 6px rgba(70, 88, 102, 0.35);
+}
+
+.orb__swirl,
+.orb__streak {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.orb__swirl {
+  background: conic-gradient(
+    from 200deg,
+    transparent 0deg,
+    rgba(191, 238, 247, 0.9) 50deg,
+    transparent 120deg,
+    rgba(255, 255, 255, 0.55) 190deg,
+    transparent 260deg,
+    rgba(95, 227, 255, 0.6) 315deg,
+    transparent 360deg
+  );
+  filter: blur(2.5px);
+  animation: orb-spin 9s linear infinite;
+}
+
+.orb__streak {
+  background:
+    radial-gradient(40% 22% at 30% 26%, rgba(255, 255, 255, 0.95), transparent 75%),
+    radial-gradient(50% 26% at 68% 74%, rgba(95, 227, 255, 0.55), transparent 75%);
+  filter: blur(1.2px);
+  animation: orb-spin 14s linear infinite reverse; /* counter-rotation = parallax depth */
+}
+
+.ask-tile:hover .orb__swirl { animation-duration: 4.5s; } /* light speeds up on hover */
+
+@keyframes orb-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =====================  Responsive  ===================== */
+
+@media (max-width: 900px) {
+  .menu__links { display: none; }
+  .hero__content {
+    left: 24px;
+    right: 24px;
+    max-width: none;
+    width: auto;
+  }
+  .hero__title { font-size: clamp(38px, 8vw, 64px); }
+  .stage__video { object-position: 58% 50%; }
+  .gov__panel { left: 20px; bottom: 116px; }
+  .gov__ask { right: 20px; bottom: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta, .hero__book, .hero__actions, .menu__link, .menu__demo, .hero__backed { transition: none; }
+  .hero__book:hover { transform: none; }
+  .orb__swirl,
+  .orb__streak,
+  .gov__ask-label.is-typing::after,
+  .type-caret { animation: none; }
+  .ask-tile:hover { transform: none; }
+}
