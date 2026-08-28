@@ -47,9 +47,21 @@ show the same picture on both sides:
   loop is hidden the instant it appears and no undecoded frame can flash black.
   The decoder is warmed at load so the first revealed frame is already painted.
 
-Playback then speeds up to reach the fly-in in about a second and drops back to
-normal once inside, where the scene brightens to full. The final frame is held,
-ready for the next section.
+`dive.mp4` carries the whole journey: the camera move, the fly-in, and the push
+into the workstation screen — 430 frames, 17.92s, rebuilt from the original
+sources so nothing is a re-encode of a re-encode. It holds two joins:
+
+- **frame 192 (8.0s), into the fly-in** — a hard cut, because those frames
+  genuinely match (a single-frame step, confirmed against its neighbours).
+- **~12.84s, into the last clip** — a 0.2s dissolve. Here a hard cut would have
+  shown a faint pop: a one-frame step inside that clip measures ~44 dB, while
+  its opening frame against the preceding one measures only ~36, so the two
+  renders differ slightly even though the camera has not moved. The dissolve
+  absorbs that, and the ramp across it is smooth end to end.
+
+Playback speeds up to reach the fly-in in about a second and drops back to
+normal once inside, where the scene brightens to full. The final frame — the
+dashboard — is held, ready for the next section.
 
 ## Notes
 

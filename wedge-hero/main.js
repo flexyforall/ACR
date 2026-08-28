@@ -66,10 +66,10 @@ reveal();
 
 /* ---------------- Explore Agents → fly inside ----------------
  *
- * dive.mp4 is the hero's camera move with the fly-in welded onto the end of
- * it, as a single encode. The moment the camera enters the building therefore
- * lives inside a file — it is a plain frame-to-frame cut that cannot glitch,
- * stall or flash.
+ * dive.mp4 is the whole journey as a single encode: the hero's camera move,
+ * the fly-in, and the push into the workstation screen. Every join between
+ * those shots therefore lives inside a file — nothing to glitch, stall or
+ * flash at runtime.
  *
  * That leaves one swap: from the looping clip to the dive. We control it, so
  * we make it show the same picture on both sides:
