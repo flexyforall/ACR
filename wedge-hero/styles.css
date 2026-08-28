@@ -1,35 +1,33 @@
 /* ------------------------------------------------------------------
-   Wedge — Hero (Figma node 395:378)
-   Built to the frame's own numbers: 1440x810 canvas, 50px side margins.
-   Type: Mozilla Headline for display, Rinter standing in for Inter Display.
+   Wedge — Hero (Figma node 425:1038)
+   Built to the frame's own numbers: 1440x810 canvas, centred 800px column.
+   Type: Mozilla Headline for the title, Inter Display for everything else.
 ------------------------------------------------------------------- */
 
-@font-face {
-  font-family: "Mozilla Headline";
-  src: url("assets/MozillaHeadline-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-display: swap;
-}
 @font-face {
   font-family: "Mozilla Headline";
   src: url("assets/MozillaHeadline-Medium.ttf") format("truetype");
   font-weight: 500;
   font-display: swap;
 }
+
 @font-face {
-  font-family: "Rinter";
-  src: url("assets/Rinter.ttf") format("truetype");
-  font-weight: 400 500;
+  font-family: "Inter Display";
+  src: url("assets/InterDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("assets/InterDisplay-Medium.ttf") format("truetype");
+  font-weight: 500;
   font-display: swap;
 }
 
 :root {
-  --ink: #171c16;          /* frame background */
   --green: #105f40;        /* CTA icon tile */
-  --green-dot: #589f84;    /* stat markers */
-  --rule: rgba(255, 255, 255, 0.16);
   --font-display: "Mozilla Headline", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Rinter", system-ui, "Segoe UI", Arial, sans-serif;
+  --font-body: "Inter Display", system-ui, "Segoe UI", Arial, sans-serif;
   --gutter: 50px;
 }
 
@@ -39,7 +37,7 @@ html, body { height: 100%; }
 
 body {
   font-family: var(--font-body);
-  background: var(--ink);
+  background: #000;
   color: #fff;
   -webkit-font-smoothing: antialiased;
 }
@@ -50,9 +48,9 @@ body {
   position: relative;
   width: 100%;
   height: 100vh;
-  min-height: 720px;
+  min-height: 700px;
   overflow: hidden;
-  background: var(--ink);
+  background: #000;
 }
 
 .hero__bg { position: absolute; inset: 0; }
@@ -63,21 +61,8 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.8;            /* Figma: video layer at 80% */
+  opacity: 0.5;            /* Figma: video layer at 50% over black */
   pointer-events: none;
-}
-
-/* three stacked black gradients in the frame; their combined falloff is
-   ~0.46 at the midpoint and ~0.75 at the foot */
-.hero__scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.46) 50%,
-    rgba(0, 0, 0, 0.75) 100%
-  );
 }
 
 /* =====================  Logo + nav  ===================== */
@@ -104,7 +89,7 @@ body {
 }
 
 .nav__link {
-  padding: 12px;
+  padding: 15px 12px 12px;   /* Figma: text sits 3px low inside the 12px box */
   border-radius: 100px;
   font-size: 16px;
   line-height: 1;
@@ -117,7 +102,7 @@ body {
 }
 .nav__link:hover { opacity: 1; }
 
-/* the two links sit tight together, then a 16px gap before the CTA */
+/* the two links sit flush together, then a 16px gap before the CTA */
 .nav__link + .nav__link { margin-left: -16px; }
 
 .nav__cta {
@@ -138,35 +123,35 @@ body {
   white-space: nowrap;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
-.nav__cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35); }
-.nav__cta svg { display: block; }
+.nav__cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); }
+.nav__cta-arrow { display: block; width: 12px; height: 12px; }
 
-/* =====================  Title  ===================== */
+/* =====================  Centred column (425:1116)  ===================== */
 
-.hero__title-block {
+.hero__center {
   position: absolute;
-  left: var(--gutter);
-  top: calc(50% - 36.5px);
-  transform: translateY(-50%);
+  left: 50%;
+  top: calc(50% + 0.5px);
+  transform: translate(-50%, -50%);
   z-index: 2;
   width: 800px;
   max-width: calc(100% - var(--gutter) * 2);
   display: flex;
   flex-direction: column;
-  gap: 26px;
-}
-
-.hero__backed {
-  display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 16px;
-  line-height: 1.2;
-  letter-spacing: -0.32px;
-  color: #fff;
+  gap: 24px;
+  text-align: center;
 }
 
-.hero__yc { display: block; height: 28px; width: auto; margin-left: 8px; }
+.hero__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.hero__backed { display: block; height: 28px; width: auto; }
 
 .hero__title {
   font-family: var(--font-display);
@@ -178,22 +163,18 @@ body {
   font-variation-settings: "wdth" 100;
 }
 
-/* =====================  Pitch + CTA  ===================== */
+/* =====================  Pitch + CTA (425:1045)  ===================== */
 
 .hero__pitch {
-  position: absolute;
-  left: var(--gutter);
-  bottom: var(--gutter);
-  z-index: 2;
-  width: 437px;
-  max-width: calc(100% - var(--gutter) * 2);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 20px;
 }
 
 .hero__sub {
+  width: 582px;
+  max-width: 100%;
   font-size: 18px;
   line-height: 1.5;
   letter-spacing: -0.36px;
@@ -221,8 +202,8 @@ body {
 .cta:active { transform: translateY(0); }
 .cta:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; }
 
-/* soft light pooling over the top edge (Ellipse 2 in the frame); the button
-   clips it, so only a faint band along the top rim shows */
+/* soft light pooling over the top edge (Ellipse 2); the button clips it, so
+   only a faint band along the top rim shows */
 .cta::before {
   content: "";
   position: absolute;
@@ -248,7 +229,7 @@ body {
   background: var(--green);
   box-shadow: inset 0 4px 4px rgba(255, 255, 255, 0.25);
 }
-.cta__icon svg { display: block; }
+.cta__icon img { display: block; width: 20px; height: 20px; }
 
 .cta__text {
   position: relative;
@@ -261,95 +242,13 @@ body {
   white-space: nowrap;
 }
 
-/* =====================  Stats  ===================== */
-
-.stats {
-  position: absolute;
-  right: var(--gutter);
-  bottom: 51px;              /* frame: row foot sits 51px off the canvas edge */
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--rule);
-}
-
-.stat { display: flex; align-items: flex-start; gap: 12px; }
-
-.stat__dot {
-  flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
-  margin-top: 8px;
-  border-radius: 1px;
-  background: var(--green-dot);
-}
-
-.stat__body { display: flex; flex-direction: column; gap: 10px; }
-
-.stat__value {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 22px;
-  line-height: 1.09;
-  letter-spacing: -0.22px;
-  color: #fff;
-  font-variation-settings: "wdth" 100;
-  white-space: nowrap;
-}
-
-.stat__label {
-  font-size: 16px;
-  line-height: 1.09;
-  letter-spacing: -0.16px;
-  color: rgba(255, 255, 255, 0.5);
-  white-space: nowrap;
-}
-
-/* divider between stats, plus the tick that carries on below the row */
-.stats__rule {
-  position: relative;
-  flex: 0 0 auto;
-  width: 1px;
-  height: 85px;
-  background: var(--rule);
-}
-
-.stats__rule::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: calc(100% + 13px);    /* clears the row's padding and border */
-  width: 1px;
-  height: 50px;
-  background: linear-gradient(to bottom, var(--rule), rgba(255, 255, 255, 0));
-}
-
 /* =====================  Responsive  ===================== */
-
-@media (max-width: 1200px) {
-  .hero__title { font-size: clamp(44px, 6vw, 72px); }
-  .stats { gap: 20px; }
-  .stat__value { font-size: 20px; }
-  .stat__label { font-size: 14px; }
-}
 
 @media (max-width: 900px) {
   :root { --gutter: 24px; }
   .nav__link { display: none; }
-  .hero__title-block { top: auto; bottom: 300px; transform: none; }
-  .hero__pitch { width: auto; right: var(--gutter); }
-  .stats {
-    left: var(--gutter);
-    right: var(--gutter);
-    bottom: auto;
-    top: 120px;
-    gap: 16px;
-    justify-content: space-between;
-  }
-  .stats__rule { height: 60px; }
-  .stats__rule::after { display: none; }
+  .hero__title { font-size: clamp(36px, 7.2vw, 72px); letter-spacing: -0.02em; }
+  .hero__sub { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

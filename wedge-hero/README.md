@@ -1,6 +1,6 @@
 # Wedge — Hero
 
-Hero section coded from Figma **Wedge Internal → "Hero"** (node `395:378`).
+Hero section coded from Figma **Wedge Internal → "Hero"** (node `425:1038`).
 
 ## Run
 
@@ -17,19 +17,26 @@ video and the fonts.
 ## Files
 
 - `index.html` — markup, each block tagged with its Figma `data-node-id`
-- `styles.css` — all styling; the frame's own numbers (1440x810 canvas, 50px
-  gutters) are kept as literals so they can be checked against Figma
-- `assets/` — background video + poster, fonts, logo and YC marks
+- `styles.css` — all styling; the frame's own numbers (1440x810 canvas, centred
+  800px column, 50px gutters) are kept as literals so they can be checked
+  against Figma
+- `assets/` — background video + poster, fonts, logo and icons
+
+## Layout
+
+Everything sits in one centred 800px column: the "Backed by Y Combinator"
+lockup, the 72px title, a 582px-wide line of copy and the Explore Agents
+button. Logo top-left, nav top-right, both 50px off the edge at y=34.
 
 ## Notes
 
-- **Background**: `assets/hero.mp4` loops muted; it sits at 80% opacity over
-  `#171c16`, under a bottom-weighted black scrim (the frame stacks three
-  gradients — their combined falloff is ~0.46 at the midpoint and ~0.75 at the
-  foot, which is what the single gradient here reproduces).
-- **Type**: Mozilla Headline for the title and stat values. The frame calls for
-  **Inter Display**, which we don't have — `Rinter` stands in for it. Drop
-  `InterDisplay-Regular.ttf` / `-Medium.ttf` into `assets/` and swap the
-  `@font-face` block to switch.
-- **Icons**: the story glyph and the Book-a-Demo arrow are inline SVG; the Wedge
-  mark and the YC lockup are PNG exports.
+- **Background**: `assets/hero.mp4` loops muted at 50% opacity over black.
+  This frame carries no gradient scrim — its `overlay` group is empty — so the
+  video's own contrast is what darkens the page.
+- **Type**: Mozilla Headline Medium for the title, Inter Display
+  (Regular + Medium) for everything else. Only the weights actually used are
+  kept in `assets/`.
+- **Icons**: `launchicon.svg` in the CTA's green tile, `arrow-right.svg` in
+  Book a Demo, and `ycombinator.svg` — which is the whole "Backed by
+  Y Combinator" lockup as one 218x28 asset, so that row is a single image
+  rather than text plus a logo.
