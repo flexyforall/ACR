@@ -28,6 +28,25 @@ Everything sits in one left-aligned 800px column, 80px off the left edge: the "B
 lockup, the 72px title, a 582px-wide line of copy and the Explore Agents
 button. Logo top-left, nav top-right, both 50px off the edge at y=34.
 
+## Explore Agents
+
+Clicking the CTA flies the camera inside, into `assets/transition.mp4`, which
+opens on the very frame the hero loop turns around on (frame 192 / 8.0s —
+found by comparing frames, 39.5 dB against 16-22 dB elsewhere). Handing off
+exactly there means the camera just keeps going, with no cut.
+
+Two things make that work from a click at any moment:
+
+- If the loop is on its way back, playback jumps to the mirrored point in the
+  forward pass. Because a boomerang holds every frame twice, that seek shows
+  the identical image and is invisible.
+- Playback then speeds up to reach the turnaround in about a second, so the
+  click feels answered — it reads as the camera diving in rather than a wait.
+
+The transition takes over at the same 50% opacity, so the handoff carries no
+brightness step; it brightens to full only once the copy is gone. Its last
+frame is held, ready for the next section to pick up.
+
 ## Notes
 
 - **Background**: `assets/hero.mp4` loops muted at 50% opacity over black. The

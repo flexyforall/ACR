@@ -10,10 +10,15 @@
 
   <section class="hero" data-node-id="425:1150">
 
-    <!-- backdrop: looping video at 50% over black (425:1151) -->
+    <!-- backdrop: looping video at 50% over black (425:1151).
+         hero.mp4 is a boomerang; its turnaround frame (8.0s) is the exact shot
+         transition.mp4 opens on, so Explore Agents can hand off without a cut. -->
     <div class="hero__bg" aria-hidden="true">
-      <video class="hero__video" src="assets/hero.mp4" poster="assets/hero-poster.jpg"
-             autoplay muted loop playsinline preload="auto" tabindex="-1"></video>
+      <video class="hero__video" id="heroVideo" src="assets/hero.mp4"
+             poster="assets/hero-poster.jpg" autoplay muted loop playsinline
+             preload="auto" tabindex="-1"></video>
+      <video class="hero__video hero__video--transition" id="transitionVideo"
+             src="assets/transition.mp4" muted playsinline preload="auto" tabindex="-1"></video>
     </div>
 
     <!-- logo (425:1177) -->

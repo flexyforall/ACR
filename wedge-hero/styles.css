@@ -65,6 +65,31 @@ body {
   pointer-events: none;
 }
 
+/* the transition opens on the very frame the loop turns around on, so it only
+   needs a hair of a fade to cover the difference between the two encodes — and
+   it takes over at the same 50%, so the handoff carries no brightness step */
+.hero__video--transition {
+  opacity: 0;
+  transition: opacity 0.12s linear;
+}
+.hero.is-transition .hero__video--transition { opacity: 0.5; }
+.hero.is-transition .hero__video { opacity: 0; }
+
+/* the 50% wash only existed to keep the copy legible; with the copy gone the
+   scene comes up to full brightness as we fly in */
+.hero.is-inside .hero__video--transition {
+  opacity: 1;
+  transition: opacity 0.9s ease;
+}
+
+/* hero copy clears out as the dive begins */
+.hero.is-diving .hero__center {
+  opacity: 0;
+  transform: translateY(-50%) scale(1.04);
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.9s cubic-bezier(0.3, 0, 0.2, 1);
+}
+
 /* =====================  Logo + nav  ===================== */
 
 .hero__logo {
