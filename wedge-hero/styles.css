@@ -1,0 +1,358 @@
+/* ------------------------------------------------------------------
+   Wedge — Hero (Figma node 395:378)
+   Built to the frame's own numbers: 1440x810 canvas, 50px side margins.
+   Type: Mozilla Headline for display, Rinter standing in for Inter Display.
+------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Mozilla Headline";
+  src: url("assets/MozillaHeadline-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mozilla Headline";
+  src: url("assets/MozillaHeadline-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Rinter";
+  src: url("assets/Rinter.ttf") format("truetype");
+  font-weight: 400 500;
+  font-display: swap;
+}
+
+:root {
+  --ink: #171c16;          /* frame background */
+  --green: #105f40;        /* CTA icon tile */
+  --green-dot: #589f84;    /* stat markers */
+  --rule: rgba(255, 255, 255, 0.16);
+  --font-display: "Mozilla Headline", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Rinter", system-ui, "Segoe UI", Arial, sans-serif;
+  --gutter: 50px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--ink);
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =====================  Hero shell  ===================== */
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 720px;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.hero__bg { position: absolute; inset: 0; }
+
+.hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;            /* Figma: video layer at 80% */
+  pointer-events: none;
+}
+
+/* three stacked black gradients in the frame; their combined falloff is
+   ~0.46 at the midpoint and ~0.75 at the foot */
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.46) 50%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+}
+
+/* =====================  Logo + nav  ===================== */
+
+.hero__logo {
+  position: absolute;
+  left: var(--gutter);
+  top: 34px;
+  z-index: 2;
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+.hero__logo img { display: block; width: 40px; height: 40px; }
+
+.nav {
+  position: absolute;
+  right: var(--gutter);
+  top: 34px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav__link {
+  padding: 12px;
+  border-radius: 100px;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: -0.16px;
+  color: #fff;
+  opacity: 0.6;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+.nav__link:hover { opacity: 1; }
+
+/* the two links sit tight together, then a 16px gap before the CTA */
+.nav__link + .nav__link { margin-left: -16px; }
+
+.nav__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 4px;
+  background: #fff;
+  color: #1b1b21;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.16px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.nav__cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35); }
+.nav__cta svg { display: block; }
+
+/* =====================  Title  ===================== */
+
+.hero__title-block {
+  position: absolute;
+  left: var(--gutter);
+  top: calc(50% - 36.5px);
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 800px;
+  max-width: calc(100% - var(--gutter) * 2);
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.hero__backed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.32px;
+  color: #fff;
+}
+
+.hero__yc { display: block; height: 28px; width: auto; margin-left: 8px; }
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -1.44px;
+  color: #fff;
+  font-variation-settings: "wdth" 100;
+}
+
+/* =====================  Pitch + CTA  ===================== */
+
+.hero__pitch {
+  position: absolute;
+  left: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 2;
+  width: 437px;
+  max-width: calc(100% - var(--gutter) * 2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.hero__sub {
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: -0.36px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cta {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 56px;
+  padding: 6px 20px 6px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+.cta:hover { background: rgba(0, 0, 0, 0.38); transform: translateY(-1px); }
+.cta:active { transform: translateY(0); }
+.cta:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 2px; }
+
+/* soft light pooling over the top edge (Ellipse 2 in the frame); the button
+   clips it, so only a faint band along the top rim shows */
+.cta::before {
+  content: "";
+  position: absolute;
+  left: 48px;
+  top: -63px;
+  width: 325px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.cta__icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: var(--green);
+  box-shadow: inset 0 4px 4px rgba(255, 255, 255, 0.25);
+}
+.cta__icon svg { display: block; }
+
+.cta__text {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.16px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* =====================  Stats  ===================== */
+
+.stats {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 51px;              /* frame: row foot sits 51px off the canvas edge */
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.stat { display: flex; align-items: flex-start; gap: 12px; }
+
+.stat__dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-top: 8px;
+  border-radius: 1px;
+  background: var(--green-dot);
+}
+
+.stat__body { display: flex; flex-direction: column; gap: 10px; }
+
+.stat__value {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.09;
+  letter-spacing: -0.22px;
+  color: #fff;
+  font-variation-settings: "wdth" 100;
+  white-space: nowrap;
+}
+
+.stat__label {
+  font-size: 16px;
+  line-height: 1.09;
+  letter-spacing: -0.16px;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+/* divider between stats, plus the tick that carries on below the row */
+.stats__rule {
+  position: relative;
+  flex: 0 0 auto;
+  width: 1px;
+  height: 85px;
+  background: var(--rule);
+}
+
+.stats__rule::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(100% + 13px);    /* clears the row's padding and border */
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--rule), rgba(255, 255, 255, 0));
+}
+
+/* =====================  Responsive  ===================== */
+
+@media (max-width: 1200px) {
+  .hero__title { font-size: clamp(44px, 6vw, 72px); }
+  .stats { gap: 20px; }
+  .stat__value { font-size: 20px; }
+  .stat__label { font-size: 14px; }
+}
+
+@media (max-width: 900px) {
+  :root { --gutter: 24px; }
+  .nav__link { display: none; }
+  .hero__title-block { top: auto; bottom: 300px; transform: none; }
+  .hero__pitch { width: auto; right: var(--gutter); }
+  .stats {
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: auto;
+    top: 120px;
+    gap: 16px;
+    justify-content: space-between;
+  }
+  .stats__rule { height: 60px; }
+  .stats__rule::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__link, .nav__cta, .cta { transition: none; }
+  .nav__cta:hover, .cta:hover { transform: none; }
+}
